@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MX5 NC1 — Input Sheet</title>
+  <link rel="stylesheet" href="css/shared.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="title">MX5 NC1 — Home Alignment</span>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="input.html" class="active">Input Sheet</a></li>
+      <li><a href="report.html">Report</a></li>
+    </ul>
+  </nav>
+
+  <header class="page-header">
+    <h1>Input Sheet</h1>
+    <p class="subtitle">Enter camber readings for each bolt combination per wheel</p>
+  </header>
+
+  <main class="grid-container">
+
+    <div id="error-banner" class="error-banner" role="alert" style="display: none;">
+      <span id="error-message"></span>
+      <button id="error-close">&times;</button>
+    </div>
+    <div id="warning-banner" class="warning-banner" role="status"></div>
+
+    <!-- INPUT MEASUREMENT GRID
+         PURPOSE: Capture camber readings at each bolt position combination (13×13 grid).
+         Each cell receives three steering angle measurements: +20°, 0°, −20° (used to calculate caster).
+         Auto-saves to browser localStorage on every cell change.
+         ──────────────────────────────────────────────────────────────────────────────────────── -->
+    <div class="grid-controls">
+      <div class="wheel-selector" id="wheel-selector" role="tablist" aria-label="Wheel selection">
+        <button class="active" data-wheel="FL" role="tab" aria-selected="true">FL — Front Left</button>
+        <button data-wheel="FR" role="tab" aria-selected="false">FR — Front Right</button>
+        <button data-wheel="RL" role="tab" aria-selected="false">RL — Rear Left</button>
+        <button data-wheel="RR" role="tab" aria-selected="false">RR — Rear Right</button>
+      </div>
+
+      <div class="progress-bar" id="progress-bar" aria-live="polite">
+        <span class="progress-stat">
+          <span class="count" id="required-count">0</span>
+          <span>/ 25 required</span>
+          <span class="progress-track">
+            <span class="progress-fill required" id="required-fill" style="width:0%"></span>
+          </span>
+        </span>
+        <span class="progress-stat">
+          <span class="count" id="total-count">0</span>
+          <span>/ 169 total</span>
+          <span class="progress-track">
+            <span class="progress-fill" id="total-fill" style="width:0%"></span>
+          </span>
+        </span>
+      </div>
+
+      <div class="toe-input-group" style="display:flex; align-items:center; gap:8px;">
+        <label for="toe-input" style="font-size:0.65rem; color:var(--muted); letter-spacing:0.06em; text-transform:uppercase;">Toe (mm)</label>
+        <input id="toe-input" type="number" step="0.01" placeholder="0.58" style="width:96px; padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--panel); color:var(--text); font-family:'Share Tech Mono', monospace;">
+        <span id="toe-target-label" style="font-size:0.6rem; color:var(--muted); letter-spacing:0.05em;">Target: +0.58 mm</span>
+      </div>
+
+      <button class="button primary" id="btn-download">Save CSV</button>
+
+      <label class="button" id="btn-load-label" for="csv-upload">Load CSV</label>
+      <input type="file" id="csv-upload" accept=".csv" aria-label="Load CSV file" style="display:none">
+
+      <button class="button" id="btn-sample">Load Sample Data</button>
+
+      <button class="button danger" id="btn-clear">Clear All</button>
+    </div>
+
+
+    <!-- 13×13 Grid injected here by input-grid.js -->
+    <div class="grid-wrapper" id="grid-wrapper">
+      <div class="input-grid" id="input-grid" role="grid" aria-label="Bolt position input matrix"></div>
+    </div>
+
+    <p style="margin-top:12px; font-size:0.65rem; color:var(--muted); letter-spacing:0.05em;">
+      Rows = Front bolt (−6 to +6) &nbsp;·&nbsp;
+      Columns = Rear bolt (−6 to +6) &nbsp;·&nbsp;
+      Required positions: −6, −3, 0, +3, +6 (highlighted border)
+    </p>
+
+  </main>
+
+  <script type="module" src="../js/error-handler.js"></script>
+  <script type="module" src="../js/input-grid.js"></script>
+
+  <script type="module">
+    // Set active nav link
+    const links = document.querySelectorAll('.nav-links a');
+    const current = location.pathname.split('/').pop() || 'index.html';
+    links.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === current);
+    });
+  </script>
+
+</body>
+</html>

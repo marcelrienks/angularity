@@ -1,0 +1,78 @@
+name: Deploy to AWS S3 + CloudFront
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run integration tests
+        run: npm run test:all-sync
+        timeout-minutes: 10
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: success()  # Only deploy if tests pass
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Check AWS credentials
+        run: |
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
+            echo "❌ ERROR: GitHub Actions secrets not configured!"
+            echo "Please add the following secrets to your GitHub repository:"
+            echo "  1. AWS_ACCESS_KEY_ID"
+            echo "  2. AWS_SECRET_ACCESS_KEY"
+            echo "  3. CLOUDFRONT_DISTRIBUTION_ID (value: E3AFTSKLCPTLIM)"
+            echo ""
+            echo "Go to: Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Deploy to S3
+        run: |
+          aws s3 sync site/ s3://mx5-alignment-365620267529/ \
+            --delete \
+            --cache-control "public, max-age=3600"
+          echo "✅ Deployed to S3 (mx5-alignment-365620267529)"
+      
+      - name: Invalidate CloudFront cache
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          if [ -z "$DISTRIBUTION_ID" ]; then
+            echo "ℹ️  CLOUDFRONT_DISTRIBUTION_ID not set, skipping invalidation"
+          else
+            aws cloudfront create-invalidation \
+              --distribution-id "$DISTRIBUTION_ID" \
+              --paths "/*"
+            echo "✅ Invalidated CloudFront cache"
+          fi
+      
+      - name: Deployment complete
+        run: |
+          echo "🚀 Deployment Complete!"
+          echo "📦 Live at: https://dxfocr58kmlsu.cloudfront.net"
+          echo "⏱️  Cache invalidation completes in ~2 minutes"

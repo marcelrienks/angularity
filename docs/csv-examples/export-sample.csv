@@ -1,0 +1,10 @@
+front_bolt,rear_bolt,camber_neg20,camber_0,camber_pos20,toe,analysis_note
+-1,-2,-1.12,-1.08,-1.05,0.58,Measured values from physical test
+0,-2,-1.05,-1.02,-1.00,0.58,Measured values from physical test
+1,-2,-0.98,-0.95,-0.92,0.58,Measured values from physical test
+-1,-1,-1.08,-1.05,-1.02,0.58,Measured values from physical test
+0,-1,-1.02,-1.00,-0.98,0.58,Measured values from physical test
+1,-1,-0.95,-0.92,-0.90,0.58,Measured values from physical test
+-1,0,-1.02,-1.00,-0.98,0.58,Measured values from physical test
+0,0,-0.95,-0.92,-0.90,0.58,Measured values from physical test
+1,0,-0.88,-0.85,-0.82,0.58,Measured values from physical test
