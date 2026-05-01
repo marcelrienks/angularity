@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MX5 NC1 — Home Alignment</title>
+  <link rel="stylesheet" href="css/shared.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="title">MX5 NC1 — Home Alignment</span>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="input.html">Input Sheet</a></li>
+      <li><a href="report.html">Report</a></li>
+    </ul>
+  </nav>
+
+  <header class="page-header">
+    <h1>Alignment V2</h1>
+    <p class="subtitle">Digital angle gauge method — eccentric bolt optimisation</p>
+  </header>
+
+  <div id="error-banner" class="error-banner" role="alert" style="display: none;">
+    <span id="error-message"></span>
+    <button id="error-close">&times;</button>
+  </div>
+
+  <main class="home-container">
+
+    <div class="home-intro">
+      <p class="desc">
+        Record camber readings across all eccentric bolt positions, then generate a
+        report showing the optimal bolt combination to hit your camber and caster
+        targets with L/R symmetry.
+      </p>
+    </div>
+
+    <div class="home-grid">
+      <a class="home-card input-card" href="input.html">
+        <span class="card-heading">Input Sheet</span>
+        <p class="card-desc">
+          Enter camber readings at −20°, 0°, and +20° steering for each bolt
+          combination. Covers the full 13×13 grid (169 combinations) with a
+          minimum of 25 required positions. Download or load CSV files per wheel.
+        </p>
+        <span class="card-arrow">→ Open Input Sheet</span>
+      </a>
+      <a class="home-card report-card" href="report.html">
+        <span class="card-heading">Report</span>
+        <p class="card-desc">
+          Load CSV files for Front Left and Front Right. View the interpolated
+          13×13 summary table, multi-line chart, washer position diagrams,
+          symmetry analysis, and heatmaps — then read off the recommended bolt
+          settings.
+        </p>
+        <span class="card-arrow">→ Open Report</span>
+      </a>
+    </div>
+
+    <section class="targets-section">
+      <h2>Alignment Targets</h2>
+      <div class="targets-display" id="targets-display">
+        <div class="targets-group">
+          <div class="group-heading">Front Axle Targets</div>
+          <div class="target-item">
+            <label>Camber (°)</label>
+            <span class="target-value" id="camber-display">−1.1°</span>
+          </div>
+          <div class="target-item">
+            <label>Caster (°)</label>
+            <span class="target-value" id="caster-display">5.0°</span>
+          </div>
+          <div class="target-item">
+            <label>Toe (mm)</label>
+            <span class="target-value" id="toe-front-display">+0.58 mm</span>
+          </div>
+        </div>
+        <div class="targets-group">
+          <div class="group-heading">Rear Axle Targets</div>
+          <div class="target-item">
+            <label>Camber (°)</label>
+            <span class="target-value" id="camber-rear-display">−1.5°</span>
+          </div>
+          <div class="target-item">
+            <label>Toe (mm)</label>
+            <span class="target-value" id="toe-rear-display">+0.58 mm</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Preset Selector (Phase 4 feature) -->
+      <div style="margin: 16px 0; display: flex; gap: 12px; align-items: center;">
+        <label for="preset-selector" style="font-size: 0.85rem; color: var(--muted); font-weight: 600; letter-spacing: 0.04em;">PRESET:</label>
+        <select id="preset-selector" style="flex: 1; padding: 8px 12px; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 4px; font-family: inherit; cursor: pointer;">
+          <option value="flyin-miata">Flyin Miata (Sporty)</option>
+          <option value="fast-road">Fast Road (Street)</option>
+          <option value="consolidated" selected>Consolidated (Balanced)</option>
+        </select>
+        <button type="button" id="btn-apply-preset" class="button secondary" style="white-space: nowrap;">Apply</button>
+      </div>
+      
+      <button class="button secondary" id="btn-edit-targets">Edit Targets</button>
+      
+      <form class="targets-form" id="targets-form" style="display:none;">
+        <div class="targets-form-grid">
+          <fieldset class="form-fieldset">
+            <legend>Front Axle Targets</legend>
+            <div class="form-group">
+              <label for="camber-input">Camber (°)</label>
+              <input type="number" id="camber-input" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="caster-input">Caster (°)</label>
+              <input type="number" id="caster-input" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="toe-front-input">Toe (mm per side)</label>
+              <input type="number" id="toe-front-input" step="0.01" required>
+            </div>
+          </fieldset>
+          <fieldset class="form-fieldset">
+            <legend>Rear Axle Targets</legend>
+            <div class="form-group">
+              <label for="camber-rear-input">Camber (°)</label>
+              <input type="number" id="camber-rear-input" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="toe-rear-input">Toe (mm per side)</label>
+              <input type="number" id="toe-rear-input" step="0.01" required>
+            </div>
+          </fieldset>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="button primary">Save</button>
+          <button type="button" class="button" id="btn-cancel">Cancel</button>
+          <button type="button" class="button danger" id="btn-reset">Reset to Defaults</button>
+        </div>
+      </form>
+    </section>
+
+    <table class="spec-table">
+      <caption>Caster Formula (±20° sweep)</caption>
+      <tbody>
+        <tr><td>Caster</td><td>1.462 × |C<sub>+20</sub> − C<sub>−20</sub>|</td></tr>
+        <tr><td>Bolt range (per axis)</td><td>−6 to +6 (13 positions)</td></tr>
+        <tr><td>Required positions</td><td>−6, −3, 0, +3, +6</td></tr>
+        <tr><td>Wheel diameter</td><td>469 mm</td></tr>
+      </tbody>
+    </table>
+
+  </main>
+
+  <script type="module" src="../js/error-handler.js"></script>
+  <script type="module" src="../js/targets-manager.js"></script>
+
+  <script type="module">
+    // Set active nav link based on current page
+    const links = document.querySelectorAll('.nav-links a');
+    const current = location.pathname.split('/').pop() || 'index.html';
+    links.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === current);
+    });
+  </script>
+
+</body>
+</html>
+<!-- Deployment test: 2026-05-01T12:49:56Z -->

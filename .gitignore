@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Test Coverage
+coverage/
+*.lcov
+
+# Test Artifacts
+*.png
+*.jpg
+.test-results/
+tmp/          # Temporary files for CSV export/import tests
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment - never commit secrets (see .env.README for setup)
+.env
+.env.production
+.env.*.local
+
+# Temporary
+*.tmp
