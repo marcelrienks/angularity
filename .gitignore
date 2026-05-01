@@ -1,6 +1,6 @@
 # Dependencies
 node_modules/
-package-lock.json
+# package-lock.json: keep committed for CI cache
 yarn.lock
 
 # Test Coverage
