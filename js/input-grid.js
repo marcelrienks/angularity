@@ -2,7 +2,7 @@
  * input-grid.js — Main controller for the Input Sheet page (input.html).
  *
  * Responsibilities:
- *   - Build the 13×13 grid dynamically (rows = front bolt, cols = rear bolt)
+ *   - Build the 13×13 grid dynamically (rows = rear bolt, cols = front bolt)
  *   - 3 inputs per cell: camber_neg20, camber_0, camber_pos20
  *   - Required position cells (bolt values in {−6,−3,0,+3,+6}) visually distinct
  *   - Cell state: empty / partial / filled + border colouring
@@ -179,7 +179,7 @@ window.addEventListener('beforeunload', () => {
 
 /**
  * Build the static DOM structure of the 13×13 grid once.
- * Rows = front bolt (−6 to +6), Cols = rear bolt (−6 to +6).
+ * Rows = rear bolt (−6 to +6), Cols = front bolt (−6 to +6).
  * The grid uses CSS Grid layout; all cells are positioned in order.
  */
 function _buildGrid() {
@@ -189,31 +189,31 @@ function _buildGrid() {
   const colCount = 1 + BOLT_POSITIONS.length;
   grid.style.gridTemplateColumns = `44px repeat(${BOLT_POSITIONS.length}, 120px)`;
 
-  // ── Row 0: corner + column headers (rear bolt positions) ───────────────
+  // ── Row 0: corner + column headers (front bolt positions) ──────────────
   const corner = _el('div', 'grid-corner');
   corner.setAttribute('aria-hidden', 'true');
-  corner.textContent = 'F↓ / R→';
+  corner.textContent = 'F→\nR↓';
   grid.appendChild(corner);
 
-  for (const r of BOLT_POSITIONS) {
-    const th = _el('div', `grid-col-header${_isRequired(r) ? ' required' : ''}`);
-    th.dataset.col = r;
-    th.textContent = _sign(r);
-    th.setAttribute('aria-label', `Rear bolt ${_sign(r)}`);
+  for (const f of BOLT_POSITIONS) {
+    const th = _el('div', `grid-col-header${_isRequired(f) ? ' required' : ''}`);
+    th.dataset.col = f;
+    th.textContent = _sign(f);
+    th.setAttribute('aria-label', `Front bolt ${_sign(f)}`);
     grid.appendChild(th);
   }
 
   // ── Rows 1–13: row header + 13 cells ───────────────────────────────────
-  for (const f of BOLT_POSITIONS) {
-    // Row header (front bolt)
-    const rh = _el('div', `grid-row-header${_isRequired(f) ? ' required' : ''}`);
-    rh.dataset.row = f;
-    rh.textContent = _sign(f);
-    rh.setAttribute('aria-label', `Front bolt ${_sign(f)}`);
+  for (const r of BOLT_POSITIONS) {
+    // Row header (rear bolt)
+    const rh = _el('div', `grid-row-header${_isRequired(r) ? ' required' : ''}`);
+    rh.dataset.row = r;
+    rh.textContent = _sign(r);
+    rh.setAttribute('aria-label', `Rear bolt ${_sign(r)}`);
     grid.appendChild(rh);
 
-    // Data cells
-    for (const r of BOLT_POSITIONS) {
+    // Data cells (column axis is front bolt)
+    for (const f of BOLT_POSITIONS) {
       const cell = _buildCell(f, r);
       grid.appendChild(cell);
     }
@@ -325,14 +325,14 @@ function _onInputFocus(f, r) {
     el.classList.remove('row-highlight', 'col-highlight');
   });
 
-  const rowHeader = document.querySelector(`.grid-row-header[data-row="${f}"]`);
-  const colHeader = document.querySelector(`.grid-col-header[data-col="${r}"]`);
+  const rowHeader = document.querySelector(`.grid-row-header[data-row="${r}"]`);
+  const colHeader = document.querySelector(`.grid-col-header[data-col="${f}"]`);
   if (rowHeader) rowHeader.classList.add('row-highlight');
   if (colHeader) colHeader.classList.add('col-highlight');
 
   // Highlight cells in same row/col
-  document.querySelectorAll(`.grid-cell[data-front="${f}"]`).forEach(el => el.classList.add('row-highlight'));
-  document.querySelectorAll(`.grid-cell[data-rear="${r}"]`).forEach(el => el.classList.add('col-highlight'));
+  document.querySelectorAll(`.grid-cell[data-rear="${r}"]`).forEach(el => el.classList.add('row-highlight'));
+  document.querySelectorAll(`.grid-cell[data-front="${f}"]`).forEach(el => el.classList.add('col-highlight'));
 }
 
 function _onInputBlur() {
