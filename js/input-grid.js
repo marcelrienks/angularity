@@ -511,7 +511,8 @@ function _loadSampleData() {
 
 function _downloadCSV() {
   const toeRaw = toeState[activeWheel];
-  const toeValue = toeRaw === '' ? null : parseFloat(toeRaw);
+  const normalizedToe = toeRaw.replace(',', '.');
+  const toeValue = toeRaw === '' ? null : parseFloat(normalizedToe);
 
   if (toeRaw !== '' && Number.isNaN(toeValue)) {
     _showError('Toe must be a valid number before exporting CSV.');
@@ -623,8 +624,8 @@ function _applyCSVToGrid(rows) {
         pos20: String(pos20),
       };
     }
-    if (toe != null && !Number.isNaN(Number(toe))) {
-      toeState[activeWheel] = Number(toe).toFixed(2);
+    if (toe != null && !Number.isNaN(Number(toe.toString().replace(',', '.')))) {
+      toeState[activeWheel] = Number(toe.toString().replace(',', '.')).toFixed(2);
     }
   }
 
@@ -676,8 +677,8 @@ async function _loadFromDataFiles() {
             pos20: String(pos20),
           };
         }
-        if (toe != null && !Number.isNaN(Number(toe))) {
-          toeState[wheel] = Number(toe).toFixed(2);
+        if (toe != null && !Number.isNaN(Number(toe.toString().replace(',', '.')))) {
+          toeState[wheel] = Number(toe.toString().replace(',', '.')).toFixed(2);
         }
       }
     } catch (_) {
