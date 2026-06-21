@@ -33,6 +33,7 @@ import { calculateCaster } from './math-utils.js';
 export function buildSummaryTable(result, wheel, options = {}) {
   const { grid } = result;
   const isRearWheel = REAR_WHEELS.includes(wheel);
+  const steeringRatio = result?.targets?.steeringRatio;
   const showCaster = options.showCaster || false;
   const showInterpolated = options.showInterpolated !== false;
   const topMatches = options.topMatches || new Map();
@@ -91,7 +92,7 @@ export function buildSummaryTable(result, wheel, options = {}) {
 
       // Render cell value
       const value = showCaster && !isRearWheel
-        ? calculateCaster(cell.neg20, cell.pos20)
+        ? calculateCaster(cell.neg20, cell.pos20, { steeringRatio })
         : cell.zero;
 
       const valueSpan = document.createElement('span');

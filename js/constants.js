@@ -9,19 +9,41 @@ function getStoredOrDefault(key, defaultValue) {
   return stored !== null ? parseFloat(stored) : defaultValue;
 }
 
+function getStoredOrDefaultWithFallback(primaryKey, fallbackKey, defaultValue) {
+  const primary = localStorage.getItem(primaryKey);
+  if (primary !== null) return parseFloat(primary);
+
+  const fallback = localStorage.getItem(fallbackKey);
+  return fallback !== null ? parseFloat(fallback) : defaultValue;
+}
+
+function getStoredStringOrDefault(key, defaultValue) {
+  const stored = localStorage.getItem(key);
+  return stored !== null ? stored : defaultValue;
+}
+
 // ── Alignment targets ──────────────────────────────────────────────────────
 // Read from localStorage if available, otherwise use defaults
 // Front
 export const TARGET_CAMBER = getStoredOrDefault('alignment_target_camber', -1.1);   // degrees (front)
 export const TARGET_CASTER = getStoredOrDefault('alignment_target_caster', 5.0);   // degrees (front)
-export const TARGET_TOE_FRONT = getStoredOrDefault('alignment_target_toe_front', 0.58);   // mm per side
+export const TARGET_TOE_FRONT = getStoredOrDefault('alignment_target_toe_front', 0.07);   // degrees per wheel
+export const TARGET_STEERING_RATIO = getStoredOrDefaultWithFallback('alignment_constant_steering_ratio', 'alignment_target_steering_ratio', 15);   // steering ratio (x:1)
+export const TARGET_CASTER_INPUT_MODE = getStoredStringOrDefault('alignment_constant_caster_input_mode', 'steering-ratio');   // 'steering-ratio' | 'wheel-degrees'
+export const TARGET_CASTER_WHEEL_DEGREES = getStoredOrDefault('alignment_constant_caster_wheel_degrees', 24);   // explicit wheel steering angle
+export const TARGET_WHEEL_DIAMETER = getStoredOrDefault('alignment_constant_wheel_diameter', 469);   // mm
 // Rear
 export const TARGET_CAMBER_REAR = getStoredOrDefault('alignment_target_camber_rear', -1.5);   // degrees (rear)
-export const TARGET_TOE_REAR = getStoredOrDefault('alignment_target_toe_rear', 0.58);   // mm per side
+export const TARGET_TOE_REAR = getStoredOrDefault('alignment_target_toe_rear', 0.07);   // degrees per wheel
 
-// Caster formula: caster ≈ CASTER_MULTIPLIER × |C_+20 − C_−20|
-// Derived for a ±20° steering sweep on the NC1.
-export const CASTER_MULTIPLIER = 1.462;
+// Caster formula uses 360° steering wheel sweep and vehicle steering ratio.
+// Effective wheel steer angle theta = 360 / steering_ratio.
+// multiplier = 1 / (2 * sin(theta))
+const _effectiveWheelAngle = TARGET_CASTER_INPUT_MODE === 'wheel-degrees'
+  ? TARGET_CASTER_WHEEL_DEGREES
+  : (360 / TARGET_STEERING_RATIO);
+const _effectiveWheelAngleRad = _effectiveWheelAngle * (Math.PI / 180);
+export const CASTER_MULTIPLIER = 1 / (2 * Math.sin(_effectiveWheelAngleRad));
 
 // ── Eccentric bolt grid ────────────────────────────────────────────────────
 export const BOLT_MIN = -6;
@@ -90,15 +112,15 @@ export const CASTER_GREEN_THRESHOLD = CASTER_THRESHOLDS.targetMet;
 export const CASTER_ORANGE_THRESHOLD = CASTER_THRESHOLDS.nearTarget;
 
 export const TOE_THRESHOLDS = {
-  targetMet:  0.10,   // ≤ 0.10 mm → green
-  nearTarget: 0.25,   // ≤ 0.25 mm → orange
+  targetMet:  0.012,   // ≤ 0.012° per wheel (~0.10 mm) → green
+  nearTarget: 0.031,   // ≤ 0.031° per wheel (~0.25 mm) → orange
 };
 
 // ── Symmetry tolerance for left-right matching ──────────────────────────────
 // Used in symmetry analysis: wheels considered symmetric if camber and caster
 // values differ by ≤ this amount. Used throughout the system.
 export const SYMMETRY_TOLERANCE = 0.3;   // ±0.3° for both camber and caster
-export const TOE_SYMMETRY_TOLERANCE = 0.1;   // ±0.10 mm per side for toe
+export const TOE_SYMMETRY_TOLERANCE = 0.031;   // ±0.031° per wheel (~0.25 mm) for toe
 export const TOE_TOLERANCE = TOE_SYMMETRY_TOLERANCE;   // Alias for test compatibility
 
 // ── Heatmap colour scale stops ─────────────────────────────────────────────
@@ -119,19 +141,19 @@ export const ALIGNMENT_PRESETS = {
   'flyin-miata': {
     name: 'Flyin Miata',
     description: 'Sportier setup (lower camber, more toe)',
-    front: { camber: -1.0, caster: 5.0, toe: 0.60 },
+    front: { camber: -1.0, caster: 5.0, toe: 0.60, steeringRatio: 15 },
     rear: { camber: -1.5, toe: 0.60 }
   },
   'fast-road': {
     name: 'Fast Road',
     description: 'Road-focused setup (more camber for tire wear)',
-    front: { camber: -1.2, caster: 5.0, toe: 0.53 },
+    front: { camber: -1.2, caster: 5.0, toe: 0.53, steeringRatio: 15 },
     rear: { camber: -1.5, toe: 0.53 }
   },
   'consolidated': {
     name: 'Consolidated',
     description: 'Balanced setup (street & spirited driving)',
-    front: { camber: -1.1, caster: 5.0, toe: 0.56 },
+    front: { camber: -1.1, caster: 5.0, toe: 0.56, steeringRatio: 15 },
     rear: { camber: -1.5, toe: 0.56 }
   }
 };

@@ -45,6 +45,7 @@ export function renderSummaryTable(result, wheel) {
 function buildTable(result, wheel) {
   const { grid } = result;
   const isRearWheel = REAR_WHEELS.includes(wheel);
+  const steeringRatio = result?.targets?.steeringRatio;
   const measuredToe = Number(result.measuredToe);
   const rearToe = Number.isFinite(measuredToe) ? measuredToe : null;
 
@@ -75,7 +76,7 @@ function buildTable(result, wheel) {
       const r = BOLT_POSITIONS[ri];
       const cell = grid[fi][ri];
       const camber = +cell.zero.toFixed(2);
-      const caster = +(calculateCaster(cell.neg20, cell.pos20)).toFixed(2);
+      const caster = +(calculateCaster(cell.neg20, cell.pos20, { steeringRatio })).toFixed(2);
 
       const td = tr.insertCell();
       if (cell.isInterpolated) td.classList.add('interpolated');
@@ -266,7 +267,7 @@ function drawHeatmap(canvas, result, mode = 'camber') {
       const gridCell = result.grid[fi][ri];
       const value = mode === 'camber'
         ? gridCell.zero
-        : calculateCaster(gridCell.neg20, gridCell.pos20);
+        : calculateCaster(gridCell.neg20, gridCell.pos20, { steeringRatio: result?.targets?.steeringRatio });
 
       const t = Math.max(0, Math.min(1, (value - (target - range)) / (2 * range)));
       const colour = mode === 'camber'

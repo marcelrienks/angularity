@@ -69,8 +69,9 @@
  * See README.md § Prioritisation: The Golden Rule for full discussion of principles.
  */
 
-import { BOLT_POSITIONS, CASTER_MULTIPLIER, TARGET_CAMBER, TARGET_CASTER, SYMMETRY_TOLERANCE, TOE_SYMMETRY_TOLERANCE } from './constants.js';
+import { BOLT_POSITIONS, TARGET_CAMBER, TARGET_CASTER, TARGET_STEERING_RATIO, TARGET_CASTER_INPUT_MODE, TARGET_CASTER_WHEEL_DEGREES, SYMMETRY_TOLERANCE, TOE_SYMMETRY_TOLERANCE } from './constants.js';
 import { interpolateGrid } from './interpolation.js';
+import { calculateCaster, calculateCasterMultiplier } from './math-utils.js';
 
 /**
  * @typedef {import('./interpolation.js').GridCell} GridCell
@@ -123,7 +124,7 @@ function _computeGoldenRuleScore(camberDelta, casterDelta, toeDelta = null) {
  * may not be the same as the position that minimizes caster error.
  *
  * @param {import('./csv-io.js').MeasuredRow[]} parsedCSV
- * @param {{ targetCamber?: number, targetCaster?: number|null, targetToe?: number|null, measuredToe?: number|null }} [options]
+ * @param {{ targetCamber?: number, targetCaster?: number|null, targetToe?: number|null, measuredToe?: number|null, steeringRatio?: number|null, casterInputMode?: string|null, casterWheelDegrees?: number|null }} [options]
  * @returns {{
  *   grid: GridCell[][],
  *   rows169: DerivedRow[],
@@ -139,6 +140,24 @@ export function processWheel(parsedCSV, options = {}) {
   const targetCaster = Object.prototype.hasOwnProperty.call(options, 'targetCaster') ? options.targetCaster : TARGET_CASTER;
   const targetToe = Object.prototype.hasOwnProperty.call(options, 'targetToe') ? options.targetToe : null;
   const measuredToe = Object.prototype.hasOwnProperty.call(options, 'measuredToe') ? options.measuredToe : null;
+  const casterInputMode = Object.prototype.hasOwnProperty.call(options, 'casterInputMode')
+    ? options.casterInputMode
+    : TARGET_CASTER_INPUT_MODE;
+  const casterWheelDegreesCandidate = Object.prototype.hasOwnProperty.call(options, 'casterWheelDegrees')
+    ? options.casterWheelDegrees
+    : TARGET_CASTER_WHEEL_DEGREES;
+  const casterWheelDegrees = Number.isFinite(Number(casterWheelDegreesCandidate)) && Number(casterWheelDegreesCandidate) > 0
+    ? Number(casterWheelDegreesCandidate)
+    : TARGET_CASTER_WHEEL_DEGREES;
+  const steeringRatioCandidate = Object.prototype.hasOwnProperty.call(options, 'steeringRatio')
+    ? options.steeringRatio
+    : TARGET_STEERING_RATIO;
+  const steeringRatio = Number.isFinite(Number(steeringRatioCandidate)) && Number(steeringRatioCandidate) > 0
+    ? Number(steeringRatioCandidate)
+    : TARGET_STEERING_RATIO;
+  const casterOptions = casterInputMode === 'wheel-degrees'
+    ? { wheelDegrees: casterWheelDegrees }
+    : { steeringRatio };
 
   const csvToe = parsedCSV.find(r => r.toe != null && Number.isFinite(Number(r.toe)));
   const effectiveToe = csvToe ? Number(csvToe.toe) : measuredToe;
@@ -150,7 +169,7 @@ export function processWheel(parsedCSV, options = {}) {
     for (let ri = 0; ri < BOLT_POSITIONS.length; ri++) {
       const cell = grid[fi][ri];
       const camber = cell.zero;
-      const caster = CASTER_MULTIPLIER * Math.abs(cell.pos20 - cell.neg20);
+      const caster = calculateCaster(cell.neg20, cell.pos20, casterOptions);
       const toe = effectiveToe;
 
       const camberDelta = camber - targetCamber;
@@ -217,7 +236,15 @@ export function processWheel(parsedCSV, options = {}) {
     bestCell,
     bestCamberCell,
     bestCasterCell,
-    targets: { camber: targetCamber, caster: targetCaster, toe: targetToe },
+    targets: {
+      camber: targetCamber,
+      caster: targetCaster,
+      toe: targetToe,
+      steeringRatio,
+      casterInputMode,
+      casterWheelDegrees,
+      casterMultiplier: targetCaster == null ? null : calculateCasterMultiplier(casterOptions),
+    },
     measuredToe: effectiveToe,
   };
 }
