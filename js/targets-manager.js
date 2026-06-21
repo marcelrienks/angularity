@@ -1,4 +1,5 @@
 import { calculateEffectiveWheelAngle, calculateCasterMultiplier } from './math-utils.js';
+import { getRequiredPositions, getBoltRange, getBoltPositions } from './constants.js';
 
 const TARGET_STORAGE = {
   camber: 'alignment_target_camber',
@@ -84,11 +85,15 @@ function getConstants() {
     ? getStoredNumber(CONSTANT_STORAGE.steeringRatio, CONSTANT_DEFAULTS.steeringRatio)
     : getStoredNumber(LEGACY_STORAGE.steeringRatio, CONSTANT_DEFAULTS.steeringRatio);
 
+  const measurementDensity = localStorage.getItem('alignment_measurement_density');
+  const parsedDensity = measurementDensity !== null ? parseInt(measurementDensity, 10) : 5;
+
   return {
     casterInputMode,
     steeringRatio,
     casterWheelDegrees: getStoredNumber(CONSTANT_STORAGE.casterWheelDegrees, CONSTANT_DEFAULTS.casterWheelDegrees),
     wheelDiameter: getStoredNumber(CONSTANT_STORAGE.wheelDiameter, CONSTANT_DEFAULTS.wheelDiameter),
+    measurementDensity: parsedDensity,
   };
 }
 
@@ -107,6 +112,10 @@ function saveConstants(values) {
   localStorage.setItem(CONSTANT_STORAGE.wheelDiameter, String(values.wheelDiameter));
   // Keep legacy key in sync for backward compatibility with older flows.
   localStorage.setItem(LEGACY_STORAGE.steeringRatio, String(values.steeringRatio));
+  // Save measurement density if provided
+  if (values.measurementDensity !== undefined) {
+    localStorage.setItem('alignment_measurement_density', String(values.measurementDensity));
+  }
 }
 
 function resetTargets() {
@@ -142,6 +151,12 @@ function setConstantInputs(values) {
   document.getElementById('wheel-degrees-input').value = formatNumber(values.casterWheelDegrees, 1);
   document.getElementById('wheel-diameter-input').value = formatNumber(values.wheelDiameter, 0);
 
+  // Set measurement density selector if provided
+  const densitySelect = document.getElementById('measurement-density-select');
+  if (densitySelect && values.measurementDensity !== undefined) {
+    densitySelect.value = String(values.measurementDensity);
+  }
+
   updateDerivedConstants(values);
 }
 
@@ -155,6 +170,21 @@ function updateDerivedConstants(values) {
 
   document.getElementById('effective-wheel-angle-display').textContent = `${formatNumber(effectiveWheelAngle, 2)} deg`;
   document.getElementById('caster-multiplier-display').textContent = formatNumber(casterMultiplier, 3);
+
+  // Update bolt range display based on measurement density
+  const boltRange = getBoltRange();
+  const boltRangeDisplay = document.getElementById('bolt-range-display');
+  if (boltRangeDisplay) {
+    boltRangeDisplay.textContent = `−${Math.abs(boltRange.min)} to +${boltRange.max} (${getBoltPositions().length} positions)`;
+  }
+
+  // Update required washer points display - always -1 to +1 (3×3 grid = 9 points)
+  const requiredDisplay = document.getElementById('required-points-display');
+  if (requiredDisplay) {
+    const requiredPositions = [-1, 0, 1];
+    const positionString = requiredPositions.map(p => p === 0 ? '0' : (p < 0 ? `−${Math.abs(p)}` : `+${p}`)).join(', ');
+    requiredDisplay.textContent = `${positionString} (${requiredPositions.length * requiredPositions.length} points)`;
+  }
 }
 
 function readTargetInputs() {
@@ -171,11 +201,13 @@ function readTargetInputs() {
 function readConstantInputs() {
   const parseNumber = (str) => Number(str.replace(',', '.'));
   const mode = document.getElementById('caster-mode-wheel')?.checked ? 'wheel-degrees' : 'steering-ratio';
+  const densitySelect = document.getElementById('measurement-density-select');
   return {
     casterInputMode: mode,
     steeringRatio: parseNumber(document.getElementById('steering-ratio-input').value),
     casterWheelDegrees: parseNumber(document.getElementById('wheel-degrees-input').value),
     wheelDiameter: parseNumber(document.getElementById('wheel-diameter-input').value),
+    measurementDensity: densitySelect ? parseInt(densitySelect.value, 10) : undefined,
   };
 }
 
@@ -237,6 +269,7 @@ function bindConstantEvents() {
   const steeringRatioInput = document.getElementById('steering-ratio-input');
   const wheelDegreesInput = document.getElementById('wheel-degrees-input');
   const wheelDiameterInput = document.getElementById('wheel-diameter-input');
+  const densitySelect = document.getElementById('measurement-density-select');
 
   document.getElementById('btn-reset-constants').addEventListener('click', () => {
     resetConstants();
@@ -267,6 +300,7 @@ function bindConstantEvents() {
   if (steeringRatioInput) steeringRatioInput.addEventListener('input', rerenderDerivedConstants);
   if (wheelDegreesInput) wheelDegreesInput.addEventListener('input', rerenderDerivedConstants);
   if (wheelDiameterInput) wheelDiameterInput.addEventListener('input', rerenderDerivedConstants);
+  if (densitySelect) densitySelect.addEventListener('change', rerenderDerivedConstants);
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();

@@ -45,12 +45,122 @@ const _effectiveWheelAngle = TARGET_CASTER_INPUT_MODE === 'wheel-degrees'
 const _effectiveWheelAngleRad = _effectiveWheelAngle * (Math.PI / 180);
 export const CASTER_MULTIPLIER = 1 / (2 * Math.sin(_effectiveWheelAngleRad));
 
-// ── Eccentric bolt grid ────────────────────────────────────────────────────
-export const BOLT_MIN = -6;
-export const BOLT_MAX =  6;
-export const BOLT_POSITIONS = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6]; // 13 positions
+// Measurement density options: 3, 5, 7, 9, 11, or 13 points
+const MEASUREMENT_DENSITY_OPTIONS = [3, 5, 7, 9, 11, 13];
 
-// Required measurement positions per bolt axis (minimum 25 combinations = 5×5)
+/**
+ * Get the current measurement range based on density.
+ * density 3 → range is -1 to +1 (3 values)
+ * density 5 → range is -2 to +2 (5 values)
+ * density 7 → range is -3 to +3 (7 values)
+ * ...
+ * density 13 → range is -6 to +6 (13 values)
+ * Formula: rangeValue = (density - 1) / 2
+ * @param {number} pointCount - 3, 5, 7, 9, 11, or 13
+ * @returns {number} - The maximum absolute value (range is -value to +value)
+ */
+function _getCurrentMeasurementRange(pointCount) {
+  if (!MEASUREMENT_DENSITY_OPTIONS.includes(pointCount)) {
+    console.warn(`Invalid pointCount ${pointCount}, defaulting to 5`);
+    pointCount = 5;
+  }
+  return Math.floor((pointCount - 1) / 2);
+}
+
+/**
+ * Generate all positions for a given measurement density.
+ * For 3-11: generates all integers from -N to +N
+ * For 13: special case, generates from -6 to +6
+ *
+ * @param {number} pointCount - 3, 5, 7, 9, 11, or 13
+ * @returns {number[]} - All positions in the corrected range
+ */
+function _generatePositions(pointCount) {
+  if (!MEASUREMENT_DENSITY_OPTIONS.includes(pointCount)) {
+    console.warn(`Invalid pointCount ${pointCount}, defaulting to 5`);
+    pointCount = 5;
+  }
+  
+  const range = _getCurrentMeasurementRange(pointCount);
+  const positions = [];
+  for (let i = -range; i <= range; i++) {
+    positions.push(i);
+  }
+  return positions;
+}
+
+/**
+ * Get the dynamic BOLT_MIN and BOLT_MAX based on current measurement density.
+ * @returns {Object} - { min: number, max: number }
+ */
+export function getBoltRange() {
+  const density = _getCurrentMeasurementDensity();
+  const range = _getCurrentMeasurementRange(density);
+  return { min: -range, max: range };
+}
+
+/**
+ * Get all available bolt positions based on current measurement density.
+ * @returns {number[]} - Sorted array of all positions from -N to +N
+ */
+export function getBoltPositions() {
+  const density = _getCurrentMeasurementDensity();
+  return _generatePositions(density);
+}
+
+// Legacy constants - for backward compatibility, but use getBoltRange() instead
+export const BOLT_MIN = -6;
+export const BOLT_MAX = 6;
+export const BOLT_POSITIONS = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6];
+
+/**
+ * Get current measurement density from localStorage, default to 5.
+ * @returns {number}
+ */
+function _getCurrentMeasurementDensity() {
+  const stored = localStorage.getItem('alignment_measurement_density');
+  const density = stored ? parseInt(stored, 10) : 5;
+  return MEASUREMENT_DENSITY_OPTIONS.includes(density) ? density : 5;
+}
+
+/**
+ * Get required positions based on current measurement density.
+ * @returns {number[]}
+ */
+export function getRequiredPositions() {
+  const density = _getCurrentMeasurementDensity();
+  return _generatePositions(density);
+}
+
+/**
+ * Get current measurement density.
+ * @returns {number}
+ */
+export function getCurrentMeasurementDensity() {
+  return _getCurrentMeasurementDensity();
+}
+
+/**
+ * Set measurement density and save to localStorage.
+ * @param {number} density - 3, 5, 7, 9, 11, or 13
+ */
+export function setMeasurementDensity(density) {
+  if (MEASUREMENT_DENSITY_OPTIONS.includes(density)) {
+    localStorage.setItem('alignment_measurement_density', String(density));
+  } else {
+    console.warn(`Invalid density ${density}, keeping current`);
+  }
+}
+
+/**
+ * Get all available measurement density options.
+ * @returns {number[]}
+ */
+export function getMeasurementDensityOptions() {
+  return MEASUREMENT_DENSITY_OPTIONS;
+}
+
+// Deprecated: REQUIRED_POSITIONS is now dynamic, but exported for backward compatibility
 export const REQUIRED_POSITIONS = [-6, -3, 0, 3, 6];
 
 // ── Wheel identifiers ──────────────────────────────────────────────────────
