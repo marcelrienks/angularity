@@ -34,6 +34,11 @@ const CONSTANT_DEFAULTS = {
   wheelDiameter: 469,
 };
 
+// Format numbers with . as decimal separator, independent of locale
+function formatNumber(num, decimals) {
+  return num.toFixed(decimals).replace(',', '.');
+}
+
 function getStoredNumber(key, fallback) {
   const raw = localStorage.getItem(key);
   if (raw == null || raw === '') return fallback;
@@ -114,11 +119,11 @@ function resetConstants() {
 }
 
 function setTargetInputs(values) {
-  document.getElementById('camber-input').value = values.camber.toFixed(2);
-  document.getElementById('caster-input').value = values.caster.toFixed(2);
-  document.getElementById('toe-front-input').value = values.toeFront.toFixed(2);
-  document.getElementById('camber-rear-input').value = values.camberRear.toFixed(2);
-  document.getElementById('toe-rear-input').value = values.toeRear.toFixed(2);
+  document.getElementById('camber-input').value = formatNumber(values.camber, 2);
+  document.getElementById('caster-input').value = formatNumber(values.caster, 2);
+  document.getElementById('toe-front-input').value = formatNumber(values.toeFront, 2);
+  document.getElementById('camber-rear-input').value = formatNumber(values.camberRear, 2);
+  document.getElementById('toe-rear-input').value = formatNumber(values.toeRear, 2);
 }
 
 function setConstantInputs(values) {
@@ -133,10 +138,14 @@ function setConstantInputs(values) {
   if (steeringRatioGroup) steeringRatioGroup.style.display = values.casterInputMode === 'steering-ratio' ? '' : 'none';
   if (wheelDegreesGroup) wheelDegreesGroup.style.display = values.casterInputMode === 'wheel-degrees' ? '' : 'none';
 
-  document.getElementById('steering-ratio-input').value = values.steeringRatio.toFixed(1);
-  document.getElementById('wheel-degrees-input').value = values.casterWheelDegrees.toFixed(1);
-  document.getElementById('wheel-diameter-input').value = values.wheelDiameter.toFixed(0);
+  document.getElementById('steering-ratio-input').value = formatNumber(values.steeringRatio, 1);
+  document.getElementById('wheel-degrees-input').value = formatNumber(values.casterWheelDegrees, 1);
+  document.getElementById('wheel-diameter-input').value = formatNumber(values.wheelDiameter, 0);
 
+  updateDerivedConstants(values);
+}
+
+function updateDerivedConstants(values) {
   const effectiveWheelAngle = values.casterInputMode === 'wheel-degrees'
     ? Number(values.casterWheelDegrees)
     : calculateEffectiveWheelAngle(values.steeringRatio);
@@ -144,27 +153,29 @@ function setConstantInputs(values) {
     ? calculateCasterMultiplier({ wheelDegrees: values.casterWheelDegrees })
     : calculateCasterMultiplier(values.steeringRatio);
 
-  document.getElementById('effective-wheel-angle-display').textContent = `${effectiveWheelAngle.toFixed(2)} deg`;
-  document.getElementById('caster-multiplier-display').textContent = casterMultiplier.toFixed(3);
+  document.getElementById('effective-wheel-angle-display').textContent = `${formatNumber(effectiveWheelAngle, 2)} deg`;
+  document.getElementById('caster-multiplier-display').textContent = formatNumber(casterMultiplier, 3);
 }
 
 function readTargetInputs() {
+  const parseNumber = (str) => Number(str.replace(',', '.'));
   return {
-    camber: Number(document.getElementById('camber-input').value),
-    caster: Number(document.getElementById('caster-input').value),
-    toeFront: Number(document.getElementById('toe-front-input').value),
-    camberRear: Number(document.getElementById('camber-rear-input').value),
-    toeRear: Number(document.getElementById('toe-rear-input').value),
+    camber: parseNumber(document.getElementById('camber-input').value),
+    caster: parseNumber(document.getElementById('caster-input').value),
+    toeFront: parseNumber(document.getElementById('toe-front-input').value),
+    camberRear: parseNumber(document.getElementById('camber-rear-input').value),
+    toeRear: parseNumber(document.getElementById('toe-rear-input').value),
   };
 }
 
 function readConstantInputs() {
+  const parseNumber = (str) => Number(str.replace(',', '.'));
   const mode = document.getElementById('caster-mode-wheel')?.checked ? 'wheel-degrees' : 'steering-ratio';
   return {
     casterInputMode: mode,
-    steeringRatio: Number(document.getElementById('steering-ratio-input').value),
-    casterWheelDegrees: Number(document.getElementById('wheel-degrees-input').value),
-    wheelDiameter: Number(document.getElementById('wheel-diameter-input').value),
+    steeringRatio: parseNumber(document.getElementById('steering-ratio-input').value),
+    casterWheelDegrees: parseNumber(document.getElementById('wheel-degrees-input').value),
+    wheelDiameter: parseNumber(document.getElementById('wheel-diameter-input').value),
   };
 }
 
@@ -240,7 +251,7 @@ function bindConstantEvents() {
     if (steeringRatioGroup) steeringRatioGroup.style.display = isRatioMode ? '' : 'none';
     if (wheelDegreesGroup) wheelDegreesGroup.style.display = isRatioMode ? 'none' : '';
     
-    rerenderDerivedConstants();
+    updateDerivedConstants(readConstantInputs());
   };
 
   const rerenderDerivedConstants = () => {
@@ -248,7 +259,7 @@ function bindConstantEvents() {
     if (values.casterInputMode !== 'wheel-degrees' && (!Number.isFinite(values.steeringRatio) || values.steeringRatio <= 0)) return;
     if (values.casterInputMode === 'wheel-degrees' && (!Number.isFinite(values.casterWheelDegrees) || values.casterWheelDegrees <= 0)) return;
     if (!Number.isFinite(values.wheelDiameter) || values.wheelDiameter <= 0) return;
-    setConstantInputs(values);
+    updateDerivedConstants(values);
   };
 
   if (ratioModeRadio) ratioModeRadio.addEventListener('change', toggleVisibility);
