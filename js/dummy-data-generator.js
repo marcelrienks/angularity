@@ -14,7 +14,9 @@
  */
 
 export const BOLT_POSITIONS = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6];
-export const CASTER_MULTIPLIER = 1.462;
+export const DEFAULT_STEERING_RATIO = 15;
+const _effectiveWheelAngleRadians = (360 / DEFAULT_STEERING_RATIO) * (Math.PI / 180);
+export const CASTER_MULTIPLIER = 1 / (2 * Math.sin(_effectiveWheelAngleRadians));
 export const TARGET_CAMBER = -1.1;
 export const TARGET_CASTER = 5.0;
 

@@ -5,8 +5,10 @@
  * Parses:     parseCSV(text) → array of measurement objects
  */
 
-const HEADER = 'front_bolt,rear_bolt,camber_neg20,camber_0,camber_pos20,toe';
+const HEADER = 'front_bolt,rear_bolt,camber_360acw,camber_0,camber_360cw,toe';
 const LEGACY_HEADER = 'front_bolt,rear_bolt,camber_neg20,camber_0,camber_pos20';
+const LEGACY_HEADER_WITH_TOE = 'front_bolt,rear_bolt,camber_neg20,camber_0,camber_pos20,toe';
+const ALT_HEADER = 'front_bolt,rear_bolt,camber_360acw,camber_0,camber_360cw';
 
 /**
  * Build a CSV string from an array of measurement rows (no side effects).
@@ -82,9 +84,12 @@ export function parseCSV(text) {
   const header = lines[0].toLowerCase().replace(/\s+/g, '');
   const expectedHeader = HEADER.replace(/\s+/g, '');
   const expectedLegacyHeader = LEGACY_HEADER.replace(/\s+/g, '');
-  const hasToeColumn = header === expectedHeader;
+  const expectedLegacyHeaderWithToe = LEGACY_HEADER_WITH_TOE.replace(/\s+/g, '');
+  const expectedAltHeader = ALT_HEADER.replace(/\s+/g, '');
 
-  if (!hasToeColumn && header !== expectedLegacyHeader) {
+  const hasToeColumn = header === expectedHeader || header === expectedLegacyHeaderWithToe;
+
+  if (!hasToeColumn && header !== expectedLegacyHeader && header !== expectedAltHeader) {
     throw new Error(
       `Unexpected CSV header.\nExpected: ${HEADER} (or legacy ${LEGACY_HEADER})\nGot: ${lines[0]}`
     );

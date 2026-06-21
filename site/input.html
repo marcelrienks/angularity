@@ -19,7 +19,7 @@
 
   <header class="page-header">
     <h1>Input Sheet</h1>
-    <p class="subtitle">Enter camber readings for each bolt combination per wheel</p>
+    <p class="subtitle">Enter camber at 360° ACW, 0°, and 360° CW steering wheel positions</p>
   </header>
 
   <main class="grid-container">
@@ -30,9 +30,9 @@
     </div>
     <div id="warning-banner" class="warning-banner" role="status"></div>
 
-    <!-- INPUT MEASUREMENT GRID
-         PURPOSE: Capture camber readings at each bolt position combination (13×13 grid).
-         Each cell receives three steering angle measurements: +20°, 0°, −20° (used to calculate caster).
+        <!-- INPUT MEASUREMENT GRID
+          PURPOSE: Capture camber readings at each bolt position combination (13×13 grid).
+          Each cell receives three steering wheel measurements: 360° ACW, 0°, 360° CW (used to calculate caster).
          Auto-saves to browser localStorage on every cell change.
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <div class="grid-controls">
@@ -61,9 +61,9 @@
       </div>
 
       <div class="toe-input-group" style="display:flex; align-items:center; gap:8px;">
-        <label for="toe-input" style="font-size:0.65rem; color:var(--muted); letter-spacing:0.06em; text-transform:uppercase;">Toe (mm)</label>
-        <input id="toe-input" type="number" step="0.01" placeholder="0.58" style="width:96px; padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--panel); color:var(--text); font-family:'Share Tech Mono', monospace;">
-        <span id="toe-target-label" style="font-size:0.6rem; color:var(--muted); letter-spacing:0.05em;">Target: +0.58 mm</span>
+        <label for="toe-input" style="font-size:0.65rem; color:var(--muted); letter-spacing:0.06em; text-transform:uppercase;">Toe (° per wheel)</label>
+        <input id="toe-input" type="number" step="0.01" placeholder="0.08" style="width:96px; padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--panel); color:var(--text); font-family:'Share Tech Mono', monospace;">
+        <span id="toe-target-label" style="font-size:0.6rem; color:var(--muted); letter-spacing:0.05em;">Target: +0.07° per wheel</span>
       </div>
 
       <button class="button primary" id="btn-download">Save CSV</button>

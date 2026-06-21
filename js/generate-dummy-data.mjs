@@ -10,7 +10,7 @@
 import { BOLT_POSITIONS, generateCSVRows } from './dummy-data-generator.js';
 
 // Generate CSV header
-console.log('front_bolt,rear_bolt,camber_neg20,camber_0,camber_pos20');
+console.log('front_bolt,rear_bolt,camber_360acw,camber_0,camber_360cw');
 
 // Generate all rows for Front Left wheel
 const rows = generateCSVRows('FL');

@@ -10,11 +10,13 @@
 
 import { 
   calculateCaster, 
+  calculateCasterMultiplier,
+  calculateEffectiveWheelAngle,
   calculateDeltas, 
   getColorThreshold, 
   formatAngle, 
   formatMillimeters,
-  CASTER_MULTIPLIER
+  DEFAULT_STEERING_RATIO
 } from '../../js/math-utils.js';
 
 describe('math-utils.js', () => {
@@ -23,16 +25,15 @@ describe('math-utils.js', () => {
   // T051: calculateCaster formula
   // ─────────────────────────────────────────────────────────────
   describe('calculateCaster()', () => {
-    test('T051.1: Should calculate caster as CASTER_MULTIPLIER × |camberPos20 - camberNeg20|', () => {
+    test('T051.1: Should calculate caster as dynamic multiplier × |camberCW - camberACW|', () => {
       const camberNeg20 = -0.8;
       const camberPos20 = -1.2;
       const sweep = Math.abs(camberPos20 - camberNeg20);  // 0.4°
-      const expectedCaster = CASTER_MULTIPLIER * sweep;   // 0.4 * 1.462 = 0.5848
+      const expectedCaster = calculateCasterMultiplier(DEFAULT_STEERING_RATIO) * sweep;
       
       const result = calculateCaster(camberNeg20, camberPos20);
       
       expect(result).toBeCloseTo(expectedCaster, 4);
-      expect(result).toBeCloseTo(0.5848, 4);
     });
 
     test('T051.2: Should work with various camber sweeps', () => {
@@ -45,13 +46,18 @@ describe('math-utils.js', () => {
       
       testCases.forEach(tc => {
         const result = calculateCaster(tc.neg20, tc.pos20);
-        const expected = CASTER_MULTIPLIER * tc.expectedSweep;
+        const expected = calculateCasterMultiplier(DEFAULT_STEERING_RATIO) * tc.expectedSweep;
         expect(result).toBeCloseTo(expected, 4);
       });
     });
 
-    test('T051.3: CASTER_MULTIPLIER should equal 1.462', () => {
-      expect(CASTER_MULTIPLIER).toBe(1.462);
+    test('T051.3: 15:1 steering ratio produces 24° effective wheel angle', () => {
+      expect(calculateEffectiveWheelAngle(15)).toBeCloseTo(24, 8);
+    });
+
+    test('T051.4: dynamic caster multiplier is derived from effective wheel angle', () => {
+      const expected = 1 / (2 * Math.sin((24 * Math.PI) / 180));
+      expect(calculateCasterMultiplier(15)).toBeCloseTo(expected, 12);
     });
   });
 

@@ -176,15 +176,18 @@ export function clearStorage() {
 
 export const DEFAULT_CAMBER = -1.1;
 export const DEFAULT_CASTER = 5.0;
-export const DEFAULT_TOE_FRONT = 0.58;
+export const DEFAULT_TOE_FRONT = 0.07;
 export const DEFAULT_CAMBER_REAR = -1.5;
-export const DEFAULT_TOE_REAR = 0.58;
+export const DEFAULT_TOE_REAR = 0.07;
+export const DEFAULT_STEERING_RATIO = 15;
 
 const STORAGE_KEY_CAMBER = 'alignment_target_camber';
 const STORAGE_KEY_CASTER = 'alignment_target_caster';
 const STORAGE_KEY_TOE_FRONT = 'alignment_target_toe_front';
 const STORAGE_KEY_CAMBER_REAR = 'alignment_target_camber_rear';
 const STORAGE_KEY_TOE_REAR = 'alignment_target_toe_rear';
+const STORAGE_KEY_STEERING_RATIO = 'alignment_constant_steering_ratio';
+const STORAGE_KEY_STEERING_RATIO_LEGACY = 'alignment_target_steering_ratio';
 
 /**
  * Get saved or default target values
@@ -214,15 +217,25 @@ export function getSavedToeRear() {
   return stored !== null ? parseFloat(stored) : DEFAULT_TOE_REAR;
 }
 
+export function getSavedSteeringRatio() {
+  const stored = localStorage.getItem(STORAGE_KEY_STEERING_RATIO);
+  if (stored !== null) return parseFloat(stored);
+
+  const legacy = localStorage.getItem(STORAGE_KEY_STEERING_RATIO_LEGACY);
+  return legacy !== null ? parseFloat(legacy) : DEFAULT_STEERING_RATIO;
+}
+
 /**
  * Save all targets to localStorage
  */
-export function saveTargets(camber, caster, toeFront, camberRear, toeRear) {
+export function saveTargets(camber, caster, toeFront, camberRear, toeRear, steeringRatio = DEFAULT_STEERING_RATIO) {
   localStorage.setItem(STORAGE_KEY_CAMBER, camber.toString());
   localStorage.setItem(STORAGE_KEY_CASTER, caster.toString());
   localStorage.setItem(STORAGE_KEY_TOE_FRONT, toeFront.toString());
   localStorage.setItem(STORAGE_KEY_CAMBER_REAR, camberRear.toString());
   localStorage.setItem(STORAGE_KEY_TOE_REAR, toeRear.toString());
+  localStorage.setItem(STORAGE_KEY_STEERING_RATIO, steeringRatio.toString());
+  localStorage.setItem(STORAGE_KEY_STEERING_RATIO_LEGACY, steeringRatio.toString());
 }
 
 /**
@@ -234,6 +247,8 @@ export function resetTargets() {
   localStorage.removeItem(STORAGE_KEY_TOE_FRONT);
   localStorage.removeItem(STORAGE_KEY_CAMBER_REAR);
   localStorage.removeItem(STORAGE_KEY_TOE_REAR);
+  localStorage.removeItem(STORAGE_KEY_STEERING_RATIO);
+  localStorage.removeItem(STORAGE_KEY_STEERING_RATIO_LEGACY);
 }
 
 // ────────────────────────────────────────────────────────────────────────────

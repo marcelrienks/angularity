@@ -41,7 +41,8 @@
       <a class="home-card input-card" href="input.html">
         <span class="card-heading">Input Sheet</span>
         <p class="card-desc">
-          Enter camber readings at −20°, 0°, and +20° steering for each bolt
+          Enter camber readings at 360° anti-clockwise steering wheel, 0°, and
+          360° clockwise steering wheel for each bolt
           combination. Covers the full 13×13 grid (169 combinations) with a
           minimum of 25 required positions. Download or load CSV files per wheel.
         </p>
@@ -59,96 +60,119 @@
       </a>
     </div>
 
-    <section class="targets-section">
-      <h2>Alignment Targets</h2>
-      <div class="targets-display" id="targets-display">
-        <div class="targets-group">
-          <div class="group-heading">Front Axle Targets</div>
-          <div class="target-item">
-            <label>Camber (°)</label>
-            <span class="target-value" id="camber-display">−1.1°</span>
-          </div>
-          <div class="target-item">
-            <label>Caster (°)</label>
-            <span class="target-value" id="caster-display">5.0°</span>
-          </div>
-          <div class="target-item">
-            <label>Toe (mm)</label>
-            <span class="target-value" id="toe-front-display">+0.58 mm</span>
-          </div>
-        </div>
-        <div class="targets-group">
-          <div class="group-heading">Rear Axle Targets</div>
-          <div class="target-item">
-            <label>Camber (°)</label>
-            <span class="target-value" id="camber-rear-display">−1.5°</span>
-          </div>
-          <div class="target-item">
-            <label>Toe (mm)</label>
-            <span class="target-value" id="toe-rear-display">+0.58 mm</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Preset Selector (Phase 4 feature) -->
-      <div style="margin: 16px 0; display: flex; gap: 12px; align-items: center;">
-        <label for="preset-selector" style="font-size: 0.85rem; color: var(--muted); font-weight: 600; letter-spacing: 0.04em;">PRESET:</label>
-        <select id="preset-selector" style="flex: 1; padding: 8px 12px; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 4px; font-family: inherit; cursor: pointer;">
-          <option value="flyin-miata">Flyin Miata (Sporty)</option>
-          <option value="fast-road">Fast Road (Street)</option>
-          <option value="consolidated" selected>Consolidated (Balanced)</option>
-        </select>
-        <button type="button" id="btn-apply-preset" class="button secondary" style="white-space: nowrap;">Apply</button>
-      </div>
-      
-      <button class="button secondary" id="btn-edit-targets">Edit Targets</button>
-      
-      <form class="targets-form" id="targets-form" style="display:none;">
-        <div class="targets-form-grid">
-          <fieldset class="form-fieldset">
-            <legend>Front Axle Targets</legend>
-            <div class="form-group">
-              <label for="camber-input">Camber (°)</label>
-              <input type="number" id="camber-input" step="0.01" required>
-            </div>
-            <div class="form-group">
-              <label for="caster-input">Caster (°)</label>
-              <input type="number" id="caster-input" step="0.01" required>
-            </div>
-            <div class="form-group">
-              <label for="toe-front-input">Toe (mm per side)</label>
-              <input type="number" id="toe-front-input" step="0.01" required>
-            </div>
-          </fieldset>
-          <fieldset class="form-fieldset">
-            <legend>Rear Axle Targets</legend>
-            <div class="form-group">
-              <label for="camber-rear-input">Camber (°)</label>
-              <input type="number" id="camber-rear-input" step="0.01" required>
-            </div>
-            <div class="form-group">
-              <label for="toe-rear-input">Toe (mm per side)</label>
-              <input type="number" id="toe-rear-input" step="0.01" required>
-            </div>
-          </fieldset>
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="button primary">Save</button>
-          <button type="button" class="button" id="btn-cancel">Cancel</button>
-          <button type="button" class="button danger" id="btn-reset">Reset to Defaults</button>
-        </div>
-      </form>
-    </section>
+    <section class="targets-section" id="config-section">
+      <h2>Alignment Configuration</h2>
 
-    <table class="spec-table">
-      <caption>Caster Formula (±20° sweep)</caption>
-      <tbody>
-        <tr><td>Caster</td><td>1.462 × |C<sub>+20</sub> − C<sub>−20</sub>|</td></tr>
-        <tr><td>Bolt range (per axis)</td><td>−6 to +6 (13 positions)</td></tr>
-        <tr><td>Required positions</td><td>−6, −3, 0, +3, +6</td></tr>
-        <tr><td>Wheel diameter</td><td>469 mm</td></tr>
-      </tbody>
-    </table>
+      <div class="wheel-selector" id="config-tabs" role="tablist" aria-label="Configuration tabs" style="margin-bottom:16px;">
+        <button class="active" data-tab="targets" role="tab" aria-selected="true">Targets</button>
+        <button data-tab="constants" role="tab" aria-selected="false">Constants</button>
+      </div>
+
+      <div id="targets-panel" role="tabpanel" aria-label="Targets">
+        <form id="targets-form" class="targets-form">
+          <div class="targets-form-grid">
+            <fieldset class="form-fieldset">
+              <legend>Front Axle Targets</legend>
+              <div class="form-group">
+                <label for="camber-input">Camber (°)</label>
+                <input type="number" id="camber-input" step="0.01" required>
+              </div>
+              <div class="form-group">
+                <label for="caster-input">Caster (°)</label>
+                <input type="number" id="caster-input" step="0.01" required>
+              </div>
+              <div class="form-group">
+                <label for="toe-front-input">Toe (° per wheel)</label>
+                <input type="number" id="toe-front-input" step="0.01" required>
+              </div>
+            </fieldset>
+            <fieldset class="form-fieldset">
+              <legend>Rear Axle Targets</legend>
+              <div class="form-group">
+                <label for="camber-rear-input">Camber (°)</label>
+                <input type="number" id="camber-rear-input" step="0.01" required>
+              </div>
+              <div class="form-group">
+                <label for="toe-rear-input">Toe (° per wheel)</label>
+                <input type="number" id="toe-rear-input" step="0.01" required>
+              </div>
+            </fieldset>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="button primary" id="btn-save-targets">Save Targets</button>
+            <button type="button" class="button danger" id="btn-reset-targets">Reset Targets</button>
+          </div>
+          <p style="margin-top:10px; font-size:0.65rem; color:var(--muted); letter-spacing:0.04em;">
+            Report calculations use stored values only. Edits apply after you click Save Targets.
+          </p>
+        </form>
+      </div>
+
+      <div id="constants-panel" role="tabpanel" aria-label="Constants" style="display:none;">
+        <form id="constants-form" class="targets-form">
+          <div class="targets-form-grid">
+            <fieldset class="form-fieldset">
+              <legend>Vehicle Constants</legend>
+              <div class="form-group">
+                <label>Caster Angle Input Mode</label>
+                <div style="display:flex; gap:16px; align-items:center; padding:6px 0;">
+                  <label style="display:flex; gap:6px; align-items:center; font-size:0.85rem; color:var(--text);">
+                    <input type="radio" name="caster-input-mode" id="caster-mode-ratio" value="steering-ratio" checked>
+                    Steering Ratio (360° ACW/CW)
+                  </label>
+                  <label style="display:flex; gap:6px; align-items:center; font-size:0.85rem; color:var(--text);">
+                    <input type="radio" name="caster-input-mode" id="caster-mode-wheel" value="wheel-degrees">
+                    Wheel Degrees
+                  </label>
+                </div>
+              </div>
+               <div id="steering-ratio-group" class="form-group">
+                 <label for="steering-ratio-input">Steering Ratio (x:1)</label>
+                 <input type="number" id="steering-ratio-input" step="0.1" min="1" required>
+               </div>
+               <div id="wheel-degrees-group" class="form-group" style="display:none;">
+                 <label for="wheel-degrees-input">Measurement Wheel Degrees (°)</label>
+                 <input type="number" id="wheel-degrees-input" step="0.1" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="wheel-diameter-input">Wheel Diameter (mm)</label>
+                <input type="number" id="wheel-diameter-input" step="1" min="100" required>
+              </div>
+              <div class="form-group">
+                <label for="steering-sweep-input">Steering Wheel Sweep (°)</label>
+                <div id="steering-sweep-display" style="padding:10px 0; color:var(--text);">360 each direction</div>
+              </div>
+            </fieldset>
+            <fieldset class="form-fieldset">
+              <legend>Derived / Fixed Constants</legend>
+              <div class="form-group">
+                <label for="effective-wheel-angle-input">Effective Wheel Angle (°)</label>
+                <div id="effective-wheel-angle-display" style="padding:10px 0; color:var(--text);"></div>
+              </div>
+              <div class="form-group">
+                <label for="caster-multiplier-input">Caster Multiplier</label>
+                <div id="caster-multiplier-display" style="padding:10px 0; color:var(--text);"></div>
+              </div>
+              <div class="form-group">
+                <label for="bolt-range-input">Adjustment Bolt Positions</label>
+                <div id="bolt-range-display" style="padding:10px 0; color:var(--text);">−6 to +6 (13 positions)</div>
+              </div>
+              <div class="form-group">
+                <label for="required-points-input">Minimum Required Washer Points</label>
+                <div id="required-points-display" style="padding:10px 0; color:var(--text);">−6, −3, 0, +3, +6 (5 points)</div>
+              </div>
+            </fieldset>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="button primary" id="btn-save-constants">Save Constants</button>
+            <button type="button" class="button danger" id="btn-reset-constants">Reset Constants</button>
+          </div>
+          <p style="margin-top:10px; font-size:0.65rem; color:var(--muted); letter-spacing:0.04em;">
+            Report calculations use stored values only. Edits apply after you click Save Constants.
+          </p>
+        </form>
+      </div>
+    </section>
 
   </main>
 

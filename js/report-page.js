@@ -12,7 +12,7 @@
  */
 
 import { BOLT_POSITIONS, REQUIRED_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER,
-         TARGET_CAMBER_REAR, TARGET_TOE_FRONT, TARGET_TOE_REAR, CAMBER_THRESHOLDS, CASTER_THRESHOLDS, TOE_THRESHOLDS, HEATMAP_CAMBER_RANGE,
+         TARGET_CAMBER_REAR, TARGET_TOE_FRONT, TARGET_TOE_REAR, TARGET_STEERING_RATIO, TARGET_CASTER_INPUT_MODE, TARGET_CASTER_WHEEL_DEGREES, TARGET_WHEEL_DIAMETER, CAMBER_THRESHOLDS, CASTER_THRESHOLDS, TOE_THRESHOLDS, HEATMAP_CAMBER_RANGE,
          HEATMAP_CASTER_RANGE, WHEELS, FRONT_WHEELS, REAR_WHEELS, WHEEL_LABELS,
          SYMMETRY_TOLERANCE } from './constants.js';
 import { parseCSV } from './csv-io.js';
@@ -20,7 +20,7 @@ import { processWheel, symmetryAnalysis } from './report-engine.js';
 import { buildMainChart, destroyChart, updateChartNote } from './chart-builder.js';
 import { renderWasherSection } from './washer-diagram.js';
 import { loadFullGridState, loadWheelFromStorage, loadWheelToeFromStorage, hasSufficientData, invalidateCache } from './localstorage-io.js';
-import { calculateCaster } from './math-utils.js';
+import { calculateCaster, toeDegreesToResultantMm } from './math-utils.js';
 import { renderSummaryTable as renderTableUI,
          renderMainChart as renderChartUI,
          renderSymmetryPanel as renderSymmetryUI,
@@ -44,8 +44,15 @@ let activeHeatmapWheel = 'FL';
 
 function _getWheelTargets(wheel) {
   return REAR_WHEELS.includes(wheel)
-    ? { camber: TARGET_CAMBER_REAR, caster: null, toe: TARGET_TOE_REAR }
-    : { camber: TARGET_CAMBER, caster: TARGET_CASTER, toe: TARGET_TOE_FRONT };
+    ? { camber: TARGET_CAMBER_REAR, caster: null, toe: TARGET_TOE_REAR, steeringRatio: null, casterInputMode: null, casterWheelDegrees: null }
+    : {
+        camber: TARGET_CAMBER,
+        caster: TARGET_CASTER,
+        toe: TARGET_TOE_FRONT,
+        steeringRatio: TARGET_STEERING_RATIO,
+        casterInputMode: TARGET_CASTER_INPUT_MODE,
+        casterWheelDegrees: TARGET_CASTER_WHEEL_DEGREES,
+      };
 }
 
 function _getWheelProcessingOptions(wheel) {
@@ -54,8 +61,28 @@ function _getWheelProcessingOptions(wheel) {
     targetCamber: targets.camber,
     targetCaster: targets.caster,
     targetToe: targets.toe,
+    steeringRatio: targets.steeringRatio,
+    casterInputMode: targets.casterInputMode,
+    casterWheelDegrees: targets.casterWheelDegrees,
     measuredToe: loadWheelToeFromStorage(wheel),
   };
+}
+
+function _getWheelCasterOptions(wheel, result = null) {
+  const mode = result?.targets?.casterInputMode ?? _getWheelTargets(wheel).casterInputMode;
+  const wheelDegrees = result?.targets?.casterWheelDegrees ?? _getWheelTargets(wheel).casterWheelDegrees;
+  const steeringRatio = result?.targets?.steeringRatio ?? _getWheelTargets(wheel).steeringRatio;
+
+  if (mode === 'wheel-degrees' && Number.isFinite(Number(wheelDegrees)) && Number(wheelDegrees) > 0) {
+    return { wheelDegrees: Number(wheelDegrees) };
+  }
+
+  return { steeringRatio: _getWheelSteeringRatio(wheel, result) };
+}
+
+function _getWheelSteeringRatio(wheel, result = null) {
+  const ratio = result?.targets?.steeringRatio ?? _getWheelTargets(wheel).steeringRatio;
+  return Number.isFinite(Number(ratio)) && Number(ratio) > 0 ? Number(ratio) : TARGET_STEERING_RATIO;
 }
 
 function _getLoadedWheels() {
@@ -537,7 +564,7 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
       const r     = BOLT_POSITIONS[ri];
       const cell  = grid[fi][ri];
       const camber = +cell.zero.toFixed(2);
-      const caster = +(calculateCaster(cell.neg20, cell.pos20)).toFixed(2);
+      const caster = +(calculateCaster(cell.neg20, cell.pos20, _getWheelCasterOptions(activeTableWheel, result))).toFixed(2);
       const isHighlighted = (cell.frontBolt === highlightFront && cell.rearBolt === highlightRear);
       
       const key = `${cell.frontBolt},${cell.rearBolt}`;
@@ -606,7 +633,7 @@ function _buildTable(result) {
       const r     = BOLT_POSITIONS[ri];
       const cell  = grid[fi][ri];
       const camber = +cell.zero.toFixed(2);
-      const caster = +(calculateCaster(cell.neg20, cell.pos20)).toFixed(2);
+      const caster = +(calculateCaster(cell.neg20, cell.pos20, _getWheelCasterOptions(activeTableWheel, result))).toFixed(2);
       
       const key = `${cell.frontBolt},${cell.rearBolt}`;
       const matchType = targetMatches.get(key);
@@ -687,7 +714,7 @@ function _formatSelectedMetricValue(values, isRearWheel) {
   if (selectedMetric === 'toe') {
     if (!isRearWheel || values.toe == null || Number.isNaN(Number(values.toe))) return 'n/a';
     const toe = Number(values.toe);
-    return `${toe >= 0 ? '+' : ''}${toe.toFixed(2)} mm`;
+    return `${toe >= 0 ? '+' : ''}${toe.toFixed(2)}°`;
   }
 
   const caster = Number(values.caster);
@@ -717,23 +744,25 @@ function _renderToeSummary() {
     return;
   }
 
-  const targetToe = result.targets?.toe ?? _getWheelTargets(activeTableWheel).toe;
-  const measuredToe = result.measuredToe;
+  const targetToeDeg = result.targets?.toe ?? _getWheelTargets(activeTableWheel).toe;
+  const measuredToeDeg = result.measuredToe;
 
-  if (measuredToe == null || Number.isNaN(Number(measuredToe))) {
-    el.textContent = `${activeTableWheel} toe: not measured (target ${targetToe >= 0 ? '+' : ''}${targetToe.toFixed(2)} mm)`;
+  if (measuredToeDeg == null || Number.isNaN(Number(measuredToeDeg))) {
+    el.textContent = `${activeTableWheel} toe: not measured (target ${targetToeDeg >= 0 ? '+' : ''}${targetToeDeg.toFixed(2)}° per wheel)`;
     return;
   }
 
-  const delta = measuredToe - targetToe;
-  const absDelta = Math.abs(delta);
-  const status = absDelta <= TOE_THRESHOLDS.targetMet
+  const deltaDeg = Number(measuredToeDeg) - targetToeDeg;
+  const absDeltaDeg = Math.abs(deltaDeg);
+  const status = absDeltaDeg <= TOE_THRESHOLDS.targetMet
     ? 'on target'
-    : absDelta <= TOE_THRESHOLDS.nearTarget
+    : absDeltaDeg <= TOE_THRESHOLDS.nearTarget
       ? 'near target'
       : 'off target';
 
-  el.textContent = `${activeTableWheel} toe ${measuredToe >= 0 ? '+' : ''}${Number(measuredToe).toFixed(2)} mm (target ${targetToe >= 0 ? '+' : ''}${targetToe.toFixed(2)} mm, Δ ${delta >= 0 ? '+' : ''}${delta.toFixed(2)} mm, ${status})`;
+  const perWheelMm = toeDegreesToResultantMm(Number(measuredToeDeg), TARGET_WHEEL_DIAMETER);
+  const axleTotalMm = perWheelMm * 2;
+  el.textContent = `${activeTableWheel} toe ${Number(measuredToeDeg) >= 0 ? '+' : ''}${Number(measuredToeDeg).toFixed(2)}° per wheel (target ${targetToeDeg >= 0 ? '+' : ''}${targetToeDeg.toFixed(2)}°, Δ ${deltaDeg >= 0 ? '+' : ''}${deltaDeg.toFixed(2)}°, ${status}; resultant ~${perWheelMm >= 0 ? '+' : ''}${perWheelMm.toFixed(2)} mm/wheel, axle ~${axleTotalMm >= 0 ? '+' : ''}${axleTotalMm.toFixed(2)} mm)`;
 }
 
 // ── Section 2.3: Washer Diagrams ───────────────────────────────────────────
@@ -2429,7 +2458,7 @@ function _drawHeatmap(canvasId, legendId, result, mode) {
       const gridCell = result.grid[fi][ri];
       const value = mode === 'camber'
         ? gridCell.zero
-        : calculateCaster(gridCell.neg20, gridCell.pos20);
+        : calculateCaster(gridCell.neg20, gridCell.pos20, _getWheelCasterOptions(activeHeatmapWheel, result));
 
       const t = Math.max(0, Math.min(1, (value - (target - range)) / (2 * range)));
       const colour = mode === 'camber'
@@ -2519,7 +2548,7 @@ function _drawProximityHeatmap(result) {
     for (let ri = 0; ri < N; ri++) {
       const gc     = result.grid[fi][ri];
       const camber = gc.zero;
-      const caster = calculateCaster(gc.neg20, gc.pos20);
+      const caster = calculateCaster(gc.neg20, gc.pos20, _getWheelCasterOptions(activeHeatmapWheel, result));
       scores.push(wC * Math.abs(camber - TARGET_CAMBER) + wK * Math.abs(caster - TARGET_CASTER));
     }
   }

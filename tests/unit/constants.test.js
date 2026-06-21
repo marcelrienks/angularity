@@ -9,6 +9,7 @@ import {
   BOLT_POSITIONS,
   TARGET_CAMBER,
   TARGET_CASTER,
+  TARGET_STEERING_RATIO,
   CASTER_MULTIPLIER,
   CAMBER_GREEN_THRESHOLD,
   CAMBER_ORANGE_THRESHOLD,
@@ -41,7 +42,8 @@ describe('constants.js', () => {
     });
 
     it('defines caster multiplier', () => {
-      expect(CASTER_MULTIPLIER).toBe(1.462);
+      const expected = 1 / (2 * Math.sin((360 / TARGET_STEERING_RATIO) * (Math.PI / 180)));
+      expect(CASTER_MULTIPLIER).toBeCloseTo(expected, 12);
       expect(typeof CASTER_MULTIPLIER).toBe('number');
     });
   });

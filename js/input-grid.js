@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  *   - Build the 13×13 grid dynamically (rows = rear bolt, cols = front bolt)
- *   - 3 inputs per cell: camber_neg20, camber_0, camber_pos20
+ *   - 3 inputs per cell: camber at 360° ACW, 0°, 360° CW steering wheel sweep
  *   - Required position cells (bolt values in {−6,−3,0,+3,+6}) visually distinct
  *   - Cell state: empty / partial / filled + border colouring
  *   - Progress indicator: X/25 required, Y/169 total
@@ -17,6 +17,10 @@
  */
 
 import { BOLT_POSITIONS, REQUIRED_POSITIONS, WHEELS, FRONT_WHEELS, REAR_WHEELS, TARGET_TOE_FRONT, TARGET_TOE_REAR } from './constants.js';
+function _getDefaultToeTarget(wheel) {
+  return FRONT_WHEELS.includes(wheel) ? TARGET_TOE_FRONT : TARGET_TOE_REAR;
+}
+
 import { buildCSVString, downloadCSVBlob, parseCSV } from './csv-io.js';
 import { generateGrid, generateThreeColorGrid } from './dummy-data-generator.js';
 
@@ -42,10 +46,6 @@ function _getStorageKey(wheel) {
 
 function _getToeStorageKey(wheel) {
   return `mx5-nc1-alignment-toe-${wheel}`;
-}
-
-function _getDefaultToeTarget(wheel) {
-  return FRONT_WHEELS.includes(wheel) ? TARGET_TOE_FRONT : TARGET_TOE_REAR;
 }
 
 /**
@@ -229,11 +229,11 @@ function _buildCell(frontBolt, rearBolt) {
   cell.setAttribute('role', 'gridcell');
   cell.setAttribute('aria-label', `Front ${_sign(frontBolt)}, Rear ${_sign(rearBolt)}`);
 
-  // Labels ordered so the most common (0°) is in the middle, ±20° above/below.
+  // Labels ordered so straight-ahead (0°) is in the middle, ACW/CW sweeps above/below.
   const defs = [
-    { key: 'pos20', label: '+20' },
-    { key: 'zero',  label: '  0' },
-    { key: 'neg20', label: '−20' },
+    { key: 'pos20', label: '360° ACW' },
+    { key: 'zero',  label: '0°' },
+    { key: 'neg20', label: '360° CW' },
   ];
 
   for (const { key, label } of defs) {
@@ -249,7 +249,7 @@ function _buildCell(frontBolt, rearBolt) {
     inp.dataset.front = frontBolt;
     inp.dataset.rear  = rearBolt;
     inp.dataset.key   = key;
-    inp.setAttribute('aria-label', `${label}° steering, front ${_sign(frontBolt)}, rear ${_sign(rearBolt)}`);
+    inp.setAttribute('aria-label', `${label} steering wheel, front ${_sign(frontBolt)}, rear ${_sign(rearBolt)}`);
 
     inp.addEventListener('input',   () => _onInputChange(frontBolt, rearBolt));
     inp.addEventListener('focus',   () => _onInputFocus(frontBolt, rearBolt));
@@ -489,12 +489,12 @@ function _loadSampleData() {
   }
 
   // Set toe value with distinct offsets for wheel selection testing
-  let toeValue = _getDefaultToeTarget(activeWheel);
+  let toeValue = 0.08;
   // Add distinct offsets for rear wheels during sample data load for testing
   if (activeWheel === 'RL') {
-    toeValue -= 0.08;  // RL: offset -0.08 mm for wheel selection testing
+    toeValue = 0.04;
   } else if (activeWheel === 'RR') {
-    toeValue += 0.10;  // RR: offset +0.10 mm for wheel selection testing
+    toeValue = 0.12;
   }
   toeState[activeWheel] = toeValue.toFixed(2);
 
@@ -725,7 +725,7 @@ function _renderToeInput() {
 
   toeInput.value = toeState[activeWheel];
   const target = _getDefaultToeTarget(activeWheel);
-  toeTargetLabel.textContent = `Target: ${target >= 0 ? '+' : ''}${target.toFixed(2)} mm`;
+  toeTargetLabel.textContent = `Target: ${target >= 0 ? '+' : ''}${target.toFixed(2)}° per wheel`;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────

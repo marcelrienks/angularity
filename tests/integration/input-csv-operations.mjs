@@ -123,9 +123,11 @@ async function main() {
       // Test 3: CSV has proper headers
       log(colors.cyan, '\n┌─ TEST 3: CSV Has Proper Headers ─────────────────────────┐');
       const headers = lines[0].split(',').map(h => h.trim());
-      const expectedHeaders = ['front_bolt', 'rear_bolt', 'camber_neg20', 'camber_0', 'camber_pos20'];
-      const hasAllHeaders = expectedHeaders.every(h => headers.includes(h));
-      assert(hasAllHeaders, `CSV has expected headers`);
+      const expectedHeadersNew = ['front_bolt', 'rear_bolt', 'camber_360acw', 'camber_0', 'camber_360cw'];
+      const expectedHeadersLegacy = ['front_bolt', 'rear_bolt', 'camber_neg20', 'camber_0', 'camber_pos20'];
+      const hasNewHeaders = expectedHeadersNew.every(h => headers.includes(h));
+      const hasLegacyHeaders = expectedHeadersLegacy.every(h => headers.includes(h));
+      assert(hasNewHeaders || hasLegacyHeaders, 'CSV has expected headers');
 
       // Test 4: CSV has correct row count
       log(colors.cyan, '\n┌─ TEST 4: CSV Has Correct Row Count ───────────────────────┐');
