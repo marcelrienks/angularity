@@ -16,15 +16,15 @@
  *   - CSV load (file input → parseCSV → populate grid, manual override)
  */
 
-import { BOLT_POSITIONS, REQUIRED_POSITIONS, WHEELS, FRONT_WHEELS, REAR_WHEELS, TARGET_TOE_FRONT, TARGET_TOE_REAR } from './constants.js';
-function _getDefaultToeTarget(wheel) {
-  return FRONT_WHEELS.includes(wheel) ? TARGET_TOE_FRONT : TARGET_TOE_REAR;
-}
-
+import { REQUIRED_POSITIONS, WHEELS, FRONT_WHEELS, REAR_WHEELS, TARGET_TOE_FRONT, TARGET_TOE_REAR, getRequiredPositions, getCurrentMeasurementDensity, getBoltPositions } from './constants.js';
 import { buildCSVString, downloadCSVBlob, parseCSV } from './csv-io.js';
 import { generateGrid, generateThreeColorGrid } from './dummy-data-generator.js';
 
 // ── State ─────────────────────────────────────────────────────────────────
+
+function _getDefaultToeTarget(wheel) {
+  return FRONT_WHEELS.includes(wheel) ? TARGET_TOE_FRONT : TARGET_TOE_REAR;
+}
 
 /** @type {'FL'|'FR'} */
 let activeWheel = 'FL';
@@ -54,16 +54,32 @@ function _getToeStorageKey(wheel) {
  */
 const gridState = {};
 const toeState = {};
-for (const w of WHEELS) {
-  gridState[w] = {};
-  toeState[w] = '';
-  for (const f of BOLT_POSITIONS) {
-    gridState[w][f] = {};
-    for (const r of BOLT_POSITIONS) {
-      gridState[w][f][r] = { neg20: '', zero: '', pos20: '' };
+
+/**
+ * Initialize grid state based on current bolt positions (dynamic based on measurement density).
+ */
+function _initializeGridState() {
+  const boltPositions = getBoltPositions();
+  
+  // Clear existing state
+  Object.keys(gridState).forEach(key => delete gridState[key]);
+  Object.keys(toeState).forEach(key => delete toeState[key]);
+  
+  // Reinitialize with current bolt positions
+  for (const w of WHEELS) {
+    gridState[w] = {};
+    toeState[w] = '';
+    for (const f of boltPositions) {
+      gridState[w][f] = {};
+      for (const r of boltPositions) {
+        gridState[w][f][r] = { neg20: '', zero: '', pos20: '' };
+      }
     }
   }
 }
+
+// Initialize on module load
+_initializeGridState();
 
 /** Debounce timer ID for localStorage writes. */
 let _saveDebounceTimer = null;
@@ -126,13 +142,14 @@ function _saveToStorage() {
  */
 function _restoreFromStorage() {
   try {
+    const boltPositions = getBoltPositions();
     for (const wheel of WHEELS) {
       const key = _getStorageKey(wheel);
       const raw = localStorage.getItem(key);
       if (!raw) continue;
       const saved = JSON.parse(raw);
-      for (const f of BOLT_POSITIONS) {
-        for (const r of BOLT_POSITIONS) {
+      for (const f of boltPositions) {
+        for (const r of boltPositions) {
           const cell = saved?.[f]?.[r];
           if (!cell) continue;
           gridState[wheel][f][r] = {
@@ -162,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
   _populateGrid(activeWheel);
   _renderToeInput();
   _updateProgress();
+  _updateRequiredCountDisplay();
   _bindControls();
   // NOTE: Auto-loading CSV files is disabled because:
   // 1. It interferes with test isolation (loads sample data for all wheels)
@@ -184,10 +202,11 @@ window.addEventListener('beforeunload', () => {
  */
 function _buildGrid() {
   const grid = document.getElementById('input-grid');
+  const boltPositions = getBoltPositions();
 
-  // CSS grid: 1 row-header column + 13 data columns = 14 columns total
-  const colCount = 1 + BOLT_POSITIONS.length;
-  grid.style.gridTemplateColumns = `44px repeat(${BOLT_POSITIONS.length}, 120px)`;
+  // CSS grid: 1 row-header column + N data columns
+  const colCount = 1 + boltPositions.length;
+  grid.style.gridTemplateColumns = `44px repeat(${boltPositions.length}, 120px)`;
 
   // ── Row 0: corner + column headers (front bolt positions) ──────────────
   const corner = _el('div', 'grid-corner');
@@ -195,7 +214,7 @@ function _buildGrid() {
   corner.textContent = 'F→\nR↓';
   grid.appendChild(corner);
 
-  for (const f of BOLT_POSITIONS) {
+  for (const f of boltPositions) {
     const th = _el('div', `grid-col-header${_isRequired(f) ? ' required' : ''}`);
     th.dataset.col = f;
     th.textContent = _sign(f);
@@ -203,8 +222,8 @@ function _buildGrid() {
     grid.appendChild(th);
   }
 
-  // ── Rows 1–13: row header + 13 cells ───────────────────────────────────
-  for (const r of BOLT_POSITIONS) {
+  // ── Rows 1–N: row header + N cells ───────────────────────────────────
+  for (const r of boltPositions) {
     // Row header (rear bolt)
     const rh = _el('div', `grid-row-header${_isRequired(r) ? ' required' : ''}`);
     rh.dataset.row = r;
@@ -213,7 +232,7 @@ function _buildGrid() {
     grid.appendChild(rh);
 
     // Data cells (column axis is front bolt)
-    for (const f of BOLT_POSITIONS) {
+    for (const f of boltPositions) {
       const cell = _buildCell(f, r);
       grid.appendChild(cell);
     }
@@ -268,8 +287,9 @@ function _buildCell(frontBolt, rearBolt) {
 
 /** Write gridState[wheel] values into the DOM inputs. */
 function _populateGrid(wheel) {
-  for (const f of BOLT_POSITIONS) {
-    for (const r of BOLT_POSITIONS) {
+  const boltPositions = getBoltPositions();
+  for (const f of boltPositions) {
+    for (const r of boltPositions) {
       const state = gridState[wheel][f][r];
       const inputs = _getInputs(f, r);
       if (inputs) {
@@ -281,10 +301,11 @@ function _populateGrid(wheel) {
       }
     }
   }
-  // Debug: Log first cell values for each wheel
-  if (window.location.pathname.includes('input')) {
-    const state0 = gridState[wheel][-6][-6];
-    console.log(`[DEBUG] _populateGrid(${wheel}): first cell = ${state0.zero || '(empty)'}`);
+  // Debug: Log first cell values for each wheel (using first bolt position, not hardcoded -6)
+  if (window.location.pathname.includes('input') && boltPositions.length > 0) {
+    const firstPos = boltPositions[0];
+    const state0 = gridState[wheel][firstPos][firstPos];
+    console.log(`[DEBUG] _populateGrid(${wheel}): first cell (${firstPos},${firstPos}) = ${state0.zero || '(empty)'}`);
   }
 }
 
@@ -385,13 +406,20 @@ function _updateProgress() {
   let requiredFilled = 0;
   let totalFilled    = 0;
 
-  for (const f of BOLT_POSITIONS) {
-    for (const r of BOLT_POSITIONS) {
+  const boltPositions = getBoltPositions();
+  const requiredCount = 9; // 3×3 from -1 to +1 on both axes
+  const totalCount = boltPositions.length * boltPositions.length;
+  
+  // Required subset: -1, 0, +1 on both axes = 9 positions
+  const REQUIRED_SUBSET = [-1, 0, 1];
+
+  for (const f of boltPositions) {
+    for (const r of boltPositions) {
       const { neg20, zero, pos20 } = gridState[activeWheel][f][r];
       const allFilled = neg20 !== '' && zero !== '' && pos20 !== '';
       if (allFilled) {
         totalFilled++;
-        if (_isRequired(f) && _isRequired(r)) requiredFilled++;
+        if (REQUIRED_SUBSET.includes(f) && REQUIRED_SUBSET.includes(r)) requiredFilled++;
       }
     }
   }
@@ -403,14 +431,38 @@ function _updateProgress() {
 
   if (reqEl) {
     reqEl.textContent = requiredFilled;
-    reqEl.className = 'count' + (requiredFilled >= 25 ? ' complete' : requiredFilled > 0 ? ' partial' : '');
+    reqEl.className = 'count' + (requiredFilled >= requiredCount ? ' complete' : requiredFilled > 0 ? ' partial' : '');
   }
   if (totEl) {
     totEl.textContent = totalFilled;
-    totEl.className = 'count' + (totalFilled >= 169 ? ' complete' : totalFilled > 0 ? ' partial' : '');
+    totEl.className = 'count' + (totalFilled >= totalCount ? ' complete' : totalFilled > 0 ? ' partial' : '');
   }
-  if (reqFill) reqFill.style.width = `${(requiredFilled / 25) * 100}%`;
-  if (totFill) totFill.style.width = `${(totalFilled / 169) * 100}%`;
+  if (reqFill) reqFill.style.width = `${(requiredFilled / requiredCount) * 100}%`;
+  if (totFill) totFill.style.width = `${(totalFilled / totalCount) * 100}%`;
+}
+
+/**
+ * Update the required count display based on current measurement density.
+ * "Required" = always 3×3 (−1 to +1) = 9 positions minimum
+ * "Total" = scales with density, max 13×13 (−6 to +6) = 169
+ */
+function _updateRequiredCountDisplay() {
+  const boltPositions = getBoltPositions();
+  const totalCount = boltPositions.length * boltPositions.length;
+  
+  // Required is always the 3×3 subset: -1, 0, +1 on both axes = 9 positions
+  const requiredCount = 9; // 3×3
+  
+  const reqEl = document.getElementById('required-total');
+  const totEl = document.getElementById('total-total');
+  
+  if (reqEl) {
+    reqEl.textContent = `/ ${requiredCount} required`;
+  }
+  
+  if (totEl) {
+    totEl.textContent = `/ ${totalCount} total`;
+  }
 }
 
 // ── Wheel selector ────────────────────────────────────────────────────────
@@ -466,9 +518,10 @@ function _bindControls() {
  * - RL/RR: RED (no symmetric match)
  */
 function _loadSampleData() {
+  const boltPositions = getBoltPositions();
   if (gridState[activeWheel]) {
-    const nonEmpty = BOLT_POSITIONS.some(f =>
-      BOLT_POSITIONS.some(r => gridState[activeWheel][f][r].neg20 !== '')
+    const nonEmpty = boltPositions.some(f =>
+      boltPositions.some(r => gridState[activeWheel][f][r].neg20 !== '')
     );
     if (nonEmpty && !confirm('Replace current ' + activeWheel + ' data with sample data?')) return;
   }
@@ -477,8 +530,8 @@ function _loadSampleData() {
   const generatedGrid = generateThreeColorGrid(activeWheel);
 
   // Import generated data into gridState
-  for (const f of BOLT_POSITIONS) {
-    for (const r of BOLT_POSITIONS) {
+  for (const f of boltPositions) {
+    for (const r of boltPositions) {
       const zeroValue = generatedGrid[f][r].zero;
       gridState[activeWheel][f][r] = {
         neg20: _isRearWheel(activeWheel) ? zeroValue : generatedGrid[f][r].neg20,
@@ -510,6 +563,7 @@ function _loadSampleData() {
 // ── CSV download ──────────────────────────────────────────────────────────
 
 function _downloadCSV() {
+  const boltPositions = getBoltPositions();
   const toeRaw = toeState[activeWheel];
   const normalizedToe = toeRaw.replace(',', '.');
   const toeValue = toeRaw === '' ? null : parseFloat(normalizedToe);
@@ -520,8 +574,8 @@ function _downloadCSV() {
   }
 
   const rows = [];
-  for (const f of BOLT_POSITIONS) {
-    for (const r of BOLT_POSITIONS) {
+  for (const f of boltPositions) {
+    for (const r of boltPositions) {
       const { neg20, zero, pos20 } = gridState[activeWheel][f][r];
       const exportNeg20 = _isRearWheel(activeWheel) ? zero : neg20;
       const exportPos20 = _isRearWheel(activeWheel) ? zero : pos20;
@@ -543,14 +597,17 @@ function _downloadCSV() {
 
   _hideError();
 
-  // Warn if fewer than 25 required cells are complete (interpolation quality suffers)
+  // Warn if fewer than minimum required cells are complete (interpolation quality suffers)
+  const requiredPos = getRequiredPositions();
+  const minRequiredCount = requiredPos.length * requiredPos.length;
   const requiredFilled = rows.filter(
-    row => REQUIRED_POSITIONS.includes(row.frontBolt) && REQUIRED_POSITIONS.includes(row.rearBolt)
+    row => requiredPos.includes(row.frontBolt) && requiredPos.includes(row.rearBolt)
   ).length;
-  if (requiredFilled < 25) {
+  if (requiredFilled < minRequiredCount) {
+    const posLabels = requiredPos.map(p => (p > 0 ? '+' : '') + p).join(', ');
     _showWarning(
-      `Only ${requiredFilled}/25 required positions are filled. ` +
-      'Interpolation accuracy may be reduced. Required positions: −6, −3, 0, +3, +6 on both axes.'
+      `Only ${requiredFilled}/${minRequiredCount} required positions are filled. ` +
+      `Interpolation accuracy may be reduced. Required positions: ${posLabels} on both axes.`
     );
   } else {
     _hideWarning();
@@ -606,9 +663,10 @@ function _loadCSV(e) {
 }
 
 function _applyCSVToGrid(rows) {
+  const boltPositions = getBoltPositions();
   // Clear current wheel's grid state first, then apply CSV rows
-  for (const f of BOLT_POSITIONS) {
-    for (const r of BOLT_POSITIONS) {
+  for (const f of boltPositions) {
+    for (const r of boltPositions) {
       gridState[activeWheel][f][r] = { neg20: '', zero: '', pos20: '' };
     }
   }
@@ -643,12 +701,13 @@ function _applyCSVToGrid(rows) {
  * Silently skips wheels whose files are absent or unparseable.
  */
 async function _loadFromDataFiles() {
+  const boltPositions = getBoltPositions();
   if (location.protocol === 'file:') return; // fetch blocked on file:// — skip silently
 
   for (const wheel of WHEELS) {
     // Skip fetch if localStorage already has in-progress data for this wheel.
-    const hasLocalData = BOLT_POSITIONS.some(f =>
-      BOLT_POSITIONS.some(r => {
+    const hasLocalData = boltPositions.some(f =>
+      boltPositions.some(r => {
         const c = gridState[wheel][f][r];
         return c.neg20 !== '' || c.zero !== '' || c.pos20 !== '';
       })
@@ -661,8 +720,8 @@ async function _loadFromDataFiles() {
       const text = await res.text();
       const rows = parseCSV(text);
 
-      for (const f of BOLT_POSITIONS) {
-        for (const r of BOLT_POSITIONS) {
+      for (const f of boltPositions) {
+        for (const r of boltPositions) {
           gridState[wheel][f][r] = { neg20: '', zero: '', pos20: '' };
         }
       }
@@ -694,10 +753,11 @@ async function _loadFromDataFiles() {
 // ── Clear all ─────────────────────────────────────────────────────────────
 
 function _clearAll() {
+  const boltPositions = getBoltPositions();
   if (!confirm(`Clear all ${activeWheel} measurements? This cannot be undone.`)) return;
 
-  for (const f of BOLT_POSITIONS) {
-    for (const r of BOLT_POSITIONS) {
+  for (const f of boltPositions) {
+    for (const r of boltPositions) {
       gridState[activeWheel][f][r] = { neg20: '', zero: '', pos20: '' };
     }
   }
@@ -732,7 +792,7 @@ function _renderToeInput() {
 // ── Helpers ───────────────────────────────────────────────────────────────
 
 function _isRequired(pos) {
-  return REQUIRED_POSITIONS.includes(pos);
+  return getRequiredPositions().includes(pos);
 }
 
 function _sign(n) {

@@ -11,10 +11,10 @@
  *   - Heatmaps (OPT-1, OPT-2, OPT-3)
  */
 
-import { BOLT_POSITIONS, REQUIRED_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER,
+import { REQUIRED_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER,
          TARGET_CAMBER_REAR, TARGET_TOE_FRONT, TARGET_TOE_REAR, TARGET_STEERING_RATIO, TARGET_CASTER_INPUT_MODE, TARGET_CASTER_WHEEL_DEGREES, TARGET_WHEEL_DIAMETER, CAMBER_THRESHOLDS, CASTER_THRESHOLDS, TOE_THRESHOLDS, HEATMAP_CAMBER_RANGE,
          HEATMAP_CASTER_RANGE, WHEELS, FRONT_WHEELS, REAR_WHEELS, WHEEL_LABELS,
-         SYMMETRY_TOLERANCE } from './constants.js';
+         SYMMETRY_TOLERANCE, getBoltPositions, getCurrentMeasurementDensity } from './constants.js';
 import { parseCSV } from './csv-io.js';
 import { processWheel, symmetryAnalysis } from './report-engine.js';
 import { buildMainChart, destroyChart, updateChartNote } from './chart-builder.js';

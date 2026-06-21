@@ -26,11 +26,10 @@
  *   - Tick marks span the bottom semicircle (9 o'clock → 3 o'clock)
  */
 
-import { BOLT_POSITIONS, COLOURS } from './constants.js';
+import { BOLT_POSITIONS, COLOURS, getRequiredPositions, getCurrentMeasurementDensity } from './constants.js';
 
 const BOLT_MIN = -6;
 const BOLT_MAX =  6;
-const TOTAL_TICKS = BOLT_POSITIONS.length; // 13
 
 /**
  * Render washer diagrams into containerId with grid layout.
@@ -266,27 +265,32 @@ function _buildWasherSVG(position, colour) {
   // ── Create rotation group ────────────────────────────────────────────────
   // All washer components (markers, labels, bolt hole) rotate together.
   // Rotation aligns the marker for this position with 6 o'clock (90° angle).
-  // Each position step = 15° (180° / 12 steps from -6 to +6)
-  const anglePerPosition = 15;  // degrees = 180° / 12 steps
+  // Each position step calculated dynamically based on measurement density
+  const selectedPositions = getRequiredPositions();
+  const numPositions = selectedPositions.length;
+  const anglePerPosition = numPositions > 1 ? 180 / (numPositions - 1) : 180;
   const rotationDegrees = position * anglePerPosition;
   
   const rotationGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   rotationGroup.setAttribute('transform', `rotate(${rotationDegrees} ${CX} ${CY})`);
 
-  // ── Position marking scale (13 tick marks, -6 to +6) ──────────────────────
+  // ── Position marking scale (dynamic based on measurement density) ─────────
   // Markers span bottom semicircle (180° arc): 9 o'clock to 3 o'clock via 6 o'clock
-  // Marker for position i is at angle: 180 - (i + 6) × 15 degrees
+  // Marker for position i is at angle: 180 - (i + 6) × anglePerPosition degrees
   
+  // Render tick marks for all positions, but only show labels for selected required positions
   for (let i = BOLT_MIN; i <= BOLT_MAX; i++) {
     // Calculate marker angle for this bolt position
-    // Position -6: 180 - (0)*15 = 180° (left/9 o'clock)
-    // Position 0: 180 - (6)*15 = 90° (bottom/6 o'clock)
-    // Position +6: 180 - (12)*15 = 0° (right/3 o'clock)
+    // Position -6: 180 - (0)*anglePerPosition = 180° (left/9 o'clock)
+    // Position 0: 180 - (6)*anglePerPosition = 90° (bottom/6 o'clock)
+    // Position +6: 180 - (12)*anglePerPosition = 0° (right/3 o'clock)
     const markerAngleDeg = 180 - (i + 6) * anglePerPosition;
     const markerAngleRad = (markerAngleDeg * Math.PI) / 180;
     
-    // Determine if this is a major tick (shown with label)
-    const isMajor = i === 0 || i === BOLT_MIN || i === BOLT_MAX || i % 3 === 0;
+    // Determine if this position is in the selected required positions (show with label)
+    const isSelected = selectedPositions.includes(i);
+    // Major ticks: selected positions, or endpoints
+    const isMajor = isSelected || i === BOLT_MIN || i === BOLT_MAX;
     const tickLength = isMajor ? 20 : 10;  // scaled: 10/5 * 2 = 20/10
     const tickStrokeWidth = isMajor ? 3.6 : 2.0;  // scaled: 1.8/1.0 * 2 = 3.6/2.0
     const tickColor = isMajor ? COLOURS.muted : COLOURS.mutedStrong;
@@ -307,8 +311,8 @@ function _buildWasherSVG(position, colour) {
     line.setAttribute('stroke-linecap', 'round');
     rotationGroup.appendChild(line);
 
-    // Position label for major ticks only (−6, −3, 0, +3, +6)
-    if (isMajor) {
+    // Position label for selected positions only
+    if (isSelected) {
       const lx = CX + LABEL_RADIUS * Math.cos(markerAngleRad);
       const ly = CY + LABEL_RADIUS * Math.sin(markerAngleRad);
       
