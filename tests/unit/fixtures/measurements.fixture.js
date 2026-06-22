@@ -15,8 +15,8 @@
  * Target camber: -1.1°, Target caster: 5.0°
  */
 export const excellentCamberGoodCaster = {
-  frontBolt: 0,
-  rearBolt: 0,
+  camberBolt: 0,
+  casterBolt: 0,
   neg20: -0.95,     // Measured
   zero: -1.08,      // Measured (delta: -0.08, within camber GREEN ±0.15°)
   pos20: -1.24,     // Measured (implies caster: ~0.26, within GREEN ±0.25°)
@@ -27,8 +27,8 @@ export const excellentCamberGoodCaster = {
  * Camber within green, but caster > 0.60°
  */
 export const excellentCamberPoorCaster = {
-  frontBolt: 0,
-  rearBolt: 0,
+  camberBolt: 0,
+  casterBolt: 0,
   neg20: -0.90,     // Measured
   zero: -1.09,      // Measured (delta: -0.09, within camber GREEN)
   pos20: -1.50,     // Measured (implies caster: ~0.87, RED >0.60°)
@@ -39,8 +39,8 @@ export const excellentCamberPoorCaster = {
  * Target -1.1°, measured -1.30° (delta: -0.20, orange but not red)
  */
 export const poorCamberOrangeTier = {
-  frontBolt: 0,
-  rearBolt: 0,
+  camberBolt: 0,
+  casterBolt: 0,
   neg20: -1.00,     // Measured
   zero: -1.30,      // Measured (delta: -0.20, within camber ORANGE ±0.40°)
   pos20: -1.50,     // Measured
@@ -51,8 +51,8 @@ export const poorCamberOrangeTier = {
  * Target -1.1°, measured -1.60° (delta: -0.50, RED >0.40°)
  */
 export const veryPoorCamberRedTier = {
-  frontBolt: 0,
-  rearBolt: 0,
+  camberBolt: 0,
+  casterBolt: 0,
   neg20: -1.10,     // Measured
   zero: -1.60,      // Measured (delta: -0.50, RED >0.40°)
   pos20: -2.10,     // Measured
@@ -63,8 +63,8 @@ export const veryPoorCamberRedTier = {
  * Target -1.1°, measured -1.25° (delta: -0.15, exactly at boundary)
  */
 export const boundaryGreenOrangeCamber = {
-  frontBolt: 0,
-  rearBolt: 0,
+  camberBolt: 0,
+  casterBolt: 0,
   neg20: -1.00,     // Measured
   zero: -1.25,      // Measured (delta: -0.15, at GREEN/ORANGE boundary)
   pos20: -1.50,     // Measured
@@ -75,8 +75,8 @@ export const boundaryGreenOrangeCamber = {
  * Target -1.1°, measured -1.50° (delta: -0.40, exactly at boundary)
  */
 export const boundaryOrangeRedCamber = {
-  frontBolt: 0,
-  rearBolt: 0,
+  camberBolt: 0,
+  casterBolt: 0,
   neg20: -1.05,     // Measured
   zero: -1.50,      // Measured (delta: -0.40, at ORANGE/RED boundary)
   pos20: -1.95,     // Measured
@@ -87,8 +87,8 @@ export const boundaryOrangeRedCamber = {
  * Useful for testing handling of missing/undefined data
  */
 export const nullToeValue = {
-  frontBolt: 0,
-  rearBolt: 0,
+  camberBolt: 0,
+  casterBolt: 0,
   neg20: -1.08,     // Measured
   zero: -1.10,      // Measured (valid)
   pos20: -1.32,     // Measured (valid)
@@ -102,24 +102,24 @@ export const nullToeValue = {
 export const casterMetrics = [
   // Excellent caster (within GREEN ±0.25°)
   {
-    frontBolt: 0,
-    rearBolt: 0,
+    camberBolt: 0,
+    casterBolt: 0,
     neg20: -1.05,
     zero: -1.11,
     pos20: -1.27,    // Implies caster ≈ 1.462 × 0.22 = 0.32°, within GREEN
   },
   // Good caster (within ORANGE ±0.60°)
   {
-    frontBolt: 0,
-    rearBolt: 0,
+    camberBolt: 0,
+    casterBolt: 0,
     neg20: -1.02,
     zero: -1.15,
     pos20: -1.44,    // Implies caster ≈ 1.462 × 0.42 = 0.61°, at/near RED
   },
   // Poor caster (RED > 0.60°)
   {
-    frontBolt: 0,
-    rearBolt: 0,
+    camberBolt: 0,
+    casterBolt: 0,
     neg20: -0.95,
     zero: -1.20,
     pos20: -1.50,    // Implies caster ≈ 1.462 × 0.55 = 0.80°, RED
@@ -162,8 +162,8 @@ export const negativeTargetDeltas = {
  */
 export const sampleInterpolatedGrid = Array.from({ length: 13 }, (_, fi) =>
   Array.from({ length: 13 }, (_, ri) => ({
-    frontBolt: -6 + fi,
-    rearBolt: -6 + ri,
+    camberBolt: -6 + fi,
+    casterBolt: -6 + ri,
     neg20: -1.0 + (fi * 0.05) + (ri * 0.03),
     zero: -1.1 + (fi * 0.05) + (ri * 0.03),
     pos20: -1.2 + (fi * 0.05) + (ri * 0.03),
@@ -176,8 +176,8 @@ export const sampleInterpolatedGrid = Array.from({ length: 13 }, (_, fi) =>
  * Edge case: All measurements are exactly 0.0
  */
 export const allZeroMeasurements = {
-  frontBolt: 0,
-  rearBolt: 0,
+  camberBolt: 0,
+  casterBolt: 0,
   neg20: 0,
   zero: 0,
   pos20: 0,
@@ -188,8 +188,8 @@ export const allZeroMeasurements = {
  * Tests handling of unrealistic/extreme values
  */
 export const largePositiveValues = {
-  frontBolt: 0,
-  rearBolt: 0,
+  camberBolt: 0,
+  casterBolt: 0,
   neg20: 10.5,
   zero: 11.2,
   pos20: 12.0,
@@ -200,8 +200,8 @@ export const largePositiveValues = {
  * Tests handling of extreme negative values
  */
 export const largeNegativeValues = {
-  frontBolt: 0,
-  rearBolt: 0,
+  camberBolt: 0,
+  casterBolt: 0,
   neg20: -10.5,
   zero: -11.2,
   pos20: -12.0,

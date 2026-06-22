@@ -6,10 +6,10 @@
  *
  * recommendations shape:
  *   {
- *     FL?: { frontBolt, rearBolt },
- *     FR?: { frontBolt, rearBolt },
- *     RL?: { frontBolt, rearBolt },
- *     RR?: { frontBolt, rearBolt }
+ *     FL?: { camberBolt, casterBolt },
+ *     FR?: { camberBolt, casterBolt },
+ *     RL?: { camberBolt, casterBolt },
+ *     RR?: { camberBolt, casterBolt }
  *   }
  *
  * Each eccentric bolt is drawn as a circular washer with:
@@ -52,7 +52,7 @@ const BOLT_MAX =  6;
  * └─────────────────────────────────────────────────────┘
  *
  * @param {string} containerId
- * @param {{ FL?: { frontBolt:number, rearBolt:number }, FR?: { frontBolt:number, rearBolt:number }, RL?: { frontBolt:number, rearBolt:number }, RR?: { frontBolt:number, rearBolt:number } }} recommendations
+ * @param {{ FL?: { camberBolt:number, casterBolt:number }, FR?: { camberBolt:number, casterBolt:number }, RL?: { camberBolt:number, casterBolt:number }, RR?: { camberBolt:number, casterBolt:number } }} recommendations
  */
 export function renderWasherSection(containerId, recommendations) {
   const container = document.getElementById(containerId);
@@ -80,8 +80,8 @@ export function renderWasherSection(containerId, recommendations) {
   flGroup.appendChild(flWheelTitle);
   
   if (recommendations.FL) {
-    flGroup.appendChild(_makeBoltRow('Front Bolt', 'Camber', recommendations.FL.frontBolt, COLOURS.blue));
-    flGroup.appendChild(_makeBoltRow('Rear Bolt', 'Caster', recommendations.FL.rearBolt, COLOURS.green));
+    flGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.FL.camberBolt, COLOURS.blue));
+    flGroup.appendChild(_makeBoltRow('Caster Bolt', 'Caster', recommendations.FL.casterBolt, COLOURS.green));
   }
   frontGrid.appendChild(flGroup);
 
@@ -94,8 +94,8 @@ export function renderWasherSection(containerId, recommendations) {
   frGroup.appendChild(frWheelTitle);
   
   if (recommendations.FR) {
-    frGroup.appendChild(_makeBoltRow('Front Bolt', 'Camber', recommendations.FR.frontBolt, COLOURS.blue));
-    frGroup.appendChild(_makeBoltRow('Rear Bolt', 'Caster', recommendations.FR.rearBolt, COLOURS.green));
+    frGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.FR.camberBolt, COLOURS.blue));
+    frGroup.appendChild(_makeBoltRow('Caster Bolt', 'Caster', recommendations.FR.casterBolt, COLOURS.green));
   }
   frontGrid.appendChild(frGroup);
 
@@ -125,8 +125,8 @@ export function renderWasherSection(containerId, recommendations) {
   rlWheelTitle.textContent = 'LEFT (RL)';
   rlGroup.appendChild(rlWheelTitle);
   if (recommendations.RL) {
-    rlGroup.appendChild(_makeBoltRow('Front Bolt', 'Camber', recommendations.RL.frontBolt, COLOURS.purple));
-    rlGroup.appendChild(_makeBoltRow('Rear Bolt', 'Camber Support', recommendations.RL.rearBolt, COLOURS.purple));
+    rlGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RL.camberBolt, COLOURS.purple));
+    rlGroup.appendChild(_makeBoltRow('Caster Bolt', 'Camber Support', recommendations.RL.casterBolt, COLOURS.purple));
   } else {
     rlGroup.appendChild(_makeBlankBoltRow('Front Bolt'));
     rlGroup.appendChild(_makeBlankBoltRow('Rear Bolt'));
@@ -141,8 +141,8 @@ export function renderWasherSection(containerId, recommendations) {
   rrWheelTitle.textContent = 'RIGHT (RR)';
   rrGroup.appendChild(rrWheelTitle);
   if (recommendations.RR) {
-    rrGroup.appendChild(_makeBoltRow('Front Bolt', 'Camber', recommendations.RR.frontBolt, COLOURS.purple));
-    rrGroup.appendChild(_makeBoltRow('Rear Bolt', 'Camber Support', recommendations.RR.rearBolt, COLOURS.purple));
+    rrGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RR.camberBolt, COLOURS.purple));
+    rrGroup.appendChild(_makeBoltRow('Caster Bolt', 'Camber Support', recommendations.RR.casterBolt, COLOURS.purple));
   } else {
     rrGroup.appendChild(_makeBlankBoltRow('Front Bolt'));
     rrGroup.appendChild(_makeBlankBoltRow('Rear Bolt'));

@@ -22,7 +22,7 @@
  *   but Front +1 gives better caster).
  *
  * DerivedRow shape:
- *   { frontBolt, rearBolt, camber, caster, isInterpolated,
+ *   { camberBolt, casterBolt, camber, caster, isInterpolated,
  *     camberDelta, casterDelta, score }
  *
  * SymmetryResult shape (Phase 1):
@@ -31,7 +31,7 @@
  *     fr: { bestCamber, bestCaster, bestFront, bestRear }
  *     recommendation: {
  *       camber, caster,
- *       flFront, flRear, frFront, frRear,
+ *       flCamberBolt, flCasterBolt, frCamberBolt, frCasterBolt,
  *       note: string
  *     }
  *   }
@@ -75,7 +75,7 @@ import { calculateCaster, calculateCasterMultiplier } from './math-utils.js';
 
 /**
  * @typedef {import('./interpolation.js').GridCell} GridCell
- * @typedef {{ frontBolt:number, rearBolt:number, camber:number, caster:number, toe:number|null,
+ * @typedef {{ camberBolt:number, casterBolt:number, camber:number, caster:number, toe:number|null,
  *             isInterpolated:boolean, camberDelta:number, casterDelta:number|null, toeDelta:number|null, score:number }} DerivedRow
  */
 
@@ -180,8 +180,8 @@ export function processWheel(parsedCSV, options = {}) {
         : _computeGoldenRuleScore(camberDelta, casterDelta, toeDelta);
 
       rows169.push({
-        frontBolt:    cell.frontBolt,
-        rearBolt:     cell.rearBolt,
+        camberBolt:    cell.camberBolt,
+        casterBolt:     cell.casterBolt,
         camber,
         caster,
         toe,
@@ -195,7 +195,7 @@ export function processWheel(parsedCSV, options = {}) {
   }
 
   rows169.sort((a, b) =>
-    a.frontBolt !== b.frontBolt ? a.frontBolt - b.frontBolt : a.rearBolt - b.rearBolt
+    a.camberBolt !== b.camberBolt ? a.camberBolt - b.camberBolt : a.casterBolt - b.casterBolt
   );
 
   // Pre-sort for quick access to top matches (optimization: avoid re-sorting in report-page.js)
@@ -311,10 +311,10 @@ export function symmetryAnalysis(flResult, frResult, rlResult = null, rrResult =
         recommendation = {
           camber: (fl.bestCamber + fr.bestCamber) / 2,
           caster: (fl.bestCaster + fr.bestCaster) / 2,
-          flFront: fl.camberFront,
-          flRear: fl.camberRear,
-          frFront: fr.camberFront,
-          frRear: fr.camberRear,
+          flCamberBolt: fl.camberOptCamberBolt,
+          flCasterBolt: fl.camberOptCasterBolt,
+          frCamberBolt: fr.camberOptCamberBolt,
+          frCasterBolt: fr.camberOptCasterBolt,
           flToe: fl.bestToe,
           frToe: fr.bestToe,
           toeMismatch: fl.bestToe != null && fr.bestToe != null ? Math.abs(fl.bestToe - fr.bestToe) : null,
@@ -325,10 +325,10 @@ export function symmetryAnalysis(flResult, frResult, rlResult = null, rrResult =
         recommendation = {
           camber: casterSymmetricPair.flCamberAtBestCaster,
           caster: casterSymmetricPair.flCaster,
-          flFront: casterSymmetricPair.flPosition.frontBolt,
-          flRear: casterSymmetricPair.flPosition.rearBolt,
-          frFront: casterSymmetricPair.frPosition.frontBolt,
-          frRear: casterSymmetricPair.frPosition.rearBolt,
+          flCamberBolt: casterSymmetricPair.flPosition.camberBolt,
+          flCasterBolt: casterSymmetricPair.flPosition.casterBolt,
+          frCamberBolt: casterSymmetricPair.frPosition.camberBolt,
+          frCasterBolt: casterSymmetricPair.frPosition.casterBolt,
           flToe: casterSymmetricPair.flToe,
           frToe: casterSymmetricPair.frToe,
           toeMismatch: casterSymmetricPair.toeMismatch,
@@ -339,10 +339,10 @@ export function symmetryAnalysis(flResult, frResult, rlResult = null, rrResult =
         recommendation = {
           camber: camberSymmetricPair.flCamber,
           caster: camberSymmetricPair.flCasterAtBestCamber,
-          flFront: camberSymmetricPair.flPosition.frontBolt,
-          flRear: camberSymmetricPair.flPosition.rearBolt,
-          frFront: camberSymmetricPair.frPosition.frontBolt,
-          frRear: camberSymmetricPair.frPosition.rearBolt,
+          flCamberBolt: camberSymmetricPair.flPosition.camberBolt,
+          flCasterBolt: camberSymmetricPair.flPosition.casterBolt,
+          frCamberBolt: camberSymmetricPair.frPosition.camberBolt,
+          frCasterBolt: camberSymmetricPair.frPosition.casterBolt,
           flToe: camberSymmetricPair.flToe,
           frToe: camberSymmetricPair.frToe,
           toeMismatch: camberSymmetricPair.toeMismatch,
@@ -360,10 +360,10 @@ export function symmetryAnalysis(flResult, frResult, rlResult = null, rrResult =
           recommendation = {
             camber: camberSymmetricPair.flCamber,
             caster: camberSymmetricPair.flCasterAtBestCamber,
-            flFront: camberSymmetricPair.flPosition.frontBolt,
-            flRear: camberSymmetricPair.flPosition.rearBolt,
-            frFront: camberSymmetricPair.frPosition.frontBolt,
-            frRear: camberSymmetricPair.frPosition.rearBolt,
+            flCamberBolt: camberSymmetricPair.flPosition.camberBolt,
+            flCasterBolt: camberSymmetricPair.flPosition.casterBolt,
+            frCamberBolt: camberSymmetricPair.frPosition.camberBolt,
+            frCasterBolt: camberSymmetricPair.frPosition.casterBolt,
             flToe: camberSymmetricPair.flToe,
             frToe: camberSymmetricPair.frToe,
             toeMismatch: camberSymmetricPair.toeMismatch,
@@ -374,10 +374,10 @@ export function symmetryAnalysis(flResult, frResult, rlResult = null, rrResult =
           recommendation = {
             camber: casterSymmetricPair.flCamberAtBestCaster,
             caster: casterSymmetricPair.flCaster,
-            flFront: casterSymmetricPair.flPosition.frontBolt,
-            flRear: casterSymmetricPair.flPosition.rearBolt,
-            frFront: casterSymmetricPair.frPosition.frontBolt,
-            frRear: casterSymmetricPair.frPosition.rearBolt,
+            flCamberBolt: casterSymmetricPair.flPosition.camberBolt,
+            flCasterBolt: casterSymmetricPair.flPosition.casterBolt,
+            frCamberBolt: casterSymmetricPair.frPosition.camberBolt,
+            frCasterBolt: casterSymmetricPair.frPosition.casterBolt,
             flToe: casterSymmetricPair.flToe,
             frToe: casterSymmetricPair.frToe,
             toeMismatch: casterSymmetricPair.toeMismatch,
@@ -402,10 +402,10 @@ export function symmetryAnalysis(flResult, frResult, rlResult = null, rrResult =
       if (rearCamberSymmetricPair) {
         rearRecommendation = {
           camber: rearCamberSymmetricPair.rlCamber,
-          rlFront: rearCamberSymmetricPair.rlPosition.frontBolt,
-          rlRear: rearCamberSymmetricPair.rlPosition.rearBolt,
-          rrFront: rearCamberSymmetricPair.rrPosition.frontBolt,
-          rrRear: rearCamberSymmetricPair.rrPosition.rearBolt,
+          rlCamberBolt: rearCamberSymmetricPair.rlPosition.camberBolt,
+          rlCasterBolt: rearCamberSymmetricPair.rlPosition.casterBolt,
+          rrCamberBolt: rearCamberSymmetricPair.rrPosition.camberBolt,
+          rrCasterBolt: rearCamberSymmetricPair.rrPosition.casterBolt,
           rlToe: rearCamberSymmetricPair.rlToe,
           rrToe: rearCamberSymmetricPair.rrToe,
           toeMismatch: rearCamberSymmetricPair.toeMismatch,
@@ -415,10 +415,10 @@ export function symmetryAnalysis(flResult, frResult, rlResult = null, rrResult =
         // No symmetric pair; use individual best positions
         rearRecommendation = {
           camber: (rl.bestCamber + rr.bestCamber) / 2,
-          rlFront: rl.camberFront,
-          rlRear: rl.camberRear,
-          rrFront: rr.camberFront,
-          rrRear: rr.camberRear,
+          rlCamberBolt: rl.camberFront,
+          rlCasterBolt: rl.camberRear,
+          rrCamberBolt: rr.camberFront,
+          rrCasterBolt: rr.camberRear,
           rlToe: rl.bestToe,
           rrToe: rr.bestToe,
           toeMismatch: rl.bestToe != null && rr.bestToe != null ? Math.abs(rl.bestToe - rr.bestToe) : null,
@@ -459,16 +459,16 @@ function _summariseIndependent(result) {
     bestCamber: bestCamberCell.camber,
     bestCamberValue: bestCamberCell.camber,  // Alias for clarity
     camberCasterAtBestCamber: bestCamberCell.caster,  // What caster results from best camber position
-    camberFront: bestCamberCell.frontBolt,
-    camberRear: bestCamberCell.rearBolt,
+    camberOptCamberBolt: bestCamberCell.camberBolt,
+    camberOptCasterBolt: bestCamberCell.casterBolt,
     camberDelta: bestCamberCell.camberDelta,
 
     // Best caster scenario: values from the position that minimizes caster error
     bestCaster: bestCasterCell.caster,
     bestCasterValue: bestCasterCell.caster,  // Alias for clarity
     casterCamberAtBestCaster: bestCasterCell.camber,  // What camber results from best caster position
-    casterFront: bestCasterCell.frontBolt,
-    casterRear: bestCasterCell.rearBolt,
+    casterOptCamberBolt: bestCasterCell.camberBolt,
+    casterOptCasterBolt: bestCasterCell.casterBolt,
     casterDelta: bestCasterCell.casterDelta,
   };
 }
@@ -555,8 +555,8 @@ function _findBestSymmetricPosition(flRows, frRows, targetCamber, targetCaster) 
       if (pairScore < bestScore) {
         bestScore = pairScore;
         bestPair = {
-          flPosition: { frontBolt: flRow.frontBolt, rearBolt: flRow.rearBolt },
-          frPosition: { frontBolt: bestMatchFrRow.frontBolt, rearBolt: bestMatchFrRow.rearBolt },
+          flPosition: { camberBolt: flRow.camberBolt, casterBolt: flRow.casterBolt },
+          frPosition: { camberBolt: bestMatchFrRow.camberBolt, casterBolt: bestMatchFrRow.casterBolt },
           flCamber: flRow.camber,
           frCamber: bestMatchFrRow.camber,
           flCaster: flRow.caster,
@@ -592,8 +592,8 @@ function _findBestSymmetricPosition(flRows, frRows, targetCamber, targetCaster) 
     }
 
     bestPair = {
-      flPosition: { frontBolt: bestFlRow.frontBolt, rearBolt: bestFlRow.rearBolt },
-      frPosition: { frontBolt: bestFrRow.frontBolt, rearBolt: bestFrRow.rearBolt },
+      flPosition: { camberBolt: bestFlRow.camberBolt, casterBolt: bestFlRow.casterBolt },
+      frPosition: { camberBolt: bestFrRow.camberBolt, casterBolt: bestFrRow.casterBolt },
       flCamber: bestFlRow.camber,
       frCamber: bestFrRow.camber,
       flCaster: bestFlRow.caster,
@@ -669,8 +669,8 @@ function _findBestSymmetricCamberPair(flRows, frRows, targetCamber) {
       if (pairScore < bestScore) {
         bestScore = pairScore;
         bestPair = {
-          flPosition: { frontBolt: flRow.frontBolt, rearBolt: flRow.rearBolt },
-          frPosition: { frontBolt: bestMatchFrRow.frontBolt, rearBolt: bestMatchFrRow.rearBolt },
+          flPosition: { camberBolt: flRow.camberBolt, casterBolt: flRow.casterBolt },
+          frPosition: { camberBolt: bestMatchFrRow.camberBolt, casterBolt: bestMatchFrRow.casterBolt },
           flCamber: flRow.camber,
           frCamber: bestMatchFrRow.camber,
           flCasterAtBestCamber: flRow.caster,      // Caster value at FL's best-camber position
@@ -753,8 +753,8 @@ function _findBestSymmetricCasterPair(flRows, frRows, targetCaster) {
       if (pairScore < bestScore) {
         bestScore = pairScore;
         bestPair = {
-          flPosition: { frontBolt: flRow.frontBolt, rearBolt: flRow.rearBolt },
-          frPosition: { frontBolt: bestMatchFrRow.frontBolt, rearBolt: bestMatchFrRow.rearBolt },
+          flPosition: { camberBolt: flRow.camberBolt, casterBolt: flRow.casterBolt },
+          frPosition: { camberBolt: bestMatchFrRow.camberBolt, casterBolt: bestMatchFrRow.casterBolt },
           flCaster: flRow.caster,
           frCaster: bestMatchFrRow.caster,
           flCamberAtBestCaster: flRow.camber,      // Camber value at FL's best-caster position
@@ -836,8 +836,8 @@ function _findBestSymmetricRearCamberPair(rlRows, rrRows, targetCamber) {
       if (pairScore < bestScore) {
         bestScore = pairScore;
         bestPair = {
-          rlPosition: { frontBolt: rlRow.frontBolt, rearBolt: rlRow.rearBolt },
-          rrPosition: { frontBolt: bestMatchRrRow.frontBolt, rearBolt: bestMatchRrRow.rearBolt },
+          rlPosition: { camberBolt: rlRow.camberBolt, casterBolt: rlRow.casterBolt },
+          rrPosition: { camberBolt: bestMatchRrRow.camberBolt, casterBolt: bestMatchRrRow.casterBolt },
           rlCamber: rlRow.camber,
           rrCamber: bestMatchRrRow.camber,
           rlToe: rlRow.toe,

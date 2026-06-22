@@ -5,27 +5,31 @@
  * Parses:     parseCSV(text) → array of measurement objects
  */
 
-const HEADER = 'front_bolt,rear_bolt,camber_360acw,camber_0,camber_360cw,toe';
-const LEGACY_HEADER = 'front_bolt,rear_bolt,camber_neg20,camber_0,camber_pos20';
-const LEGACY_HEADER_WITH_TOE = 'front_bolt,rear_bolt,camber_neg20,camber_0,camber_pos20,toe';
-const ALT_HEADER = 'front_bolt,rear_bolt,camber_360acw,camber_0,camber_360cw';
+const HEADER = 'camber_bolt,caster_bolt,camber_360acw,camber_0,camber_360cw,toe';
+const LEGACY_HEADER = 'camber_bolt,caster_bolt,camber_neg20,camber_0,camber_pos20';
+const LEGACY_HEADER_WITH_TOE = 'camber_bolt,caster_bolt,camber_neg20,camber_0,camber_pos20,toe';
+const ALT_HEADER = 'camber_bolt,caster_bolt,camber_360acw,camber_0,camber_360cw';
+const LEGACY_OLD_HEADER = 'front_bolt,rear_bolt,camber_360acw,camber_0,camber_360cw,toe';
+const LEGACY_OLD_HEADER_BASE = 'front_bolt,rear_bolt,camber_neg20,camber_0,camber_pos20';
+const LEGACY_OLD_HEADER_WITH_TOE = 'front_bolt,rear_bolt,camber_neg20,camber_0,camber_pos20,toe';
+const LEGACY_OLD_ALT_HEADER = 'front_bolt,rear_bolt,camber_360acw,camber_0,camber_360cw';
 
 /**
  * Build a CSV string from an array of measurement rows (no side effects).
  *
- * @param {Array<{frontBolt:number, rearBolt:number, camberNeg20:number, camber0:number, camberPos20:number, toe?:number|null}>} rows
+ * @param {Array<{camberBolt:number, casterBolt:number, camberNeg20:number, camber0:number, camberPos20:number, toe?:number|null}>} rows
  * @returns {string}
  */
 export function buildCSVString(rows) {
   const sorted = [...rows].sort((a, b) =>
-    a.frontBolt !== b.frontBolt ? a.frontBolt - b.frontBolt : a.rearBolt - b.rearBolt
+    a.camberBolt !== b.camberBolt ? a.camberBolt - b.camberBolt : a.casterBolt - b.casterBolt
   );
   const lines = [HEADER];
   for (const r of sorted) {
     lines.push(
       [
-        r.frontBolt,
-        r.rearBolt,
+        r.camberBolt,
+        r.casterBolt,
         _fmt(r.camberNeg20),
         _fmt(r.camber0),
         _fmt(r.camberPos20),
@@ -66,9 +70,10 @@ export function generateCSV(rows, wheel) {
 /**
  * Parse a CSV string into an array of measurement objects.
  * Only rows with actual measurements are included (no interpolated rows).
+ * Supports legacy 'front_bolt,rear_bolt' headers for backward compatibility.
  *
  * @param {string} text  Raw CSV text
- * @returns {Array<{frontBolt:number, rearBolt:number, camberNeg20:number, camber0:number, camberPos20:number, toe:number|null}>}
+ * @returns {Array<{camberBolt:number, casterBolt:number, camberNeg20:number, camber0:number, camberPos20:number, toe:number|null}>}
  * @throws {Error}  Descriptive error on invalid format or data
  */
 export function parseCSV(text) {
@@ -86,10 +91,15 @@ export function parseCSV(text) {
   const expectedLegacyHeader = LEGACY_HEADER.replace(/\s+/g, '');
   const expectedLegacyHeaderWithToe = LEGACY_HEADER_WITH_TOE.replace(/\s+/g, '');
   const expectedAltHeader = ALT_HEADER.replace(/\s+/g, '');
+  const expectedOldHeader = LEGACY_OLD_HEADER.replace(/\s+/g, '');
+  const expectedOldLegacyHeader = LEGACY_OLD_HEADER_BASE.replace(/\s+/g, '');
+  const expectedOldLegacyHeaderWithToe = LEGACY_OLD_HEADER_WITH_TOE.replace(/\s+/g, '');
+  const expectedOldAltHeader = LEGACY_OLD_ALT_HEADER.replace(/\s+/g, '');
 
-  const hasToeColumn = header === expectedHeader || header === expectedLegacyHeaderWithToe;
+  const hasToeColumn = header === expectedHeader || header === expectedLegacyHeaderWithToe || header === expectedOldHeader || header === expectedOldLegacyHeaderWithToe;
+  const isLegacyOldFormat = header === expectedOldHeader || header === expectedOldLegacyHeader || header === expectedOldLegacyHeaderWithToe || header === expectedOldAltHeader;
 
-  if (!hasToeColumn && header !== expectedLegacyHeader && header !== expectedAltHeader) {
+  if (!hasToeColumn && header !== expectedLegacyHeader && header !== expectedAltHeader && header !== expectedOldLegacyHeader && header !== expectedOldAltHeader) {
     throw new Error(
       `Unexpected CSV header.\nExpected: ${HEADER} (or legacy ${LEGACY_HEADER})\nGot: ${lines[0]}`
     );
@@ -104,29 +114,29 @@ export function parseCSV(text) {
       throw new Error(`Row ${i + 1}: expected ${expectedColumns} columns, got ${cols.length}.\nRow: "${lines[i]}"`);
     }
 
-    const [frontBoltRaw, rearBoltRaw, camberNeg20Raw, camber0Raw, camberPos20Raw, toeRaw = ''] = cols;
-    const frontBolt = Number(frontBoltRaw);
-    const rearBolt = Number(rearBoltRaw);
+    const [boltAraw, boltBraw, camberNeg20Raw, camber0Raw, camberPos20Raw, toeRaw = ''] = cols;
+    const camberBolt = Number(boltAraw);
+    const casterBolt = Number(boltBraw);
     const camberNeg20 = Number(camberNeg20Raw);
     const camber0 = Number(camber0Raw);
     const camberPos20 = Number(camberPos20Raw);
     const toe = toeRaw.trim() === '' ? null : Number(toeRaw);
 
-    if ([frontBolt, rearBolt, camberNeg20, camber0, camberPos20].some(Number.isNaN)) {
+    if ([camberBolt, casterBolt, camberNeg20, camber0, camberPos20].some(Number.isNaN)) {
       throw new Error(`Row ${i + 1}: non-numeric value.\nRow: "${lines[i]}"`);
     }
     if (toeRaw.trim() !== '' && Number.isNaN(toe)) {
       throw new Error(`Row ${i + 1}: toe must be numeric when provided.\nRow: "${lines[i]}"`);
     }
 
-    if (frontBolt < -6 || frontBolt > 6) {
-      throw new Error(`Row ${i + 1}: front_bolt ${frontBolt} is outside −6 to +6 range.`);
+    if (camberBolt < -6 || camberBolt > 6) {
+      throw new Error(`Row ${i + 1}: camber_bolt ${camberBolt} is outside −6 to +6 range.`);
     }
-    if (rearBolt < -6 || rearBolt > 6) {
-      throw new Error(`Row ${i + 1}: rear_bolt ${rearBolt} is outside −6 to +6 range.`);
+    if (casterBolt < -6 || casterBolt > 6) {
+      throw new Error(`Row ${i + 1}: caster_bolt ${casterBolt} is outside −6 to +6 range.`);
     }
 
-    results.push({ frontBolt, rearBolt, camberNeg20, camber0, camberPos20, toe });
+    results.push({ camberBolt, casterBolt, camberNeg20, camber0, camberPos20, toe });
   }
 
   if (results.length === 0) {

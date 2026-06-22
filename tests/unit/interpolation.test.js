@@ -55,13 +55,13 @@ describe('interpolation.js', () => {
     // T026: Measured cells return exact values
     test('T026.1: Should return exact value for measured center cell', () => {
       const input = [
-        { frontBolt: 0, rearBolt: 0, neg20: -1.0, zero: -1.1, pos20: -1.2 }
+        { camberBolt: 0, casterBolt: 0, neg20: -1.0, zero: -1.1, pos20: -1.2 }
       ];
       const result = interpolateGrid(input);
       const centerIdx = 6; // BOLT_POSITIONS: -6 to +6, center is at index 6 (value 0)
       expect(result[centerIdx][centerIdx]).toEqual({
-        frontBolt: 0,
-        rearBolt: 0,
+        camberBolt: 0,
+        casterBolt: 0,
         neg20: -1.0,
         zero: -1.1,
         pos20: -1.2,
@@ -79,8 +79,8 @@ describe('interpolation.js', () => {
     // T027: Unmeasured cells use bilinear interpolation
     test('T027.1: Should interpolate unmeasured cells (isInterpolated=true)', () => {
       const input = [
-        { frontBolt: -6, rearBolt: -6, neg20: -0.7, zero: -0.8, pos20: -0.9 },
-        { frontBolt: 6, rearBolt: 6, neg20: -1.3, zero: -1.4, pos20: -1.5 }
+        { camberBolt: -6, casterBolt: -6, neg20: -0.7, zero: -0.8, pos20: -0.9 },
+        { camberBolt: 6, casterBolt: 6, neg20: -1.3, zero: -1.4, pos20: -1.5 }
       ];
       const result = interpolateGrid(input);
       const centerIdx = 6;
@@ -96,13 +96,13 @@ describe('interpolation.js', () => {
 
     test('T027.2: Should use actual bilinear interpolation (not nearest-neighbor)', () => {
       const input = [
-        { frontBolt: 0, rearBolt: 0, neg20: 0.0, zero: 0.0, pos20: 0.0 },
-        { frontBolt: 2, rearBolt: 0, neg20: 2.0, zero: 2.0, pos20: 2.0 },
+        { camberBolt: 0, casterBolt: 0, neg20: 0.0, zero: 0.0, pos20: 0.0 },
+        { camberBolt: 2, casterBolt: 0, neg20: 2.0, zero: 2.0, pos20: 2.0 },
       ];
       const result = interpolateGrid(input);
       
-      // Cell at frontBolt=1 should interpolate between 0 and 2, not snap to nearest
-      const interpolated = result[7][6]; // frontBolt=1, rearBolt=0
+      // Cell at camberBolt=1 should interpolate between 0 and 2, not snap to nearest
+      const interpolated = result[7][6]; // camberBolt=1, casterBolt=0
       expect(interpolated.neg20).toBe(1.0); // Exactly midpoint
     });
 
@@ -186,22 +186,22 @@ describe('interpolation.js', () => {
     // T031: Boundary extrapolation
     test('T031.1: Should handle extrapolation beyond measured range', () => {
       const input = [
-        { frontBolt: -2, rearBolt: -2, neg20: -1.0, zero: -1.1, pos20: -1.2 },
-        { frontBolt: 0, rearBolt: 0, neg20: -1.1, zero: -1.2, pos20: -1.3 },
-        { frontBolt: 2, rearBolt: 2, neg20: -1.2, zero: -1.3, pos20: -1.4 },
+        { camberBolt: -2, casterBolt: -2, neg20: -1.0, zero: -1.1, pos20: -1.2 },
+        { camberBolt: 0, casterBolt: 0, neg20: -1.1, zero: -1.2, pos20: -1.3 },
+        { camberBolt: 2, casterBolt: 2, neg20: -1.2, zero: -1.3, pos20: -1.4 },
       ];
       const result = interpolateGrid(input);
       
       // Cells at -6, -5 should be extrapolated or fallback
-      const corner = result[0][0]; // frontBolt=-6, rearBolt=-6
+      const corner = result[0][0]; // camberBolt=-6, casterBolt=-6
       expect(corner).toBeDefined();
       expect(typeof corner.neg20).toBe('number');
     });
 
     test('T031.2: Should not produce NaN in boundary extrapolation', () => {
       const input = [
-        { frontBolt: -2, rearBolt: -2, neg20: -1.0, zero: -1.1, pos20: -1.2 },
-        { frontBolt: 2, rearBolt: 2, neg20: -1.2, zero: -1.3, pos20: -1.4 },
+        { camberBolt: -2, casterBolt: -2, neg20: -1.0, zero: -1.1, pos20: -1.2 },
+        { camberBolt: 2, casterBolt: 2, neg20: -1.2, zero: -1.3, pos20: -1.4 },
       ];
       const result = interpolateGrid(input);
       
@@ -214,31 +214,31 @@ describe('interpolation.js', () => {
     // T032: BOLT_POSITIONS ordering
     test('T032.1: Should use correct grid indexing for BOLT_POSITIONS', () => {
       const input = [
-        { frontBolt: -6, rearBolt: -6, neg20: 1, zero: 1, pos20: 1 },
-        { frontBolt: 6, rearBolt: 6, neg20: 2, zero: 2, pos20: 2 },
+        { camberBolt: -6, casterBolt: -6, neg20: 1, zero: 1, pos20: 1 },
+        { camberBolt: 6, casterBolt: 6, neg20: 2, zero: 2, pos20: 2 },
       ];
       const result = interpolateGrid(input);
       
-      // result[0][0] should be frontBolt=-6, rearBolt=-6
-      expect(result[0][0].frontBolt).toBe(-6);
-      expect(result[0][0].rearBolt).toBe(-6);
+      // result[0][0] should be camberBolt=-6, casterBolt=-6
+      expect(result[0][0].camberBolt).toBe(-6);
+      expect(result[0][0].casterBolt).toBe(-6);
       expect(result[0][0].neg20).toBe(1);
       
-      // result[12][12] should be frontBolt=6, rearBolt=6
-      expect(result[12][12].frontBolt).toBe(6);
-      expect(result[12][12].rearBolt).toBe(6);
+      // result[12][12] should be camberBolt=6, casterBolt=6
+      expect(result[12][12].camberBolt).toBe(6);
+      expect(result[12][12].casterBolt).toBe(6);
       expect(result[12][12].neg20).toBe(2);
     });
 
     test('T032.2: Should verify 13x13 BOLT_POSITIONS structure', () => {
       const input = [
-        { frontBolt: 0, rearBolt: 0, neg20: 0, zero: 0, pos20: 0 },
+        { camberBolt: 0, casterBolt: 0, neg20: 0, zero: 0, pos20: 0 },
       ];
       const result = interpolateGrid(input);
       
       // Center should be at [6][6] (13 positions from -6 to +6)
-      expect(result[6][6].frontBolt).toBe(0);
-      expect(result[6][6].rearBolt).toBe(0);
+      expect(result[6][6].camberBolt).toBe(0);
+      expect(result[6][6].casterBolt).toBe(0);
     });
   });
 });
