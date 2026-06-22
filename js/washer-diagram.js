@@ -128,8 +128,8 @@ export function renderWasherSection(containerId, recommendations) {
     rlGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RL.camberBolt, COLOURS.purple));
     rlGroup.appendChild(_makeBoltRow('Caster Bolt', 'Camber Support', recommendations.RL.casterBolt, COLOURS.purple));
   } else {
-    rlGroup.appendChild(_makeBlankBoltRow('Front Bolt'));
-    rlGroup.appendChild(_makeBlankBoltRow('Rear Bolt'));
+    rlGroup.appendChild(_makeBlankBoltRow('Camber Bolt'));
+    rlGroup.appendChild(_makeBlankBoltRow('Caster Bolt'));
   }
   rearGrid.appendChild(rlGroup);
 
@@ -144,8 +144,8 @@ export function renderWasherSection(containerId, recommendations) {
     rrGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RR.camberBolt, COLOURS.purple));
     rrGroup.appendChild(_makeBoltRow('Caster Bolt', 'Camber Support', recommendations.RR.casterBolt, COLOURS.purple));
   } else {
-    rrGroup.appendChild(_makeBlankBoltRow('Front Bolt'));
-    rrGroup.appendChild(_makeBlankBoltRow('Rear Bolt'));
+    rrGroup.appendChild(_makeBlankBoltRow('Camber Bolt'));
+    rrGroup.appendChild(_makeBlankBoltRow('Caster Bolt'));
   }
   rearGrid.appendChild(rrGroup);
 
