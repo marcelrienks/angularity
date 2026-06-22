@@ -1349,19 +1349,19 @@ body {
  */
 
 .grid-col-header.required {
-  background: var(--req-band);
+  background: var(--bg);
   color: var(--red);
   font-size: 0.9rem;
   font-weight: 900;
-  border-bottom-color: rgba(106, 180, 255, 0.3);
+  border-bottom-color: transparent;
 }
 
 .grid-row-header.required {
-  background: var(--req-band);
+  background: var(--bg);
   color: var(--red);
   font-size: 0.9rem;
   font-weight: 900;
-  border-right-color: rgba(106, 180, 255, 0.3);
+  border-right-color: transparent;
 }
 
 /* Required intersection cell (both axes are required) */
