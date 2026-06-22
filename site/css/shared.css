@@ -1300,11 +1300,11 @@ body {
   color: var(--text);
 }
 
-.symmetry-metric.front-bolt .value {
+.symmetry-metric.camber-bolt .value {
   color: var(--blue);
 }
 
-.symmetry-metric.rear-bolt .value {
+.symmetry-metric.caster-bolt .value {
   color: var(--green);
 }
 

@@ -260,13 +260,13 @@ function _buildGrid() {
 }
 
 /** Build a single grid cell with 3 inputs. */
-function _buildCell(frontBolt, rearBolt) {
-  const isReq = _isRequired(frontBolt) && _isRequired(rearBolt);
+function _buildCell(camberBolt, casterBolt) {
+  const isReq = _isRequired(camberBolt) && _isRequired(casterBolt);
   const cell = _el('div', `grid-cell${isReq ? ' required' : ''}`);
-  cell.dataset.front = frontBolt;
-  cell.dataset.rear  = rearBolt;
+  cell.dataset.camber = camberBolt;
+  cell.dataset.caster  = casterBolt;
   cell.setAttribute('role', 'gridcell');
-  cell.setAttribute('aria-label', `Front ${_sign(frontBolt)}, Rear ${_sign(rearBolt)}`);
+  cell.setAttribute('aria-label', `Camber ${_sign(camberBolt)}, Caster ${_sign(casterBolt)}`);
 
   const defs = getInputLabels();
 
@@ -280,13 +280,13 @@ function _buildCell(frontBolt, rearBolt) {
     inp.type        = 'text';
     inp.inputMode   = 'decimal';
     inp.placeholder = '—';
-    inp.dataset.front = frontBolt;
-    inp.dataset.rear  = rearBolt;
+    inp.dataset.camber = camberBolt;
+    inp.dataset.caster  = casterBolt;
     inp.dataset.key   = key;
-    inp.setAttribute('aria-label', `${label} steering wheel, front ${_sign(frontBolt)}, rear ${_sign(rearBolt)}`);
+    inp.setAttribute('aria-label', `${label} steering wheel, camber ${_sign(camberBolt)}, caster ${_sign(casterBolt)}`);
 
-    inp.addEventListener('input',   () => _onInputChange(frontBolt, rearBolt));
-    inp.addEventListener('focus',   () => _onInputFocus(frontBolt, rearBolt));
+    inp.addEventListener('input',   () => _onInputChange(camberBolt, casterBolt));
+    inp.addEventListener('focus',   () => _onInputFocus(camberBolt, casterBolt));
     inp.addEventListener('blur',    _onInputBlur);
     inp.addEventListener('keydown', _onKeyDown);
 

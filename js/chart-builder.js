@@ -32,7 +32,7 @@ export function buildMainChart(canvasId, rows169, wheel, targets = {}) {
 
   // Aggregate rows by front bolt position, keeping best values for each position
   const aggregated = _aggregateByFrontBolt(rows169);
-  const labels  = aggregated.map(r => r.frontBolt);
+  const labels  = aggregated.map(r => r.camberBolt);
   const cambers = aggregated.map(r => +r.camber.toFixed(3));
   const casters = showCaster ? aggregated.map(r => +r.caster.toFixed(3)) : [];
   const numPoints = aggregated.length;
@@ -41,7 +41,7 @@ export function buildMainChart(canvasId, rows169, wheel, targets = {}) {
 
   const chartDebug = {
     wheel,
-    frontBolts: labels,
+    camberBolts: labels,
     cambers,
     casters,
     targetCamber,
@@ -246,8 +246,8 @@ function _mainChartOptions(aggregated, showCaster) {
         bodyFont: { family: "'Share Tech Mono', monospace", size: 10 },
         callbacks: {
           title: ctx => {
-            const frontBolt = aggregated[ctx[0].dataIndex].frontBolt;
-            return `Front Bolt: ${_sign(frontBolt)}`;
+            const camberBolt = aggregated[ctx[0].dataIndex].camberBolt;
+            return `Camber Bolt: ${_sign(camberBolt)}`;
           },
         },
       },
@@ -407,40 +407,40 @@ function _delta(d) {
  * This creates smooth curves without jagging from mixing different rear positions.
  *
  * @param {import('./report-engine.js').DerivedRow[]} rows169
- * @returns {{ frontBolt: number, camber: number, caster: number }[]}
+ * @returns {{ camberBolt: number, camber: number, caster: number }[]}
  */
 function _aggregateByFrontBolt(rows169) {
   const result = [];
   
-  // Create a map for fast lookup: map[frontBolt][rearBolt] = row
+  // Create a map for fast lookup: map[camberBolt][casterBolt] = row
   const map = {};
   for (const row of rows169) {
-    if (!map[row.frontBolt]) map[row.frontBolt] = {};
-    map[row.frontBolt][row.rearBolt] = row;
+    if (!map[row.camberBolt]) map[row.camberBolt] = {};
+    map[row.camberBolt][row.casterBolt] = row;
   }
 
   // For each front bolt position, get the row where rear bolt = 0
   // This gives us the nominal aligned configuration curve
   const frontPositions = Object.keys(map).map(Number).sort((a, b) => a - b);
   
-  for (const frontBolt of frontPositions) {
-    const rearZeroRow = map[frontBolt][0];
+  for (const camberBolt of frontPositions) {
+    const rearZeroRow = map[camberBolt][0];
     
     if (rearZeroRow) {
       result.push({
-        frontBolt: rearZeroRow.frontBolt,
+        camberBolt: rearZeroRow.camberBolt,
         camber: rearZeroRow.camber,
         caster: rearZeroRow.caster,
       });
     } else {
       // Fallback: if rear=0 not available, pick the best available row
-      const candidates = Object.values(map[frontBolt]);
+      const candidates = Object.values(map[camberBolt]);
       const bestRow = candidates.reduce((best, row) =>
         (row.camberDelta ** 2 + row.casterDelta ** 2) <
         (best.camberDelta ** 2 + best.casterDelta ** 2) ? row : best
       );
       result.push({
-        frontBolt: bestRow.frontBolt,
+        camberBolt: bestRow.camberBolt,
         camber: bestRow.camber,
         caster: bestRow.caster,
       });

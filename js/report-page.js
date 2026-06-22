@@ -205,7 +205,7 @@ function _setupAutoRefresh() {
  * numeric and string keys.
  *
  * @param {Object} wheelState - gridState[wheel] (may have string keys from JSON.parse)
- * @returns {Array<{frontBolt:number, rearBolt:number, camberNeg20:number, camber0:number, camberPos20:number}>}
+ * @returns {Array<{camberBolt:number, casterBolt:number, camberNeg20:number, camber0:number, camberPos20:number}>}
  */
 function _gridStateToRows(wheelState) {
   const rows = [];
@@ -237,8 +237,8 @@ function _gridStateToRows(wheelState) {
       // Only add row if at least one value is numeric
       if (!isNaN(neg20) || !isNaN(zero) || !isNaN(pos20)) {
         rows.push({
-          frontBolt: f,
-          rearBolt: r,
+          camberBolt: f,
+          casterBolt: r,
           camberNeg20: isNaN(neg20) ? 0 : neg20,
           camber0: isNaN(zero) ? 0 : zero,
           camberPos20: isNaN(pos20) ? 0 : pos20,
@@ -257,8 +257,8 @@ function _gridStateToRows(wheelState) {
  */
 function _convertRowsForProcessing(gridStateRows) {
   return gridStateRows.map(r => ({
-    frontBolt: r.frontBolt,
-    rearBolt: r.rearBolt,
+    camberBolt: r.camberBolt,
+    casterBolt: r.casterBolt,
     neg20: r.camberNeg20,
     zero: r.camber0,
     pos20: r.camberPos20,
@@ -473,8 +473,8 @@ function _getTopTargetMatches(result, wheel) {
   const isRearWheel = REAR_WHEELS.includes(wheel);
   
   // Convert pre-sorted rows to keys
-  const topCamber = topByCamberDelta.map(r => `${r.frontBolt},${r.rearBolt}`);
-  const topCaster = isRearWheel ? [] : topByCasterDelta.map(r => `${r.frontBolt},${r.rearBolt}`);
+  const topCamber = topByCamberDelta.map(r => `${r.camberBolt},${r.casterBolt}`);
+  const topCaster = isRearWheel ? [] : topByCasterDelta.map(r => `${r.camberBolt},${r.casterBolt}`);
   
   // Build result map
   const result_map = new Map();
@@ -549,9 +549,9 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
       const cell  = grid[fi][ri];
       const camber = +cell.zero.toFixed(2);
       const caster = +(calculateCaster(cell.neg20, cell.pos20, _getWheelCasterOptions(activeTableWheel, result))).toFixed(2);
-      const isHighlighted = (cell.frontBolt === highlightFront && cell.rearBolt === highlightRear);
+      const isHighlighted = (cell.camberBolt === highlightFront && cell.casterBolt === highlightRear);
       
-      const key = `${cell.frontBolt},${cell.rearBolt}`;
+      const key = `${cell.camberBolt},${cell.casterBolt}`;
       const matchType = targetMatches.get(key);
 
       const td = tr.insertCell();
@@ -619,7 +619,7 @@ function _buildTable(result) {
       const camber = +cell.zero.toFixed(2);
       const caster = +(calculateCaster(cell.neg20, cell.pos20, _getWheelCasterOptions(activeTableWheel, result))).toFixed(2);
       
-      const key = `${cell.frontBolt},${cell.rearBolt}`;
+      const key = `${cell.camberBolt},${cell.casterBolt}`;
       const matchType = targetMatches.get(key);
 
       const td = tr.insertCell();
@@ -766,12 +766,12 @@ function _renderWashers() {
       const rec = sym.recommendation;
       
       recommendations.FL = {
-        frontBolt: rec.flFront,
-        rearBolt: rec.flRear,
+        camberBolt: rec.flCamberBolt,
+        casterBolt: rec.flCasterBolt,
       };
       recommendations.FR = {
-        frontBolt: rec.frFront,
-        rearBolt: rec.frRear,
+        camberBolt: rec.frCamberBolt,
+        casterBolt: rec.frCasterBolt,
       };
     } catch (err) {
       console.error('[report-page] Error in symmetry analysis for washers:', err);
@@ -783,8 +783,8 @@ function _renderWashers() {
   for (const wheel of FRONT_WHEELS) {
     if (!recommendations[wheel] && results[wheel]) {
       recommendations[wheel] = {
-        frontBolt: results[wheel].bestCell.frontBolt,
-        rearBolt: results[wheel].bestCell.rearBolt,
+        camberBolt: results[wheel].bestCell.camberBolt,
+        casterBolt: results[wheel].bestCell.casterBolt,
       };
     }
   }
@@ -793,20 +793,20 @@ function _renderWashers() {
   if (rearSymmetry && rearSymmetry.recommendation) {
     const rec = rearSymmetry.recommendation;
     recommendations.RL = {
-      frontBolt: rec.rlFront,
-      rearBolt: rec.rlRear,
+      camberBolt: rec.rlCamberBolt,
+      casterBolt: rec.rlCasterBolt,
     };
     recommendations.RR = {
-      frontBolt: rec.rrFront,
-      rearBolt: rec.rrRear,
+      camberBolt: rec.rrCamberBolt,
+      casterBolt: rec.rrCasterBolt,
     };
   }
 
   for (const wheel of REAR_WHEELS) {
     if (!recommendations[wheel] && results[wheel]) {
       recommendations[wheel] = {
-        frontBolt: results[wheel].bestCell.frontBolt,
-        rearBolt: results[wheel].bestCell.rearBolt,
+        camberBolt: results[wheel].bestCell.camberBolt,
+        casterBolt: results[wheel].bestCell.casterBolt,
       };
     }
   }
@@ -1122,13 +1122,13 @@ function _buildIndependentOptimizationCard(wheel, data) {
         <div class="scenario-header">Best Camber</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric front-bolt" style="margin-bottom:0">
-              <span class="label">Front Bolt</span>
-              <span class="value">${_sign(data.camberFront)}</span>
+            <div class="symmetry-metric camber-bolt" style="margin-bottom:0">
+              <span class="label">Camber Bolt</span>
+              <span class="value">${_sign(data.camberOptCamberBolt)}</span>
             </div>
-            <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
-              <span class="label">Rear Bolt</span>
-              <span class="value">${_sign(data.camberRear)}</span>
+            <div class="symmetry-metric caster-bolt" style="margin-bottom:0">
+              <span class="label">Caster Bolt</span>
+              <span class="value">${_sign(data.camberOptCasterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
@@ -1150,13 +1150,13 @@ function _buildIndependentOptimizationCard(wheel, data) {
         <div class="scenario-header">Best Caster</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric front-bolt" style="margin-bottom:0">
-              <span class="label">Front Bolt</span>
-              <span class="value">${_sign(data.casterFront)}</span>
+            <div class="symmetry-metric camber-bolt" style="margin-bottom:0">
+              <span class="label">Camber Bolt</span>
+              <span class="value">${_sign(data.casterOptCamberBolt)}</span>
             </div>
-            <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
-              <span class="label">Rear Bolt</span>
-              <span class="value">${_sign(data.casterRear)}</span>
+            <div class="symmetry-metric caster-bolt" style="margin-bottom:0">
+              <span class="label">Caster Bolt</span>
+              <span class="value">${_sign(data.casterOptCasterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
@@ -1189,11 +1189,11 @@ function _buildRearIndependentOptimizationCard(wheel, bestCell, targetCamber) {
     <div style="display:flex; flex-direction:column; gap:0">
       <div class="symmetry-metric front-bolt">
         <span class="label">Best Camber Front Bolt</span>
-        <span class="value">${_sign(bestCell.frontBolt)}</span>
+        <span class="value">${_sign(bestCell.camberBolt)}</span>
       </div>
       <div class="symmetry-metric rear-bolt">
         <span class="label">Best Camber Rear Bolt</span>
-        <span class="value">${_sign(bestCell.rearBolt)}</span>
+        <span class="value">${_sign(bestCell.casterBolt)}</span>
       </div>
       <div class="symmetry-metric camber">
         <span class="label">Camber</span>
@@ -1234,11 +1234,11 @@ function _buildSymmetryPairCard(title, pairData, metricType) {
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt" style="margin-bottom:0">
               <span class="label">Front Bolt</span>
-              <span class="value">${_sign(pairData.flPosition.frontBolt)}</span>
+              <span class="value">${_sign(pairData.flPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
               <span class="label">Rear Bolt</span>
-              <span class="value">${_sign(pairData.flPosition.rearBolt)}</span>
+              <span class="value">${_sign(pairData.flPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
@@ -1259,11 +1259,11 @@ function _buildSymmetryPairCard(title, pairData, metricType) {
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt" style="margin-bottom:0">
               <span class="label">Front Bolt</span>
-              <span class="value">${_sign(pairData.frPosition.frontBolt)}</span>
+              <span class="value">${_sign(pairData.frPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
               <span class="label">Rear Bolt</span>
-              <span class="value">${_sign(pairData.frPosition.rearBolt)}</span>
+              <span class="value">${_sign(pairData.frPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
@@ -1307,11 +1307,11 @@ function _buildRearSymmetryPairCard(title, rearData, rearPair) {
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt" style="margin-bottom:0">
               <span class="label">Front Bolt</span>
-              <span class="value">${_sign(rearPair.rlPosition.frontBolt)}</span>
+              <span class="value">${_sign(rearPair.rlPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
               <span class="label">Rear Bolt</span>
-              <span class="value">${_sign(rearPair.rlPosition.rearBolt)}</span>
+              <span class="value">${_sign(rearPair.rlPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
@@ -1328,11 +1328,11 @@ function _buildRearSymmetryPairCard(title, rearData, rearPair) {
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt" style="margin-bottom:0">
               <span class="label">Front Bolt</span>
-              <span class="value">${_sign(rearPair.rrPosition.frontBolt)}</span>
+              <span class="value">${_sign(rearPair.rrPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
               <span class="label">Rear Bolt</span>
-              <span class="value">${_sign(rearPair.rrPosition.rearBolt)}</span>
+              <span class="value">${_sign(rearPair.rrPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
@@ -1386,11 +1386,11 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt" style="margin-bottom:0">
               <span class="label">Front Bolt</span>
-              <span class="value">${_sign(isRear ? pairData.rlPosition.frontBolt : pairData.flPosition.frontBolt)}</span>
+              <span class="value">${_sign(isRear ? pairData.rlPosition.camberBolt : pairData.flPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
               <span class="label">Rear Bolt</span>
-              <span class="value">${_sign(isRear ? pairData.rlPosition.rearBolt : pairData.flPosition.rearBolt)}</span>
+              <span class="value">${_sign(isRear ? pairData.rlPosition.casterBolt : pairData.flPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
@@ -1407,11 +1407,11 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt" style="margin-bottom:0">
               <span class="label">Front Bolt</span>
-              <span class="value">${_sign(isRear ? pairData.rrPosition.frontBolt : pairData.frPosition.frontBolt)}</span>
+              <span class="value">${_sign(isRear ? pairData.rrPosition.camberBolt : pairData.frPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
               <span class="label">Rear Bolt</span>
-              <span class="value">${_sign(isRear ? pairData.rrPosition.rearBolt : pairData.frPosition.rearBolt)}</span>
+              <span class="value">${_sign(isRear ? pairData.rrPosition.casterBolt : pairData.frPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
@@ -1468,16 +1468,16 @@ function _buildRearConsolidationTable(rearSymmetryResult) {
   const camberRow = document.createElement('tr');
   
   // Safeguard: check if recommendation has the fields
-  const rlFrontBolt = recommendation.rlFront != null ? _sign(recommendation.rlFront) : '—';
-  const rlRearBolt = recommendation.rlRear != null ? _sign(recommendation.rlRear) : '—';
-  const rrFrontBolt = recommendation.rrFront != null ? _sign(recommendation.rrFront) : '—';
-  const rrRearBolt = recommendation.rrRear != null ? _sign(recommendation.rrRear) : '—';
+  const rlCamberBoltBolt = recommendation.rlCamberBolt != null ? _sign(recommendation.rlCamberBolt) : '—';
+  const rlCasterBoltBolt = recommendation.rlCasterBolt != null ? _sign(recommendation.rlCasterBolt) : '—';
+  const rrCamberBoltBolt = recommendation.rrCamberBolt != null ? _sign(recommendation.rrCamberBolt) : '—';
+  const rrCasterBoltBolt = recommendation.rrCasterBolt != null ? _sign(recommendation.rrCasterBolt) : '—';
   
   camberRow.innerHTML = `
     <td style="font-weight:600;"><span class="camber-label">Camber</span></td>
     <td>${recommendation.camber.toFixed(2)}°</td>
-    <td><div>F:${rlFrontBolt}</div><div>R:${rlRearBolt}</div></td>
-    <td><div>F:${rrFrontBolt}</div><div>R:${rrRearBolt}</div></td>
+    <td><div>F:${rlCamberBoltBolt}</div><div>R:${rlCasterBoltBolt}</div></td>
+    <td><div>F:${rrCamberBoltBolt}</div><div>R:${rrCasterBoltBolt}</div></td>
   `;
   tbody.appendChild(camberRow);
 
@@ -1588,7 +1588,7 @@ function _buildSymmetryPanel(sym) {
   flCornerWrapper.style.gridRow = '1';
   flCornerWrapper.style.display = 'flex';
   flCornerWrapper.style.justifyContent = 'center';
-  flCornerWrapper.appendChild(_buildCornerTable('FL', sym.recommendation.flFront, sym.recommendation.flRear, sym.recommendation.camber, sym.recommendation.caster));
+  flCornerWrapper.appendChild(_buildCornerTable('FL', sym.recommendation.flCamberBolt, sym.recommendation.flCasterBolt, sym.recommendation.camber, sym.recommendation.caster));
   cornerLayout.appendChild(flCornerWrapper);
 
   // Top-right: FR
@@ -1597,7 +1597,7 @@ function _buildSymmetryPanel(sym) {
   frCornerWrapper.style.gridRow = '1';
   frCornerWrapper.style.display = 'flex';
   frCornerWrapper.style.justifyContent = 'center';
-  frCornerWrapper.appendChild(_buildCornerTable('FR', sym.recommendation.frFront, sym.recommendation.frRear, sym.recommendation.camber, sym.recommendation.caster));
+  frCornerWrapper.appendChild(_buildCornerTable('FR', sym.recommendation.frCamberBolt, sym.recommendation.frCasterBolt, sym.recommendation.camber, sym.recommendation.caster));
   cornerLayout.appendChild(frCornerWrapper);
 
   // Bottom-left: RL
@@ -1607,7 +1607,7 @@ function _buildSymmetryPanel(sym) {
   rlCornerWrapper.style.display = 'flex';
   rlCornerWrapper.style.justifyContent = 'center';
   if (sym.rear && sym.rear.rl) {
-    rlCornerWrapper.appendChild(_buildCornerTable('RL', sym.rear.rl.bestCell.frontBolt, sym.rear.rl.bestCell.rearBolt, sym.rear.rl.bestCell.camber, 'N/A'));
+    rlCornerWrapper.appendChild(_buildCornerTable('RL', sym.rear.rl.bestCell.camberBolt, sym.rear.rl.bestCell.casterBolt, sym.rear.rl.bestCell.camber, 'N/A'));
   } else {
     rlCornerWrapper.appendChild(_buildCornerTable('RL', 'N/A', 'N/A', 'N/A', 'N/A'));
   }
@@ -1620,7 +1620,7 @@ function _buildSymmetryPanel(sym) {
   rrCornerWrapper.style.display = 'flex';
   rrCornerWrapper.style.justifyContent = 'center';
   if (sym.rear && sym.rear.rr) {
-    rrCornerWrapper.appendChild(_buildCornerTable('RR', sym.rear.rr.bestCell.frontBolt, sym.rear.rr.bestCell.rearBolt, sym.rear.rr.bestCell.camber, 'N/A'));
+    rrCornerWrapper.appendChild(_buildCornerTable('RR', sym.rear.rr.bestCell.camberBolt, sym.rear.rr.bestCell.casterBolt, sym.rear.rr.bestCell.camber, 'N/A'));
   } else {
     rrCornerWrapper.appendChild(_buildCornerTable('RR', 'N/A', 'N/A', 'N/A', 'N/A'));
   }
@@ -1746,11 +1746,11 @@ function _buildSymmetryPanel(sym) {
             <div class="bolts-col">
               <div class="symmetry-metric front-bolt" style="margin-bottom:0">
                 <span class="label">Front Bolt</span>
-                <span class="value">${_sign(cpair.flPosition.frontBolt)}</span>
+                <span class="value">${_sign(cpair.flPosition.camberBolt)}</span>
               </div>
               <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
                 <span class="label">Rear Bolt</span>
-                <span class="value">${_sign(cpair.flPosition.rearBolt)}</span>
+                <span class="value">${_sign(cpair.flPosition.casterBolt)}</span>
               </div>
             </div>
             <div class="values-col">
@@ -1771,11 +1771,11 @@ function _buildSymmetryPanel(sym) {
             <div class="bolts-col">
               <div class="symmetry-metric front-bolt" style="margin-bottom:0">
                 <span class="label">Front Bolt</span>
-                <span class="value">${_sign(cpair.frPosition.frontBolt)}</span>
+                <span class="value">${_sign(cpair.frPosition.camberBolt)}</span>
               </div>
               <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
                 <span class="label">Rear Bolt</span>
-                <span class="value">${_sign(cpair.frPosition.rearBolt)}</span>
+                <span class="value">${_sign(cpair.frPosition.casterBolt)}</span>
               </div>
             </div>
             <div class="values-col">
@@ -1809,11 +1809,11 @@ function _buildSymmetryPanel(sym) {
             <div class="bolts-col">
               <div class="symmetry-metric front-bolt" style="margin-bottom:0">
                 <span class="label">Front Bolt</span>
-                <span class="value">${_sign(kpair.flPosition.frontBolt)}</span>
+                <span class="value">${_sign(kpair.flPosition.camberBolt)}</span>
               </div>
               <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
                 <span class="label">Rear Bolt</span>
-                <span class="value">${_sign(kpair.flPosition.rearBolt)}</span>
+                <span class="value">${_sign(kpair.flPosition.casterBolt)}</span>
               </div>
             </div>
             <div class="values-col">
@@ -1834,11 +1834,11 @@ function _buildSymmetryPanel(sym) {
             <div class="bolts-col">
               <div class="symmetry-metric front-bolt" style="margin-bottom:0">
                 <span class="label">Front Bolt</span>
-                <span class="value">${_sign(kpair.frPosition.frontBolt)}</span>
+                <span class="value">${_sign(kpair.frPosition.camberBolt)}</span>
               </div>
               <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
                 <span class="label">Rear Bolt</span>
-                <span class="value">${_sign(kpair.frPosition.rearBolt)}</span>
+                <span class="value">${_sign(kpair.frPosition.casterBolt)}</span>
               </div>
             </div>
             <div class="values-col">
@@ -1885,11 +1885,11 @@ function _buildSymmetryPanel(sym) {
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt" style="margin-bottom:0">
               <span class="label">Front Bolt</span>
-              <span class="value">${_sign(rec.flFront)}</span>
+              <span class="value">${_sign(rec.flCamberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
               <span class="label">Rear Bolt</span>
-              <span class="value">${_sign(rec.flRear)}</span>
+              <span class="value">${_sign(rec.flCasterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
@@ -1910,11 +1910,11 @@ function _buildSymmetryPanel(sym) {
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt" style="margin-bottom:0">
               <span class="label">Front Bolt</span>
-              <span class="value">${_sign(rec.frFront)}</span>
+              <span class="value">${_sign(rec.frCamberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
               <span class="label">Rear Bolt</span>
-              <span class="value">${_sign(rec.frRear)}</span>
+              <span class="value">${_sign(rec.frCasterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
@@ -1979,11 +1979,11 @@ function _buildRearSymmetryPanel(rearSymmetry) {
       <div class="title">${wheel}</div>
       <div class="symmetry-metric front-bolt">
         <span class="label">Best Camber Front Bolt</span>
-        <span class="value">${_sign(bestCell.frontBolt)}</span>
+        <span class="value">${_sign(bestCell.camberBolt)}</span>
       </div>
       <div class="symmetry-metric rear-bolt">
         <span class="label">Best Camber Rear Bolt</span>
-        <span class="value">${_sign(bestCell.rearBolt)}</span>
+        <span class="value">${_sign(bestCell.casterBolt)}</span>
       </div>
       <div class="symmetry-metric camber">
         <span class="label">Camber</span>
@@ -2146,18 +2146,18 @@ function _buildFrontConsolidationTableWithStatus(sym) {
   const tbody = document.createElement('tbody');
 
   const camberFlBolts = sym.camberSymmetricPair
-    ? `<div>F:${_sign(sym.camberSymmetricPair.flPosition.frontBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.flPosition.rearBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.flFront)}</div><div>R:${_sign(sym.recommendation.flRear)}</div>`;
+    ? `<div>F:${_sign(sym.camberSymmetricPair.flPosition.camberBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.flPosition.casterBolt)}</div>`
+    : `<div>F:${_sign(sym.recommendation.flCamberBolt)}</div><div>R:${_sign(sym.recommendation.flCasterBolt)}</div>`;
   const camberFrBolts = sym.camberSymmetricPair
-    ? `<div>F:${_sign(sym.camberSymmetricPair.frPosition.frontBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.frPosition.rearBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.frFront)}</div><div>R:${_sign(sym.recommendation.frRear)}</div>`;
+    ? `<div>F:${_sign(sym.camberSymmetricPair.frPosition.camberBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.frPosition.casterBolt)}</div>`
+    : `<div>F:${_sign(sym.recommendation.frCamberBolt)}</div><div>R:${_sign(sym.recommendation.frCasterBolt)}</div>`;
 
   const casterFlBolts = sym.casterSymmetricPair
-    ? `<div>F:${_sign(sym.casterSymmetricPair.flPosition.frontBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.flPosition.rearBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.flFront)}</div><div>R:${_sign(sym.recommendation.flRear)}</div>`;
+    ? `<div>F:${_sign(sym.casterSymmetricPair.flPosition.camberBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.flPosition.casterBolt)}</div>`
+    : `<div>F:${_sign(sym.recommendation.flCamberBolt)}</div><div>R:${_sign(sym.recommendation.flCasterBolt)}</div>`;
   const casterFrBolts = sym.casterSymmetricPair
-    ? `<div>F:${_sign(sym.casterSymmetricPair.frPosition.frontBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.frPosition.rearBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.frFront)}</div><div>R:${_sign(sym.recommendation.frRear)}</div>`;
+    ? `<div>F:${_sign(sym.casterSymmetricPair.frPosition.camberBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.frPosition.casterBolt)}</div>`
+    : `<div>F:${_sign(sym.recommendation.frCamberBolt)}</div><div>R:${_sign(sym.recommendation.frCasterBolt)}</div>`;
 
   // Camber row
   const camberRow = document.createElement('tr');
@@ -2224,18 +2224,18 @@ function _buildFrontConsolidationTable(sym) {
   const tbody = document.createElement('tbody');
 
   const camberFlBolts = sym.camberSymmetricPair
-    ? `<div>F:${_sign(sym.camberSymmetricPair.flPosition.frontBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.flPosition.rearBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.flFront)}</div><div>R:${_sign(sym.recommendation.flRear)}</div>`;
+    ? `<div>F:${_sign(sym.camberSymmetricPair.flPosition.camberBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.flPosition.casterBolt)}</div>`
+    : `<div>F:${_sign(sym.recommendation.flCamberBolt)}</div><div>R:${_sign(sym.recommendation.flCasterBolt)}</div>`;
   const camberFrBolts = sym.camberSymmetricPair
-    ? `<div>F:${_sign(sym.camberSymmetricPair.frPosition.frontBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.frPosition.rearBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.frFront)}</div><div>R:${_sign(sym.recommendation.frRear)}</div>`;
+    ? `<div>F:${_sign(sym.camberSymmetricPair.frPosition.camberBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.frPosition.casterBolt)}</div>`
+    : `<div>F:${_sign(sym.recommendation.frCamberBolt)}</div><div>R:${_sign(sym.recommendation.frCasterBolt)}</div>`;
 
   const casterFlBolts = sym.casterSymmetricPair
-    ? `<div>F:${_sign(sym.casterSymmetricPair.flPosition.frontBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.flPosition.rearBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.flFront)}</div><div>R:${_sign(sym.recommendation.flRear)}</div>`;
+    ? `<div>F:${_sign(sym.casterSymmetricPair.flPosition.camberBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.flPosition.casterBolt)}</div>`
+    : `<div>F:${_sign(sym.recommendation.flCamberBolt)}</div><div>R:${_sign(sym.recommendation.flCasterBolt)}</div>`;
   const casterFrBolts = sym.casterSymmetricPair
-    ? `<div>F:${_sign(sym.casterSymmetricPair.frPosition.frontBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.frPosition.rearBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.frFront)}</div><div>R:${_sign(sym.recommendation.frRear)}</div>`;
+    ? `<div>F:${_sign(sym.casterSymmetricPair.frPosition.camberBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.frPosition.casterBolt)}</div>`
+    : `<div>F:${_sign(sym.recommendation.frCamberBolt)}</div><div>R:${_sign(sym.recommendation.frCasterBolt)}</div>`;
 
   // Camber row
   const camberRow = document.createElement('tr');
@@ -2269,7 +2269,7 @@ function _buildFrontConsolidationTable(sym) {
  * Build Simplified Corner Table (3 rows: corner name, values, bolt positions)
  * Used for quick reference in symmetry vehicle diagram
  */
-function _buildCornerTable(wheel, frontBolt, rearBolt, camber, caster) {
+function _buildCornerTable(wheel, camberBolt, casterBolt, camber, caster) {
   const table = document.createElement('table');
   table.className = `symmetry-corner-table wheel-${wheel.toLowerCase()}`;
   table.style.width = '100%';
@@ -2294,7 +2294,7 @@ function _buildCornerTable(wheel, frontBolt, rearBolt, camber, caster) {
   frontRow.innerHTML = `
     <td style="padding:6px 6px; font-size:0.8rem; border-bottom:1px solid var(--border); white-space:nowrap; font-family:monospace; line-height:1;">
       <div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center;">
-        <strong style="font-size:0.75rem; text-align:right;">F: ${_sign(frontBolt)}</strong>
+        <strong style="font-size:0.75rem; text-align:right;">F: ${_sign(camberBolt)}</strong>
         <span style="color:var(--muted); padding:0 2px;">|</span>
         <span style="color:var(--blue); font-weight:600; text-align:left;">${camberStr}</span>
       </div>
@@ -2308,7 +2308,7 @@ function _buildCornerTable(wheel, frontBolt, rearBolt, camber, caster) {
   rearRow.innerHTML = `
     <td style="padding:6px 6px; font-size:0.8rem; white-space:nowrap; font-family:monospace; line-height:1;">
       <div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center;">
-        <strong style="font-size:0.75rem; text-align:right;">R: ${_sign(rearBolt)}</strong>
+        <strong style="font-size:0.75rem; text-align:right;">R: ${_sign(casterBolt)}</strong>
         <span style="color:var(--muted); padding:0 2px;">|</span>
         <span style="color:var(--orange); font-weight:600; text-align:left;">${casterStr}</span>
       </div>

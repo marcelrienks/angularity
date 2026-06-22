@@ -9,14 +9,14 @@
  *   interpolateGrid(measuredRows) → GridCell[][]   (13×13, indexed by BOLT_POSITIONS)
  *
  * GridCell shape:
- *   { frontBolt, rearBolt, neg20, zero, pos20, isInterpolated: boolean }
+ *   { camberBolt, casterBolt, neg20, zero, pos20, isInterpolated: boolean }
  */
 
 import { BOLT_POSITIONS } from './constants.js';
 
 /**
- * @typedef {{ frontBolt:number, rearBolt:number, neg20:number, zero:number, pos20:number }} MeasuredRow
- * @typedef {{ frontBolt:number, rearBolt:number, neg20:number, zero:number, pos20:number, isInterpolated:boolean }} GridCell
+ * @typedef {{ camberBolt:number, casterBolt:number, neg20:number, zero:number, pos20:number }} MeasuredRow
+ * @typedef {{ camberBolt:number, casterBolt:number, neg20:number, zero:number, pos20:number, isInterpolated:boolean }} GridCell
  */
 
 /**
@@ -30,37 +30,37 @@ export function interpolateGrid(measuredRows) {
   // Build a lookup map: measuredMap[frontBolt][rearBolt] = {neg20, zero, pos20}
   const measuredMap = _buildMap(measuredRows);
 
-  // Get sorted numerical arrays of all front/rear positions that have measurements
-  const frontMeasured = _sortedUniq(measuredRows.map(r => r.frontBolt));
-  const rearMeasured  = _sortedUniq(measuredRows.map(r => r.rearBolt));
+  // Get sorted numerical arrays of all camber/caster positions that have measurements
+  const camberMeasured = _sortedUniq(measuredRows.map(r => r.camberBolt));
+  const casterMeasured  = _sortedUniq(measuredRows.map(r => r.casterBolt));
 
   // Result: 13×13 grid
   const grid = [];
 
-  for (let fi = 0; fi < BOLT_POSITIONS.length; fi++) {
-    const f = BOLT_POSITIONS[fi];
+  for (let ci = 0; ci < BOLT_POSITIONS.length; ci++) {
+    const c = BOLT_POSITIONS[ci];
     const row = [];
 
-    for (let ri = 0; ri < BOLT_POSITIONS.length; ri++) {
-      const r = BOLT_POSITIONS[ri];
+    for (let si = 0; si < BOLT_POSITIONS.length; si++) {
+      const s = BOLT_POSITIONS[si];
 
       // Use measured value if available
-      if (measuredMap[f]?.[r] !== undefined) {
+      if (measuredMap[c]?.[s] !== undefined) {
         row.push({
-          frontBolt: f,
-          rearBolt:  r,
-          ...measuredMap[f][r],
+          camberBolt: c,
+          casterBolt:  s,
+          ...measuredMap[c][s],
           isInterpolated: false,
         });
         continue;
       }
 
       // Interpolate independently for each reading channel
-      const neg20 = _bilinear(f, r, 'neg20', measuredMap, frontMeasured, rearMeasured);
-      const zero  = _bilinear(f, r, 'zero',  measuredMap, frontMeasured, rearMeasured);
-      const pos20 = _bilinear(f, r, 'pos20', measuredMap, frontMeasured, rearMeasured);
+      const neg20 = _bilinear(c, s, 'neg20', measuredMap, camberMeasured, casterMeasured);
+      const zero  = _bilinear(c, s, 'zero',  measuredMap, camberMeasured, casterMeasured);
+      const pos20 = _bilinear(c, s, 'pos20', measuredMap, camberMeasured, casterMeasured);
 
-      row.push({ frontBolt: f, rearBolt: r, neg20, zero, pos20, isInterpolated: true });
+      row.push({ camberBolt: c, casterBolt: s, neg20, zero, pos20, isInterpolated: true });
     }
 
     grid.push(row);
@@ -72,48 +72,48 @@ export function interpolateGrid(measuredRows) {
 // ── Bilinear interpolation ─────────────────────────────────────────────────
 
 /**
- * Bilinear interpolation (or extrapolation) for one channel at position (f, r).
+ * Bilinear interpolation (or extrapolation) for one channel at position (c, s).
  *
- * Finds the two nearest measured front-bolt values (above/below f) and the two
- * nearest measured rear-bolt values (above/below r), interpolates linearly on
+ * Finds the two nearest measured camber-bolt values (above/below c) and the two
+ * nearest measured caster-bolt values (above/below s), interpolates linearly on
  * each axis in turn.
  *
- * If f or r is outside the measured range, falls back to linear extrapolation
+ * If c or s is outside the measured range, falls back to linear extrapolation
  * using the two nearest available points on that axis.
  *
- * @param {number} f           Target front bolt position
- * @param {number} r           Target rear bolt position
+ * @param {number} c           Target camber bolt position
+ * @param {number} s           Target caster bolt position
  * @param {'neg20'|'zero'|'pos20'} channel
- * @param {Object} map         measuredMap[front][rear] = {neg20, zero, pos20}
- * @param {number[]} fronts    Sorted array of measured front bolt positions
- * @param {number[]} rears     Sorted array of measured rear bolt positions
+ * @param {Object} map         measuredMap[camber][caster] = {neg20, zero, pos20}
+ * @param {number[]} cambers   Sorted array of measured camber bolt positions
+ * @param {number[]} casters   Sorted array of measured caster bolt positions
  * @returns {number}
  */
-function _bilinear(f, r, channel, map, fronts, rears) {
-  // Which two front bolt values bracket f?
-  const [f0, f1] = _bracket(fronts, f);
-  // Which two rear bolt values bracket r?
-  const [r0, r1] = _bracket(rears, r);
+function _bilinear(c, s, channel, map, cambers, casters) {
+  // Which two camber bolt values bracket c?
+  const [c0, c1] = _bracket(cambers, c);
+  // Which two caster bolt values bracket s?
+  const [s0, s1] = _bracket(casters, s);
 
-  if (f0 === null || r0 === null) {
+  if (c0 === null || s0 === null) {
     // Only one measured position on an axis — return that value
-    const sf = f0 ?? f1 ?? fronts[0];
-    const sr = r0 ?? r1 ?? rears[0];
-    return _get(map, sf, sr, channel, fronts, rears);
+    const sc = c0 ?? c1 ?? cambers[0];
+    const ss = s0 ?? s1 ?? casters[0];
+    return _get(map, sc, ss, channel, cambers, casters);
   }
 
-  // Interpolate along rear axis at f0
-  const v00 = _get(map, f0, r0, channel, fronts, rears);
-  const v01 = _get(map, f0, r1, channel, fronts, rears);
-  const atF0 = r0 === r1 ? v00 : _lerp(r0, v00, r1, v01, r);
+  // Interpolate along caster axis at c0
+  const v00 = _get(map, c0, s0, channel, cambers, casters);
+  const v01 = _get(map, c0, s1, channel, cambers, casters);
+  const atC0 = s0 === s1 ? v00 : _lerp(s0, v00, s1, v01, s);
 
-  // Interpolate along rear axis at f1
-  const v10 = _get(map, f1, r0, channel, fronts, rears);
-  const v11 = _get(map, f1, r1, channel, fronts, rears);
-  const atF1 = r0 === r1 ? v10 : _lerp(r0, v10, r1, v11, r);
+  // Interpolate along caster axis at c1
+  const v10 = _get(map, c1, s0, channel, cambers, casters);
+  const v11 = _get(map, c1, s1, channel, cambers, casters);
+  const atC1 = s0 === s1 ? v10 : _lerp(s0, v10, s1, v11, s);
 
-  // Interpolate along front axis
-  return f0 === f1 ? atF0 : _lerp(f0, atF0, f1, atF1, f);
+  // Interpolate along camber axis
+  return c0 === c1 ? atC0 : _lerp(c0, atC0, c1, atC1, c);
 }
 
 /**
@@ -121,15 +121,15 @@ function _bilinear(f, r, channel, map, fronts, rears) {
  * If the exact position isn't measured, returns the nearest measured point
  * on each axis (fallback for partial-grid extrapolation edge cases).
  */
-function _get(map, f, r, channel, fronts, rears) {
-  if (map[f]?.[r] !== undefined) return map[f][r][channel];
+function _get(map, c, s, channel, cambers, casters) {
+  if (map[c]?.[s] !== undefined) return map[c][s][channel];
 
-  // Find closest measured front row
-  const cf = _nearest(fronts, f);
-  // Find closest measured rear col
-  const cr = _nearest(rears, r);
+  // Find closest measured camber row
+  const cc = _nearest(cambers, c);
+  // Find closest measured caster col
+  const cs = _nearest(casters, s);
 
-  return (map[cf]?.[cr] ?? {})[channel] ?? 0;
+  return (map[cc]?.[cs] ?? {})[channel] ?? 0;
 }
 
 // ── Linear interpolation / extrapolation ──────────────────────────────────
@@ -190,9 +190,9 @@ function _nearest(sorted, target) {
 function _buildMap(rows) {
   const map = {};
   for (const row of rows) {
-    const { frontBolt: f, rearBolt: r, neg20, zero, pos20 } = row;
-    if (!map[f]) map[f] = {};
-    map[f][r] = { neg20, zero, pos20 };
+    const { camberBolt: c, casterBolt: s, neg20, zero, pos20 } = row;
+    if (!map[c]) map[c] = {};
+    map[c][s] = { neg20, zero, pos20 };
   }
   return map;
 }

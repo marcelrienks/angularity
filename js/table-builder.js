@@ -40,7 +40,7 @@ export function buildSummaryTable(result, wheel, options = {}) {
   const table = document.createElement('table');
   table.className = 'data-table summary-table';
 
-  // Build header row with rear bolt positions
+  // Build header row with caster bolt positions
   const thead = table.createTHead();
   const headerRow = thead.insertRow();
   _appendHeaderCell(headerRow, 'F↓/R→', 'col-label-row');
@@ -52,13 +52,13 @@ export function buildSummaryTable(result, wheel, options = {}) {
     }
   }
 
-  // Build body rows with front bolt positions
+  // Build body rows with camber bolt positions
   const tbody = table.createTBody();
   for (let fi = 0; fi < BOLT_POSITIONS.length; fi++) {
     const f = BOLT_POSITIONS[fi];
     const tr = tbody.insertRow();
 
-    // Row header with front bolt position
+    // Row header with camber bolt position
     const rowHeader = tr.insertCell();
     rowHeader.className = 'row-label';
     if (REQUIRED_POSITIONS.includes(f)) {
@@ -83,7 +83,7 @@ export function buildSummaryTable(result, wheel, options = {}) {
       }
 
       // Add target match indicator
-      const key = `${cell.frontBolt},${cell.rearBolt}`;
+      const key = `${cell.camberBolt},${cell.casterBolt}`;
       if (topMatches.has(key)) {
         const matchType = topMatches.get(key);
         td.classList.add(`best-${matchType}`);

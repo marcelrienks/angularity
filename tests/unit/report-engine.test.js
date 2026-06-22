@@ -70,8 +70,8 @@ describe('report-engine.js', () => {
         const result = processWheel([excellentCamberGoodCaster]);
         const row = result.rows169[0];
         
-        expect(row).toHaveProperty('frontBolt');
-        expect(row).toHaveProperty('rearBolt');
+        expect(row).toHaveProperty('camberBolt');
+        expect(row).toHaveProperty('casterBolt');
         expect(row).toHaveProperty('camber');
         expect(row).toHaveProperty('caster');
         expect(row).toHaveProperty('toe');
@@ -89,10 +89,10 @@ describe('report-engine.js', () => {
           const prev = result.rows169[i - 1];
           const curr = result.rows169[i];
           
-          if (curr.frontBolt !== prev.frontBolt) {
-            expect(curr.frontBolt).toBeGreaterThanOrEqual(prev.frontBolt);
+          if (curr.camberBolt !== prev.camberBolt) {
+            expect(curr.camberBolt).toBeGreaterThanOrEqual(prev.camberBolt);
           } else {
-            expect(curr.rearBolt).toBeGreaterThanOrEqual(prev.rearBolt);
+            expect(curr.casterBolt).toBeGreaterThanOrEqual(prev.casterBolt);
           }
         }
       });
@@ -215,8 +215,8 @@ describe('report-engine.js', () => {
         const result = processWheel([excellentCamberGoodCaster]);
         const validPositions = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6];
         
-        expect(validPositions).toContain(result.bestCell.frontBolt);
-        expect(validPositions).toContain(result.bestCell.rearBolt);
+        expect(validPositions).toContain(result.bestCell.camberBolt);
+        expect(validPositions).toContain(result.bestCell.casterBolt);
       });
     });
 
@@ -355,10 +355,10 @@ describe('report-engine.js', () => {
         if (result.recommendation) {
           expect(result.recommendation).toHaveProperty('camber');
           expect(result.recommendation).toHaveProperty('caster');
-          expect(result.recommendation).toHaveProperty('flFront');
-          expect(result.recommendation).toHaveProperty('flRear');
-          expect(result.recommendation).toHaveProperty('frFront');
-          expect(result.recommendation).toHaveProperty('frRear');
+          expect(result.recommendation).toHaveProperty('flCamberBolt');
+          expect(result.recommendation).toHaveProperty('flCasterBolt');
+          expect(result.recommendation).toHaveProperty('frCamberBolt');
+          expect(result.recommendation).toHaveProperty('frCasterBolt');
         }
       });
     });
@@ -388,10 +388,10 @@ describe('report-engine.js', () => {
         const result = symmetryAnalysis(flResult, frResult);
         
         if (result.recommendation) {
-          expect(result.recommendation.flFront).toBeDefined();
-          expect(result.recommendation.flRear).toBeDefined();
-          expect(result.recommendation.frFront).toBeDefined();
-          expect(result.recommendation.frRear).toBeDefined();
+          expect(result.recommendation.flCamberBolt).toBeDefined();
+          expect(result.recommendation.flCasterBolt).toBeDefined();
+          expect(result.recommendation.frCamberBolt).toBeDefined();
+          expect(result.recommendation.frCasterBolt).toBeDefined();
         }
       });
     });
@@ -423,10 +423,10 @@ describe('report-engine.js', () => {
         const result = symmetryAnalysis(flResult, frResult, rlResult, rrResult);
         
         if (result.rear && result.rear.recommendation) {
-          expect(result.rear.recommendation).toHaveProperty('rlFront');
-          expect(result.rear.recommendation).toHaveProperty('rlRear');
-          expect(result.rear.recommendation).toHaveProperty('rrFront');
-          expect(result.rear.recommendation).toHaveProperty('rrRear');
+          expect(result.rear.recommendation).toHaveProperty('rlCamberBolt');
+          expect(result.rear.recommendation).toHaveProperty('rlCasterBolt');
+          expect(result.rear.recommendation).toHaveProperty('rrCamberBolt');
+          expect(result.rear.recommendation).toHaveProperty('rrCasterBolt');
         }
       });
     });
@@ -459,12 +459,12 @@ describe('report-engine.js', () => {
         const result = symmetryAnalysis(flResult, frResult, rlResult, rrResult);
         
         if (result.recommendation) {
-          expect(result.recommendation).toHaveProperty('flFront');
-          expect(result.recommendation).toHaveProperty('frFront');
+          expect(result.recommendation).toHaveProperty('flCamberBolt');
+          expect(result.recommendation).toHaveProperty('frCamberBolt');
         }
         if (result.rear && result.rear.recommendation) {
-          expect(result.rear.recommendation).toHaveProperty('rlFront');
-          expect(result.rear.recommendation).toHaveProperty('rrFront');
+          expect(result.rear.recommendation).toHaveProperty('rlCamberBolt');
+          expect(result.rear.recommendation).toHaveProperty('rrCamberBolt');
         }
       });
     });
