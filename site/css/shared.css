@@ -389,7 +389,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 4;
-  width: 130px;
+  width: 140px;
   height: 34px;
   display: flex;
   align-items: center;
@@ -426,7 +426,7 @@ body {
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   padding: 6px 6px 6px 8px;
-  min-width: 130px;
+  min-width: 140px;
   background: var(--bg);
   align-items: stretch;
   border-left: 3px solid transparent;
@@ -452,7 +452,7 @@ body {
   font-size: 0.65rem;
   color: var(--muted);
   letter-spacing: 0.03em;
-  width: 45px;
+  width: 60px;
   text-align: right;
   flex-shrink: 0;
   user-select: none;
