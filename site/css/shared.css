@@ -586,6 +586,7 @@ body {
   border-bottom: 1px solid var(--border);
   font-weight: 700;
   font-size: 0.9rem;
+  height: 56px;
 }
 
 .data-table td {
@@ -1540,7 +1541,7 @@ body {
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0;
-  max-width: 38px;
+  width: 56px;
   white-space: pre-wrap;
   line-height: 1.1;
   word-wrap: break-word;
