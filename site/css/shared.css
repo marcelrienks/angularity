@@ -456,6 +456,9 @@ body {
   text-align: right;
   flex-shrink: 0;
   user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cell-input {
