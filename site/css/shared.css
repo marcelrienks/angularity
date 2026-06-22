@@ -453,7 +453,7 @@ body {
   color: var(--muted);
   letter-spacing: 0.03em;
   width: 45px;
-  text-align: center;
+  text-align: right;
   flex-shrink: 0;
   user-select: none;
 }
