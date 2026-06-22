@@ -442,8 +442,11 @@ body {
 
 .grid-cell:has(input.cell-input:focus) {
   background: rgba(106, 180, 255, 0.12);
-  outline: 1px solid white;
-  outline-offset: 1px;
+}
+
+.grid-cell:has(input.cell-input:focus) .cell-label {
+  color: var(--subtle);
+  font-weight: bold;
 }
 
 /* Inline label+input row inside each cell */
@@ -456,7 +459,7 @@ body {
 
 .cell-label {
   font-size: 0.65rem;
-  color: var(--muted);
+  color: var(--muted-strong);
   letter-spacing: 0.03em;
   width: 60px;
   text-align: right;
