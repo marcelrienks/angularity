@@ -55,7 +55,7 @@ function buildTable(result, wheel) {
   // Build header
   const thead = table.createTHead();
   const headerRow = thead.insertRow();
-  _th(headerRow, 'F↓/R→', 'col-label-row');
+  _th(headerRow, 'Camber↓/Caster→', 'col-label-row');
   for (const r of BOLT_POSITIONS) {
     const th = _th(headerRow, _sign(r));
     if (REQUIRED_POSITIONS.includes(r)) th.classList.add('required-header');
