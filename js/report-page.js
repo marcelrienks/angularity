@@ -8,12 +8,11 @@
  *   - Main chart (Section 2.2) via chart-builder.js
  *   - Washer diagrams (Section 2.3) via washer-diagram.js
  *   - Symmetry analysis (Section 2.4) via report-engine.js
- *   - Heatmaps (OPT-1, OPT-2, OPT-3)
  */
 
 import { REQUIRED_POSITIONS, BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER,
-         TARGET_CAMBER_REAR, TARGET_TOE_FRONT, TARGET_TOE_REAR, TARGET_STEERING_RATIO, TARGET_CASTER_INPUT_MODE, TARGET_CASTER_WHEEL_DEGREES, TARGET_WHEEL_DIAMETER, CAMBER_THRESHOLDS, CASTER_THRESHOLDS, TOE_THRESHOLDS, HEATMAP_CAMBER_RANGE,
-         HEATMAP_CASTER_RANGE, WHEELS, FRONT_WHEELS, REAR_WHEELS, WHEEL_LABELS,
+         TARGET_CAMBER_REAR, TARGET_TOE_FRONT, TARGET_TOE_REAR, TARGET_STEERING_RATIO, TARGET_CASTER_INPUT_MODE, TARGET_CASTER_WHEEL_DEGREES, TARGET_WHEEL_DIAMETER, CAMBER_THRESHOLDS, CASTER_THRESHOLDS, TOE_THRESHOLDS,
+         WHEELS, FRONT_WHEELS, REAR_WHEELS, WHEEL_LABELS,
          SYMMETRY_TOLERANCE, getBoltPositions, getCurrentMeasurementDensity } from './constants.js';
 import { parseCSV } from './csv-io.js';
 import { processWheel, symmetryAnalysis } from './report-engine.js';
@@ -23,8 +22,7 @@ import { loadFullGridState, loadWheelFromStorage, loadWheelToeFromStorage, hasSu
 import { calculateCaster, toeDegreesToResultantMm } from './math-utils.js';
 import { renderSummaryTable as renderTableUI,
          renderMainChart as renderChartUI,
-         renderSymmetryPanel as renderSymmetryUI,
-         renderHeatmaps as renderHeatmapsUI } from './report-ui.js';
+         renderSymmetryPanel as renderSymmetryUI } from './report-ui.js';
 
 // ── Storage & state ────────────────────────────────────────────────────────
 
@@ -40,7 +38,6 @@ const charts = { main: null };
 /** Active wheel tab for multi-wheel sections */
 let activeTableWheel  = 'FL';
 let activeChartWheel  = 'FL';
-let activeHeatmapWheel = 'FL';
 
 function _getWheelTargets(wheel) {
   return REAR_WHEELS.includes(wheel)
@@ -336,25 +333,16 @@ function _rebuildAll() {
 
   activeTableWheel = _ensureActiveWheel(activeTableWheel, loadedWheels);
   activeChartWheel = _ensureActiveWheel(activeChartWheel, loadedWheels);
-  activeHeatmapWheel = _ensureActiveWheel(activeHeatmapWheel, loadedWheels);
 
   _rebuildWheelTabs(loadedWheels);
   _renderSummaryTable();
   _renderMainChart();
   _renderToeSummary();
-  
-  try {
-    _renderHeatmaps();
-  } catch (e) {
-    console.error('Heatmap rendering error:', e);
-  }
-  
   _renderWashers();
   _renderSymmetry();
 
   _showSection('section-table');
   _showSection('section-chart');
-  _showSection('section-heatmaps');
 
   if (hasFrontPair || hasRearPair) {
     _showSection('section-symmetry');
@@ -371,7 +359,6 @@ function _bindWheelTabs() {
   const groups = [
     { selector: '#table-wheel-tabs button',       setter: w => { activeTableWheel = w; _normalizeSelectedMetricForWheel(); _updateMetricButtonStates(); _renderSummaryTable(); } },
     { selector: '#chart-wheel-tabs button',       setter: w => { activeChartWheel = w; _renderMainChart(); } },
-    { selector: '#heatmap-wheel-tabs button',     setter: w => { activeHeatmapWheel = w; _renderHeatmaps(); } },
   ];
 
   for (const { selector, setter } of groups) {
@@ -383,9 +370,6 @@ function _bindWheelTabs() {
       });
     });
   }
-
-  // Bind weight sliders for proximity heatmap
-  _bindWeightSliders();
 }
 
 // ── Mode toggle ──────────────────────────────────────────────────────────────
@@ -431,7 +415,6 @@ function _rebuildWheelTabs(loadedWheels) {
   const tabMap = [
     ['#table-wheel-tabs',       activeTableWheel],
     ['#chart-wheel-tabs',       activeChartWheel],
-    ['#heatmap-wheel-tabs',     activeHeatmapWheel],
   ];
 
   for (const [sel, activeWheel] of tabMap) {
@@ -2422,226 +2405,6 @@ function _buildSymmetryStatus(sym) {
   `;
 
   return div;
-}
-
-function _renderHeatmaps() {
-  const result = results[activeHeatmapWheel];
-  if (!result) return;
-
-  _drawHeatmap('camber-heatmap', 'camber-legend-bar', result, 'camber');
-  _drawHeatmap('caster-heatmap', 'caster-legend-bar', result, 'caster');
-  _drawProximityHeatmap(result);
-}
-
-/**
- * Draw a 13×13 heatmap onto a canvas using 2D context.
- * @param {string}  canvasId
- * @param {string}  legendId
- * @param {object}  result
- * @param {'camber'|'caster'} mode
- */
-function _drawHeatmap(canvasId, legendId, result, mode) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-
-  const N    = BOLT_POSITIONS.length;  // 13
-  const size = canvas.width;           // 390
-  const cell = size / N;               // 30px per cell
-
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, size, size);
-
-  const target = mode === 'camber' ? TARGET_CAMBER : TARGET_CASTER;
-  const range  = mode === 'camber' ? HEATMAP_CAMBER_RANGE : HEATMAP_CASTER_RANGE;
-
-  for (let fi = 0; fi < N; fi++) {
-    for (let ri = 0; ri < N; ri++) {
-      const gridCell = result.grid[fi][ri];
-      const value = mode === 'camber'
-        ? gridCell.zero
-        : calculateCaster(gridCell.neg20, gridCell.pos20, _getWheelCasterOptions(activeHeatmapWheel, result));
-
-      const t = Math.max(0, Math.min(1, (value - (target - range)) / (2 * range)));
-      const colour = mode === 'camber'
-        ? _camberColour(t)    // blue (negative) → green (target) → red (positive)
-        : _casterColour(t);   // blue (low) → green (target) → red (high)
-
-      const x = ri * cell;
-      const y = fi * cell;
-
-      ctx.fillStyle = colour;
-      ctx.fillRect(x, y, cell, cell);
-
-      // Dot marker for measured cells
-      if (!gridCell.isInterpolated) {
-        ctx.fillStyle = 'rgba(255,255,255,0.5)';
-        ctx.beginPath();
-        ctx.arc(x + cell / 2, y + cell / 2, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }
-
-  // Crosshair on best cell
-  const best = result.bestCell;
-  const bFI  = BOLT_POSITIONS.indexOf(best.frontBolt);
-  const bRI  = BOLT_POSITIONS.indexOf(best.rearBolt);
-  if (bFI >= 0 && bRI >= 0) {
-    const bx = bRI * cell;
-    const by = bFI * cell;
-    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-    ctx.lineWidth   = 1.5;
-    ctx.strokeRect(bx + 1, by + 1, cell - 2, cell - 2);
-  }
-
-  // Grid lines (faint)
-  ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-  ctx.lineWidth = 0.5;
-  for (let i = 0; i <= N; i++) {
-    ctx.beginPath(); ctx.moveTo(i * cell, 0); ctx.lineTo(i * cell, size); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, i * cell); ctx.lineTo(size, i * cell); ctx.stroke();
-  }
-
-  // Required position grid lines (more visible)
-  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-  ctx.lineWidth   = 1;
-  for (const pos of REQUIRED_POSITIONS) {
-    const i = BOLT_POSITIONS.indexOf(pos);
-    if (i < 0) continue;
-    ctx.beginPath(); ctx.moveTo(i * cell, 0); ctx.lineTo(i * cell, size); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, i * cell); ctx.lineTo(size, i * cell); ctx.stroke();
-  }
-
-  // Draw legend bar
-  _drawLegendBar(legendId, mode === 'camber' ? _camberColour : _casterColour);
-}
-
-// ── OPT-3: Proximity Heatmap ──────────────────────────────────────────────
-
-function _bindWeightSliders() {
-  const sC = document.getElementById('weight-camber');
-  const sK = document.getElementById('weight-caster');
-  if (sC) sC.addEventListener('input', () => {
-    document.getElementById('weight-camber-val').textContent = parseFloat(sC.value).toFixed(1);
-    _drawProximityHeatmap(results[activeHeatmapWheel]);
-  });
-  if (sK) sK.addEventListener('input', () => {
-    document.getElementById('weight-caster-val').textContent = parseFloat(sK.value).toFixed(1);
-    _drawProximityHeatmap(results[activeHeatmapWheel]);
-  });
-}
-
-function _drawProximityHeatmap(result) {
-  if (!result) return;
-  const canvas = document.getElementById('proximity-heatmap');
-  if (!canvas) return;
-
-  const wC = parseFloat(document.getElementById('weight-camber')?.value ?? 1);
-  const wK = parseFloat(document.getElementById('weight-caster')?.value  ?? 1);
-
-  const N    = BOLT_POSITIONS.length;
-  const size = canvas.width;
-  const cell = size / N;
-
-  // Compute scores for all 169 cells
-  const scores = [];
-  for (let fi = 0; fi < N; fi++) {
-    for (let ri = 0; ri < N; ri++) {
-      const gc     = result.grid[fi][ri];
-      const camber = gc.zero;
-      const caster = calculateCaster(gc.neg20, gc.pos20, _getWheelCasterOptions(activeHeatmapWheel, result));
-      scores.push(wC * Math.abs(camber - TARGET_CAMBER) + wK * Math.abs(caster - TARGET_CASTER));
-    }
-  }
-  const maxScore = Math.max(...scores) || 1;
-
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, size, size);
-
-  let idx = 0;
-  for (let fi = 0; fi < N; fi++) {
-    for (let ri = 0; ri < N; ri++) {
-      const t     = scores[idx] / maxScore;       // 0 = best (green), 1 = worst (red)
-      ctx.fillStyle = _proximityColour(t);
-      ctx.fillRect(ri * cell, fi * cell, cell, cell);
-
-      // Dot for measured
-      if (!result.grid[fi][ri].isInterpolated) {
-        ctx.fillStyle = 'rgba(255,255,255,0.4)';
-        ctx.beginPath();
-        ctx.arc(ri * cell + cell/2, fi * cell + cell/2, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      idx++;
-    }
-  }
-
-  // Crosshair on best cell
-  const best = result.bestCell;
-  const bFI  = BOLT_POSITIONS.indexOf(best.frontBolt);
-  const bRI  = BOLT_POSITIONS.indexOf(best.rearBolt);
-  if (bFI >= 0 && bRI >= 0) {
-    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-    ctx.lineWidth   = 1.5;
-    ctx.strokeRect(bRI * cell + 1, bFI * cell + 1, cell - 2, cell - 2);
-  }
-
-  // Grid lines
-  ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-  ctx.lineWidth   = 0.5;
-  for (let i = 0; i <= N; i++) {
-    ctx.beginPath(); ctx.moveTo(i*cell,0); ctx.lineTo(i*cell,size); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0,i*cell); ctx.lineTo(size,i*cell); ctx.stroke();
-  }
-
-  _drawLegendBar('proximity-legend-bar', _proximityColour);
-}
-
-
-
-// ── Colour maps ────────────────────────────────────────────────────────────
-
-/**
- * Camber heatmap: t=0 → blue (more negative), t=0.5 → green (target), t=1 → red (less negative)
- */
-function _camberColour(t) {
-  if (t < 0.5) {
-    const u = t * 2;
-    return _rgb(_lerp(0, 88, u), _lerp(0, 185, u), _lerp(139, 80, u)); // blue → green
-  }
-  const u = (t - 0.5) * 2;
-  return _rgb(_lerp(88, 248, u), _lerp(185, 81, u), _lerp(80, 73, u)); // green → red
-}
-
-/**
- * Caster heatmap: t=0 → blue (low), t=0.5 → green (target), t=1 → red (high)
- */
-function _casterColour(t) {
-  return _camberColour(t); // Same diverging scheme
-}
-
-/**
- * Proximity heatmap: t=0 → green (best), t=1 → red (worst)
- */
-function _proximityColour(t) {
-  if (t < 0.5) {
-    const u = t * 2;
-    return _rgb(_lerp(63, 210, u), _lerp(185, 153, u), _lerp(80, 34, u)); // green → orange
-  }
-  const u = (t - 0.5) * 2;
-  return _rgb(_lerp(210, 248, u), _lerp(153, 81, u), _lerp(34, 73, u)); // orange → red
-}
-
-function _drawLegendBar(canvasId, colourFn) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-  const ctx  = canvas.getContext('2d');
-  const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
-  for (let i = 0; i <= 10; i++) {
-    grad.addColorStop(i / 10, colourFn(i / 10));
-  }
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 // ── Utility ────────────────────────────────────────────────────────────────

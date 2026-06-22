@@ -29,7 +29,7 @@ export function updateMeasurementMethodText(casterInputMode, density = 13) {
 
   const reportCardDesc = document.getElementById('report-card-desc');
   if (reportCardDesc) {
-    reportCardDesc.textContent = `Load CSV files for Front Left and Front Right. View the interpolated ${gridText} summary table, multi-line chart, washer position diagrams, symmetry analysis, and heatmaps — then read off the recommended bolt settings.`;
+    reportCardDesc.textContent = `Load CSV files for Front Left and Front Right. View the interpolated ${gridText} summary table, multi-line chart, washer position diagrams, and symmetry analysis — then read off the recommended bolt settings.`;
   }
 }
 
