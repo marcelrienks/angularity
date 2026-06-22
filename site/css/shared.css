@@ -1389,13 +1389,13 @@ body {
 
 /* Row/column focus highlight */
 .grid-col-header.col-highlight {
-  background: rgba(106, 180, 255, 0.20);
-  color: var(--blue);
+  background: var(--panel-alt);
+  color: var(--muted-strong);
 }
 
 .grid-row-header.row-highlight {
-  background: rgba(106, 180, 255, 0.20);
-  color: var(--blue);
+  background: var(--panel-alt);
+  color: var(--muted-strong);
 }
 
 .grid-cell.row-highlight,
