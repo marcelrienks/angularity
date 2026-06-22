@@ -210,15 +210,33 @@ body {
 
 .grid-controls {
   display: flex;
-  gap: 12px;
+  gap: 32px;
   margin-bottom: 24px;
-  flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: space-between;
 }
 
 .grid-controls .wheel-selector {
   display: flex;
+  flex-direction: column;
   gap: 8px;
+}
+
+.grid-controls .wheel-selector .selector-row {
+  display: flex;
+  gap: 8px;
+}
+
+.grid-controls .control-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.grid-controls .control-buttons .buttons-row {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
 }
 
 .wheel-selector button {
@@ -233,6 +251,12 @@ body {
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
+  white-space: nowrap;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
 }
 
 .wheel-selector button:hover,
@@ -314,6 +338,12 @@ body {
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
+  white-space: nowrap;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
 }
 
 .button:hover {

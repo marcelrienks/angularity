@@ -37,43 +37,27 @@
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <div class="grid-controls">
       <div class="wheel-selector" id="wheel-selector" role="tablist" aria-label="Wheel selection">
-        <button class="active" data-wheel="FL" role="tab" aria-selected="true">FL — Front Left</button>
-        <button data-wheel="FR" role="tab" aria-selected="false">FR — Front Right</button>
-        <button data-wheel="RL" role="tab" aria-selected="false">RL — Rear Left</button>
-        <button data-wheel="RR" role="tab" aria-selected="false">RR — Rear Right</button>
+        <div class="selector-row">
+          <button class="active" data-wheel="FL" role="tab" aria-selected="true">FL — Front Left</button>
+          <button data-wheel="FR" role="tab" aria-selected="false">FR — Front Right</button>
+        </div>
+        <div class="selector-row">
+          <button data-wheel="RL" role="tab" aria-selected="false">RL — Rear Left</button>
+          <button data-wheel="RR" role="tab" aria-selected="false">RR — Rear Right</button>
+        </div>
       </div>
 
-      <div class="progress-bar" id="progress-bar" aria-live="polite">
-        <span class="progress-stat">
-          <span class="count" id="required-count">0</span>
-          <span id="required-total">/ 9 required</span>
-          <span class="progress-track">
-            <span class="progress-fill required" id="required-fill" style="width:0%"></span>
-          </span>
-        </span>
-        <span class="progress-stat">
-          <span class="count" id="total-count">0</span>
-          <span id="total-total">/ 9 total</span>
-          <span class="progress-track">
-            <span class="progress-fill" id="total-fill" style="width:0%"></span>
-          </span>
-        </span>
+      <div class="control-buttons">
+        <div class="buttons-row">
+          <button class="button" id="btn-download">Save CSV</button>
+          <label class="button" id="btn-load-label" for="csv-upload">Load CSV</label>
+          <input type="file" id="csv-upload" accept=".csv" aria-label="Load CSV file" style="display:none">
+        </div>
+        <div class="buttons-row">
+          <button class="button" id="btn-sample">Sample Data</button>
+          <button class="button danger" id="btn-clear">Clear All</button>
+        </div>
       </div>
-
-      <div class="toe-input-group" style="display:flex; align-items:center; gap:8px;">
-        <label for="toe-input" style="font-size:0.65rem; color:var(--muted); letter-spacing:0.06em; text-transform:uppercase;">Toe (° per wheel)</label>
-        <input id="toe-input" type="text" inputmode="decimal" placeholder="0.08" style="width:96px; padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--panel); color:var(--text); font-family:'Share Tech Mono', monospace;">
-        <span id="toe-target-label" style="font-size:0.6rem; color:var(--muted); letter-spacing:0.05em;">Target: +0.07° per wheel</span>
-      </div>
-
-      <button class="button primary" id="btn-download">Save CSV</button>
-
-      <label class="button" id="btn-load-label" for="csv-upload">Load CSV</label>
-      <input type="file" id="csv-upload" accept=".csv" aria-label="Load CSV file" style="display:none">
-
-      <button class="button" id="btn-sample">Load Sample Data</button>
-
-      <button class="button danger" id="btn-clear">Clear All</button>
     </div>
 
 

@@ -403,67 +403,9 @@ function _updateCellClass(f, r) {
 // ── Progress indicator ────────────────────────────────────────────────────
 
 function _updateProgress() {
-  let requiredFilled = 0;
-  let totalFilled    = 0;
-
-  const boltPositions = getBoltPositions();
-  const requiredCount = 9; // 3×3 from -1 to +1 on both axes
-  const totalCount = boltPositions.length * boltPositions.length;
-  
-  // Required subset: -1, 0, +1 on both axes = 9 positions
-  const REQUIRED_SUBSET = [-1, 0, 1];
-
-  for (const f of boltPositions) {
-    for (const r of boltPositions) {
-      const { neg20, zero, pos20 } = gridState[activeWheel][f][r];
-      const allFilled = neg20 !== '' && zero !== '' && pos20 !== '';
-      if (allFilled) {
-        totalFilled++;
-        if (REQUIRED_SUBSET.includes(f) && REQUIRED_SUBSET.includes(r)) requiredFilled++;
-      }
-    }
-  }
-
-  const reqEl   = document.getElementById('required-count');
-  const totEl   = document.getElementById('total-count');
-  const reqFill = document.getElementById('required-fill');
-  const totFill = document.getElementById('total-fill');
-
-  if (reqEl) {
-    reqEl.textContent = requiredFilled;
-    reqEl.className = 'count' + (requiredFilled >= requiredCount ? ' complete' : requiredFilled > 0 ? ' partial' : '');
-  }
-  if (totEl) {
-    totEl.textContent = totalFilled;
-    totEl.className = 'count' + (totalFilled >= totalCount ? ' complete' : totalFilled > 0 ? ' partial' : '');
-  }
-  if (reqFill) reqFill.style.width = `${(requiredFilled / requiredCount) * 100}%`;
-  if (totFill) totFill.style.width = `${(totalFilled / totalCount) * 100}%`;
+  // Progress bar removed
 }
 
-/**
- * Update the required count display based on current measurement density.
- * "Required" = always 3×3 (−1 to +1) = 9 positions minimum
- * "Total" = scales with density, max 13×13 (−6 to +6) = 169
- */
-function _updateRequiredCountDisplay() {
-  const boltPositions = getBoltPositions();
-  const totalCount = boltPositions.length * boltPositions.length;
-  
-  // Required is always the 3×3 subset: -1, 0, +1 on both axes = 9 positions
-  const requiredCount = 9; // 3×3
-  
-  const reqEl = document.getElementById('required-total');
-  const totEl = document.getElementById('total-total');
-  
-  if (reqEl) {
-    reqEl.textContent = `/ ${requiredCount} required`;
-  }
-  
-  if (totEl) {
-    totEl.textContent = `/ ${totalCount} total`;
-  }
-}
 
 // ── Wheel selector ────────────────────────────────────────────────────────
 
@@ -485,15 +427,8 @@ function _bindControls() {
       activeWheel = wheel;
       _applyWheelInputMode(activeWheel);
       _populateGrid(activeWheel);
-      _renderToeInput();
-      _updateProgress();
     });
   });
-
-  const toeInput = document.getElementById('toe-input');
-  if (toeInput) {
-    toeInput.addEventListener('input', e => _onToeInputChange(e.target.value));
-  }
 
   // CSV download
   document.getElementById('btn-download')?.addEventListener('click', _downloadCSV);
@@ -780,13 +715,7 @@ function _clearAll() {
 }
 
 function _renderToeInput() {
-  const toeInput = document.getElementById('toe-input');
-  const toeTargetLabel = document.getElementById('toe-target-label');
-  if (!toeInput || !toeTargetLabel) return;
-
-  toeInput.value = toeState[activeWheel];
-  const target = _getDefaultToeTarget(activeWheel);
-  toeTargetLabel.textContent = `Target: ${target >= 0 ? '+' : ''}${target.toFixed(2)}° per wheel`;
+  // Toe input removed
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
