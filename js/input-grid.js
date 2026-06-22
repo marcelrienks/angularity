@@ -206,7 +206,7 @@ function _buildGrid() {
 
   // CSS grid: 1 row-header column + N data columns
   const colCount = 1 + boltPositions.length;
-  grid.style.gridTemplateColumns = `44px repeat(${boltPositions.length}, 130px)`;
+  grid.style.gridTemplateColumns = `44px repeat(${boltPositions.length}, 140px)`;
 
   // ── Row 0: corner + column headers (front bolt positions) ──────────────
   const corner = _el('div', 'grid-corner');
