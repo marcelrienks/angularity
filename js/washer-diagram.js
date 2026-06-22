@@ -334,27 +334,34 @@ function _buildWasherSVG(position, colour) {
     line.setAttribute('stroke-linecap', 'round');
     rotationGroup.appendChild(line);
 
-    // Position label inside washer, above its respective tick mark
-    // Labels positioned at different depths based on tick length hierarchy
-    // Offset from center accounts for text extent (~10px for endpoints, ~8px for evens, ~6px for odds)
-    const labelRadius = isEndpoint ? TICK_OUTER - 44 : isEven ? TICK_OUTER - 36 : TICK_OUTER - 28;
-    const lx = CX + labelRadius * Math.cos(markerAngleRad);
-    const ly = CY + labelRadius * Math.sin(markerAngleRad);
+    // Show labels only for outermost positions (±densityRange) and 0
+    const showLabel = isEndpoint || i === 0;
+    if (showLabel) {
+      // Position label inside washer, above its respective tick mark
+      // Labels positioned at different depths based on tick length hierarchy
+      // Offset from center accounts for text extent (~10px for endpoints, ~8px for evens, ~6px for odds)
+      const labelRadius = isEndpoint ? TICK_OUTER - 44 : isEven ? TICK_OUTER - 36 : TICK_OUTER - 28;
+      const lx = CX + labelRadius * Math.cos(markerAngleRad);
+      const ly = CY + labelRadius * Math.sin(markerAngleRad);
 
-    // No vertical offset — rely on radial positioning for alignment
-    const yOffset = 0;
+      // No vertical offset — rely on radial positioning for alignment
+      const yOffset = 0;
 
-    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    text.setAttribute('x', lx.toFixed(2));
-    text.setAttribute('y', (ly + yOffset).toFixed(2));
-    text.setAttribute('text-anchor', 'middle');
-    text.setAttribute('dominant-baseline', 'middle');
-    text.setAttribute('font-size', fontSize);
-    text.setAttribute('font-weight', fontWeight);
-    text.setAttribute('font-family', "'Share Tech Mono', monospace");
-    text.setAttribute('fill', isEndpoint ? COLOURS.muted : COLOURS.mutedStrong);
-    text.textContent = _sign(i);
-    rotationGroup.appendChild(text);
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', lx.toFixed(2));
+      text.setAttribute('y', (ly + yOffset).toFixed(2));
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'middle');
+      text.setAttribute('font-size', fontSize);
+      text.setAttribute('font-weight', fontWeight);
+      text.setAttribute('font-family', "'Share Tech Mono', monospace");
+      text.setAttribute('fill', isEndpoint ? COLOURS.muted : COLOURS.mutedStrong);
+      // Rotate text to align with radial direction, then rotate 90° counter-clockwise
+      const textRotation = markerAngleDeg - 90;
+      text.setAttribute('transform', `rotate(${textRotation} ${lx.toFixed(2)} ${(ly + yOffset).toFixed(2)})`);
+      text.textContent = _sign(i);
+      rotationGroup.appendChild(text);
+    }
   }
 
   // ── Bolt hole (eccentric marker indicator) ───────────────────────────────
