@@ -377,7 +377,6 @@ body {
 .grid-wrapper {
   overflow: auto;
   max-height: 72vh;
-  position: relative;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--bg);
