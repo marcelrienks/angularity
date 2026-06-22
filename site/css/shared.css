@@ -580,15 +580,16 @@ body {
 .data-table th {
   background: var(--panel-alt);
   color: var(--muted);
-  padding: 8px;
+  padding: 12px 10px;
   text-align: center;
   letter-spacing: 0.08em;
   border-bottom: 1px solid var(--border);
   font-weight: 700;
+  font-size: 0.9rem;
 }
 
 .data-table td {
-  padding: 8px;
+  padding: 12px 10px;
   text-align: center;
   border-bottom: 1px solid #21262d;
   color: var(--subtle);
@@ -1527,11 +1528,18 @@ body {
   font-weight: 700;
   background: var(--panel-alt);
   white-space: nowrap;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  min-width: 3em;
 }
 
 .data-table .col-label-row th {
   color: var(--blue);
   background: var(--panel-alt);
+  padding: 12px 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
 }
 
 /* ============================================================================
