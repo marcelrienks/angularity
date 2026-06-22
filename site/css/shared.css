@@ -1366,7 +1366,7 @@ body {
 
 /* Required intersection cell (both axes are required) */
 .grid-cell.required {
-  background: var(--req-band);  /* distinct blue background */
+  background: var(--bg);  /* dark background */
 }
 
 /* Required cells that are still empty — red accent to indicate must fill */
