@@ -389,7 +389,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 4;
-  width: 120px;
+  width: 130px;
   height: 34px;
   display: flex;
   align-items: center;
@@ -426,8 +426,8 @@ body {
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   padding: 6px 6px 6px 8px;
-  min-width: 120px;
-  background: var(--panel-deep);  /* optional cells are darker */
+  min-width: 130px;
+  background: var(--bg);
   align-items: stretch;
   border-left: 3px solid transparent;
 }
@@ -444,29 +444,28 @@ body {
 .cell-row {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 3px;
   width: 100%;
 }
 
 .cell-label {
-  font-size: 0.75rem;  /* increased from 0.6rem */
+  font-size: 0.65rem;
   color: var(--muted);
   letter-spacing: 0.03em;
-  min-width: 30px;
-  text-align: right;
+  width: 45px;
+  text-align: center;
   flex-shrink: 0;
   user-select: none;
 }
 
 .cell-input {
-  flex: 1;
-  min-width: 0;
+  width: 58px;
   padding: 3px 5px;
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 0.8rem;  /* increased from 0.65rem */
+  font-size: 0.8rem;
   text-align: right;
   border-radius: 3px;
   transition: all 0.15s;
@@ -1378,18 +1377,18 @@ body {
 
 /* Row/column focus highlight */
 .grid-col-header.col-highlight {
-  background: rgba(106, 180, 255, 0.18);
+  background: rgba(106, 180, 255, 0.35);
   color: var(--blue);
 }
 
 .grid-row-header.row-highlight {
-  background: rgba(106, 180, 255, 0.18);
+  background: rgba(106, 180, 255, 0.35);
   color: var(--blue);
 }
 
 .grid-cell.row-highlight,
 .grid-cell.col-highlight {
-  background: rgba(106, 180, 255, 0.06);
+  background: rgba(106, 180, 255, 0.20);
 }
 
 /* ============================================================================
