@@ -278,23 +278,46 @@ function _buildWasherSVG(position, colour) {
   // Markers span bottom semicircle (180° arc): 9 o'clock to 3 o'clock via 6 o'clock
   // Marker for position i is at angle: 180 - (i + 6) × anglePerPosition degrees
   
-  // Render tick marks for all positions, but only show labels for selected required positions
-  for (let i = BOLT_MIN; i <= BOLT_MAX; i++) {
+  // Get measurement density range (e.g., 6 for 13-point, 2 for 5-point)
+  const currentDensity = getCurrentMeasurementDensity();
+  const densityRange = Math.floor((currentDensity - 1) / 2);
+
+  // Render tick marks for all positions within the current density range
+  for (let i = -densityRange; i <= densityRange; i++) {
     // Calculate marker angle for this bolt position
-    // Position -6: 180 - (0)*anglePerPosition = 180° (left/9 o'clock)
-    // Position 0: 180 - (6)*anglePerPosition = 90° (bottom/6 o'clock)
-    // Position +6: 180 - (12)*anglePerPosition = 0° (right/3 o'clock)
-    const markerAngleDeg = 180 - (i + 6) * anglePerPosition;
+    const markerAngleDeg = 180 - (i + densityRange) * anglePerPosition;
     const markerAngleRad = (markerAngleDeg * Math.PI) / 180;
-    
-    // Determine if this position is in the selected required positions (show with label)
-    const isSelected = selectedPositions.includes(i);
-    // Major ticks: selected positions, or endpoints
-    const isMajor = isSelected || i === BOLT_MIN || i === BOLT_MAX;
-    const tickLength = isMajor ? 20 : 10;  // scaled: 10/5 * 2 = 20/10
-    const tickStrokeWidth = isMajor ? 3.6 : 2.0;  // scaled: 1.8/1.0 * 2 = 3.6/2.0
-    const tickColor = isMajor ? COLOURS.muted : COLOURS.mutedStrong;
-    
+
+    // Determine tick hierarchy based on position
+    // 0 and ±densityRange (endpoints) → longest/thickest
+    // Even positions → medium
+    // Odd positions → shortest/thinnest
+    const isEndpoint = i === 0 || i === -densityRange || i === densityRange;
+    const isEven = i % 2 === 0 && i !== 0;
+    const isOdd = i % 2 !== 0;
+
+    let tickLength, tickStrokeWidth, tickColor, fontSize, fontWeight;
+
+    if (isEndpoint) {
+      tickLength = 24;
+      tickStrokeWidth = 4.2;
+      tickColor = COLOURS.muted;
+      fontSize = '20';
+      fontWeight = '700';
+    } else if (isEven) {
+      tickLength = 15;
+      tickStrokeWidth = 2.8;
+      tickColor = COLOURS.muted;
+      fontSize = '16';
+      fontWeight = '700';
+    } else if (isOdd) {
+      tickLength = 8;
+      tickStrokeWidth = 1.6;
+      tickColor = COLOURS.mutedStrong;
+      fontSize = '13';
+      fontWeight = '600';
+    }
+
     // Tick mark: from outer edge inward
     const x1 = CX + TICK_OUTER * Math.cos(markerAngleRad);
     const y1 = CY + TICK_OUTER * Math.sin(markerAngleRad);
@@ -311,23 +334,27 @@ function _buildWasherSVG(position, colour) {
     line.setAttribute('stroke-linecap', 'round');
     rotationGroup.appendChild(line);
 
-    // Position label for selected positions only
-    if (isSelected) {
-      const lx = CX + LABEL_RADIUS * Math.cos(markerAngleRad);
-      const ly = CY + LABEL_RADIUS * Math.sin(markerAngleRad);
-      
-      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.setAttribute('x', lx.toFixed(2));
-      text.setAttribute('y', (ly + 8).toFixed(2));  // scaled: 4 * 2 = 8
-      text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('dominant-baseline', 'middle');
-      text.setAttribute('font-size', '18');  // scaled: 9 * 2 = 18
-      text.setAttribute('font-weight', '700');
-      text.setAttribute('font-family', "'Share Tech Mono', monospace");
-      text.setAttribute('fill', COLOURS.mutedStrong);
-      text.textContent = _sign(i);
-      rotationGroup.appendChild(text);
-    }
+    // Position label inside washer, above its respective tick mark
+    // Labels positioned at different depths based on tick length hierarchy
+    // Offset from center accounts for text extent (~10px for endpoints, ~8px for evens, ~6px for odds)
+    const labelRadius = isEndpoint ? TICK_OUTER - 44 : isEven ? TICK_OUTER - 36 : TICK_OUTER - 28;
+    const lx = CX + labelRadius * Math.cos(markerAngleRad);
+    const ly = CY + labelRadius * Math.sin(markerAngleRad);
+
+    // No vertical offset — rely on radial positioning for alignment
+    const yOffset = 0;
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', lx.toFixed(2));
+    text.setAttribute('y', (ly + yOffset).toFixed(2));
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('font-size', fontSize);
+    text.setAttribute('font-weight', fontWeight);
+    text.setAttribute('font-family', "'Share Tech Mono', monospace");
+    text.setAttribute('fill', isEndpoint ? COLOURS.muted : COLOURS.mutedStrong);
+    text.textContent = _sign(i);
+    rotationGroup.appendChild(text);
   }
 
   // ── Bolt hole (eccentric marker indicator) ───────────────────────────────
