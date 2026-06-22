@@ -361,7 +361,7 @@ body {
 }
 
 .grid-corner {
-  background: var(--panel-alt);
+  background: var(--bg);
   border-right: 1px solid var(--border);
   border-bottom: 2px solid var(--border);
   position: sticky;
@@ -383,7 +383,7 @@ body {
 }
 
 .grid-col-header {
-  background: var(--panel-alt);
+  background: var(--bg);
   border-right: 1px solid var(--border);
   border-bottom: 2px solid var(--border);
   position: sticky;
@@ -403,7 +403,7 @@ body {
 }
 
 .grid-row-header {
-  background: var(--panel-alt);
+  background: var(--bg);
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   position: sticky;
