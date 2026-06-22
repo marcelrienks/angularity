@@ -11,7 +11,7 @@
  *   - Heatmaps (OPT-1, OPT-2, OPT-3)
  */
 
-import { REQUIRED_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER,
+import { REQUIRED_POSITIONS, BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER,
          TARGET_CAMBER_REAR, TARGET_TOE_FRONT, TARGET_TOE_REAR, TARGET_STEERING_RATIO, TARGET_CASTER_INPUT_MODE, TARGET_CASTER_WHEEL_DEGREES, TARGET_WHEEL_DIAMETER, CAMBER_THRESHOLDS, CASTER_THRESHOLDS, TOE_THRESHOLDS, HEATMAP_CAMBER_RANGE,
          HEATMAP_CASTER_RANGE, WHEELS, FRONT_WHEELS, REAR_WHEELS, WHEEL_LABELS,
          SYMMETRY_TOLERANCE, getBoltPositions, getCurrentMeasurementDensity } from './constants.js';
@@ -172,7 +172,7 @@ function _loadFromLocalStorage() {
       _clearInsufficientDataMessage();
     }
   } catch (err) {
-    console.warn('[report-page] localStorage error:', err);
+    console.error('[report-page] localStorage error:', err?.message || err);
     // Corrupt or unrecognised localStorage — fail silently
   }
 }
@@ -212,13 +212,14 @@ function _setupAutoRefresh() {
  */
 function _gridStateToRows(wheelState) {
   const rows = [];
+  const boltPositions = getBoltPositions();
 
-  for (const f of BOLT_POSITIONS) {
+  for (const f of boltPositions) {
     // JSON.parse converts numeric keys to strings
     const fKey = wheelState[f] !== undefined ? f : String(f);
     if (!wheelState[fKey]) continue;
 
-    for (const r of BOLT_POSITIONS) {
+    for (const r of boltPositions) {
       // JSON.parse converts numeric keys to strings
       const rKey = wheelState[fKey][r] !== undefined ? r : String(r);
       const cell = wheelState[fKey]?.[rKey];

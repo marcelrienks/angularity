@@ -200,7 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
   _populateGrid(activeWheel);
   _renderToeInput();
   _updateProgress();
-  _updateRequiredCountDisplay();
   _bindControls();
   // NOTE: Auto-loading CSV files is disabled because:
   // 1. It interferes with test isolation (loads sample data for all wheels)
@@ -232,7 +231,7 @@ function _buildGrid() {
   // ── Row 0: corner + column headers (front bolt positions) ──────────────
   const corner = _el('div', 'grid-corner');
   corner.setAttribute('aria-hidden', 'true');
-  corner.textContent = 'F→\nR↓';
+  corner.textContent = 'Front →\nRear ↓';
   grid.appendChild(corner);
 
   for (const f of boltPositions) {
@@ -453,7 +452,10 @@ function _bindControls() {
   document.getElementById('csv-upload')?.addEventListener('change', _loadCSV);
 
   // Load sample data
-  document.getElementById('btn-sample')?.addEventListener('click', _loadSampleData);
+  const sampleBtn = document.getElementById('btn-sample');
+  if (sampleBtn) {
+    sampleBtn.addEventListener('click', _loadSampleData);
+  }
 
   // Clear all
   document.getElementById('btn-clear')?.addEventListener('click', _clearAll);
@@ -469,6 +471,7 @@ function _bindControls() {
  * - RL/RR: RED (no symmetric match)
  */
 function _loadSampleData() {
+  console.log('_loadSampleData called for wheel:', activeWheel);
   const boltPositions = getBoltPositions();
   if (gridState[activeWheel]) {
     const nonEmpty = boltPositions.some(f =>
@@ -478,7 +481,9 @@ function _loadSampleData() {
   }
 
   // Generate grid using the three-color test scenario
+  console.log('Generating sample data grid...');
   const generatedGrid = generateThreeColorGrid(activeWheel);
+  console.log('Generated grid:', generatedGrid);
 
   // Import generated data into gridState
   for (const f of boltPositions) {

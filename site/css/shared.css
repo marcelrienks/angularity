@@ -246,9 +246,10 @@ body {
   padding: 8px 14px;
   border: 1px solid var(--border);
   background: var(--panel);
-  color: var(--muted);
+  color: var(--text);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 0.8rem;  /* increased from 0.7rem */
+  font-size: 0.7rem;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
@@ -336,6 +337,7 @@ body {
   color: var(--text);
   font-family: 'Share Tech Mono', monospace;
   font-size: 0.7rem;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
@@ -406,11 +408,11 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;  /* increased from 0.55rem */
+  font-size: 0.5rem;
   color: var(--muted);
   font-weight: 700;
   letter-spacing: 0.06em;
-  line-height: 1;
+  line-height: 1.1;
   white-space: pre-line;
 }
 
@@ -2099,7 +2101,7 @@ body {
 
 /* ── Targets section (index.html) ─────────────────────────────────────── */
 .targets-section {
-  max-width: 600px;
+  max-width: 1000px;
   margin: 0 auto 32px;
   background: var(--panel);
   border: 1px solid var(--border);
@@ -2195,6 +2197,11 @@ body {
   color: var(--muted);
   margin-bottom: 4px;
   padding: 0;
+}
+
+.form-fieldset legend strong {
+  font-weight: 900;
+  color: var(--text);
 }
 
 .form-group {

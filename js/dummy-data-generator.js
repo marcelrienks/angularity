@@ -1,9 +1,9 @@
 /**
  * dummy-data-generator.js — Pure algorithm for generating synthetic alignment data
- * 
+ *
  * Exports functions to generate measurement grids and individual measurements
  * for all wheel combinations (FL, FR, RL, RR).
- * 
+ *
  * The algorithm (opposing sweeps):
  * - Camber IMPROVES left-to-right: from -3.2° (front=-6) to -0.5° (front=+6)
  *   Crosses target (-1.1°) around front=+1
