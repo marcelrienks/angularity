@@ -216,10 +216,13 @@ body {
   justify-content: space-between;
 }
 
-.grid-controls .wheel-selector {
+.wheel-selector {
   display: flex;
-  flex-direction: column;
   gap: 8px;
+}
+
+.grid-controls .wheel-selector {
+  flex-direction: column;
 }
 
 .grid-controls .wheel-selector .selector-row {

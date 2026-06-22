@@ -20,6 +20,27 @@ import { REQUIRED_POSITIONS, WHEELS, FRONT_WHEELS, REAR_WHEELS, TARGET_TOE_FRONT
 import { buildCSVString, downloadCSVBlob, parseCSV } from './csv-io.js';
 import { generateGrid, generateThreeColorGrid } from './dummy-data-generator.js';
 
+// Helper to get input field labels based on measurement mode
+function getInputLabels() {
+  const casterInputMode = localStorage.getItem('alignment_constant_caster_input_mode') || 'steering-ratio';
+  const wheelDegrees = parseFloat(localStorage.getItem('alignment_constant_caster_wheel_degrees')) || 24;
+
+  if (casterInputMode === 'wheel-degrees') {
+    const wheelLabel = `${wheelDegrees.toFixed(0)}°`;
+    return [
+      { key: 'pos20', label: `−${wheelLabel}` },
+      { key: 'zero',  label: '0°' },
+      { key: 'neg20', label: `+${wheelLabel}` },
+    ];
+  } else {
+    return [
+      { key: 'pos20', label: '360° ACW' },
+      { key: 'zero',  label: '0°' },
+      { key: 'neg20', label: '360° CW' },
+    ];
+  }
+}
+
 // ── State ─────────────────────────────────────────────────────────────────
 
 function _getDefaultToeTarget(wheel) {
@@ -248,12 +269,7 @@ function _buildCell(frontBolt, rearBolt) {
   cell.setAttribute('role', 'gridcell');
   cell.setAttribute('aria-label', `Front ${_sign(frontBolt)}, Rear ${_sign(rearBolt)}`);
 
-  // Labels ordered so straight-ahead (0°) is in the middle, ACW/CW sweeps above/below.
-  const defs = [
-    { key: 'pos20', label: '360° ACW' },
-    { key: 'zero',  label: '0°' },
-    { key: 'neg20', label: '360° CW' },
-  ];
+  const defs = getInputLabels();
 
   for (const { key, label } of defs) {
     const wrap = _el('div', 'cell-row');
