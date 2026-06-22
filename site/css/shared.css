@@ -441,10 +441,10 @@ body {
 }
 
 .grid-cell:has(input.cell-input:focus) {
-  background: rgba(106, 180, 255, 0.3);
-  border: 2px solid white;
-  border-left: 3px solid white;
-  padding: 5px 5px 5px 7px;
+  background: rgba(106, 180, 255, 0.12);
+  border: 1px solid white;
+  border-left: 1px solid white;
+  padding: 6px 6px 6px 8px;
 }
 
 /* Inline label+input row inside each cell */
