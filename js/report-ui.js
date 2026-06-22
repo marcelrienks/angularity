@@ -2,7 +2,7 @@
  * report-ui.js — UI rendering layer for the report page
  *
  * Responsibilities:
- *   - Render tables (summary, highlighting, heatmaps)
+ *   - Render tables (summary, highlighting)
  *   - Render charts and diagrams
  *   - Render symmetry panels and analysis cards
  *   - Apply styling based on values and targets
@@ -227,83 +227,6 @@ function buildRecommendationCard(rec) {
   card.appendChild(content);
 
   return card;
-}
-
-/**
- * Render heatmaps
- * @param {object} result - Wheel result
- * @param {string} mode - Heatmap mode ('camber', 'caster', 'proximity')
- * @returns {void}
- */
-export function renderHeatmaps(result, mode = 'camber') {
-  const container = document.getElementById('heatmap-container');
-  if (!container) return;
-
-  const canvasId = `heatmap-${mode}`;
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-
-  drawHeatmap(canvas, result, mode);
-}
-
-/**
- * Draw heatmap on canvas
- * @param {HTMLCanvasElement} canvas - Canvas element
- * @param {object} result - Wheel result
- * @param {string} mode - 'camber' or 'caster'
- * @returns {void}
- */
-function drawHeatmap(canvas, result, mode = 'camber') {
-  const { grid } = result;
-  const N = 13;
-  const size = canvas.width;
-  const cell = size / N;
-
-  const target = mode === 'camber' ? TARGET_CAMBER : TARGET_CASTER;
-  const range = mode === 'camber' ? 2 : 3;
-
-  for (let fi = 0; fi < N; fi++) {
-    for (let ri = 0; ri < N; ri++) {
-      const gridCell = result.grid[fi][ri];
-      const value = mode === 'camber'
-        ? gridCell.zero
-        : calculateCaster(gridCell.neg20, gridCell.pos20, { steeringRatio: result?.targets?.steeringRatio });
-
-      const t = Math.max(0, Math.min(1, (value - (target - range)) / (2 * range)));
-      const colour = mode === 'camber'
-        ? _camberColour(t)
-        : _casterColour(t);
-
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = colour;
-      ctx.fillRect(ri * cell, fi * cell, cell, cell);
-    }
-  }
-}
-
-/**
- * Get camber colour for heatmap
- * @param {number} t - Value 0-1
- * @returns {string} RGB color
- */
-function _camberColour(t) {
-  // Blue → Green → Red
-  if (t < 0.5) {
-    const b = 1 - t * 2;
-    return _rgb(0, _lerp(100, 200, t * 2), 255);
-  }
-  const r = (t - 0.5) * 2;
-  return _rgb(_lerp(100, 255, r), _lerp(200, 100, r), _lerp(255, 100, r));
-}
-
-/**
- * Get caster colour for heatmap
- * @param {number} t - Value 0-1
- * @returns {string} RGB color
- */
-function _casterColour(t) {
-  // Blue → Green → Red
-  return _camberColour(t);
 }
 
 /**

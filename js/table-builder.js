@@ -3,7 +3,6 @@
  *
  * Consolidates table rendering logic with consistent styling for:
  *   - Summary tables (13×13 grids)
- *   - Heatmap tables
  *   - Bolt info tables
  *   - Symmetry pair tables
  *
