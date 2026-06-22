@@ -427,7 +427,7 @@ body {
   border-bottom: 1px solid var(--border);
   padding: 6px 6px 6px 8px;
   min-width: 140px;
-  background: var(--bg);
+  background: var(--panel);
   align-items: stretch;
   border-left: 3px solid transparent;
 }
@@ -1380,18 +1380,18 @@ body {
 
 /* Row/column focus highlight */
 .grid-col-header.col-highlight {
-  background: rgba(106, 180, 255, 0.35);
+  background: rgba(15, 21, 32, 0.8);
   color: var(--blue);
 }
 
 .grid-row-header.row-highlight {
-  background: rgba(106, 180, 255, 0.35);
+  background: rgba(15, 21, 32, 0.8);
   color: var(--blue);
 }
 
 .grid-cell.row-highlight,
 .grid-cell.col-highlight {
-  background: rgba(106, 180, 255, 0.20);
+  background: rgba(15, 21, 32, 0.6);
 }
 
 /* ============================================================================
