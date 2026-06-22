@@ -43,7 +43,10 @@ export function buildSummaryTable(result, wheel, options = {}) {
   // Build header row with caster bolt positions
   const thead = table.createTHead();
   const headerRow = thead.insertRow();
-  _appendHeaderCell(headerRow, 'Camber↓\nCaster→', 'col-label-row');
+  const cornerCell = headerRow.insertCell();
+  cornerCell.className = 'col-label-row';
+  cornerCell.innerHTML = 'Caster→<br>Camber↓';
+  cornerCell.title = 'Caster Bolt (→) and Camber Bolt (↓) — the eccentric bolt positions, not the wheel alignment values';
 
   for (const r of BOLT_POSITIONS) {
     const th = _appendHeaderCell(headerRow, _formatNumber(r));
