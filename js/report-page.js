@@ -526,7 +526,7 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
   // ── Header row: rear bolt positions ───────────────────────────────────
   const thead = table.createTHead();
   const headerRow = thead.insertRow();
-  _th(headerRow, 'Camber↓/Caster→', 'col-label-row');
+  _th(headerRow, 'Camber↓\nCaster→', 'col-label-row');
   for (const r of BOLT_POSITIONS) {
     const th = _th(headerRow, _sign(r));
     if (REQUIRED_POSITIONS.includes(r)) th.classList.add('required-header');
@@ -595,7 +595,7 @@ function _buildTable(result) {
   // ── Header row: rear bolt positions ───────────────────────────────────
   const thead = table.createTHead();
   const headerRow = thead.insertRow();
-  _th(headerRow, 'Camber↓/Caster→', 'col-label-row');
+  _th(headerRow, 'Camber↓\nCaster→', 'col-label-row');
   for (const r of BOLT_POSITIONS) {
     const th = _th(headerRow, _sign(r));
     if (REQUIRED_POSITIONS.includes(r)) th.classList.add('required-header');
