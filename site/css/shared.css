@@ -440,6 +440,13 @@ body {
   border-left-color: var(--orange);
 }
 
+.grid-cell:has(input.cell-input:focus) {
+  background: rgba(106, 180, 255, 0.3);
+  border: 2px solid white;
+  border-left: 3px solid white;
+  padding: 5px 5px 5px 7px;
+}
+
 /* Inline label+input row inside each cell */
 .cell-row {
   display: flex;
