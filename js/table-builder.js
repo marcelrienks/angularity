@@ -43,7 +43,7 @@ export function buildSummaryTable(result, wheel, options = {}) {
   // Build header row with caster bolt positions
   const thead = table.createTHead();
   const headerRow = thead.insertRow();
-  _appendHeaderCell(headerRow, 'Camber↓/Caster→', 'col-label-row');
+  _appendHeaderCell(headerRow, 'Camber↓\nCaster→', 'col-label-row');
 
   for (const r of BOLT_POSITIONS) {
     const th = _appendHeaderCell(headerRow, _formatNumber(r));

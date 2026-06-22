@@ -1536,10 +1536,14 @@ body {
 .data-table .col-label-row th {
   color: var(--blue);
   background: var(--panel-alt);
-  padding: 12px 8px;
-  font-size: 0.85rem;
+  padding: 8px 4px;
+  font-size: 0.65rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
+  max-width: 38px;
+  white-space: pre-wrap;
+  line-height: 1.1;
+  word-wrap: break-word;
 }
 
 /* ============================================================================
