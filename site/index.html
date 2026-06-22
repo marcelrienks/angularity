@@ -40,7 +40,7 @@
     <div class="home-grid">
       <a class="home-card input-card" href="input.html">
         <span class="card-heading">Input Sheet</span>
-        <p class="card-desc">
+        <p class="card-desc" id="input-card-desc">
           Enter camber readings at 360° anti-clockwise steering wheel, 0°, and
           360° clockwise steering wheel for each bolt
           combination. Covers the full 13×13 grid (169 combinations) with a
@@ -50,7 +50,7 @@
       </a>
       <a class="home-card report-card" href="report.html">
         <span class="card-heading">Report</span>
-        <p class="card-desc">
+        <p class="card-desc" id="report-card-desc">
           Load CSV files for Front Left and Front Right. View the interpolated
           13×13 summary table, multi-line chart, washer position diagrams,
           symmetry analysis, and heatmaps — then read off the recommended bolt
@@ -65,7 +65,7 @@
 
       <div class="wheel-selector" id="config-tabs" role="tablist" aria-label="Configuration tabs" style="margin-bottom:16px;">
         <button class="active" data-tab="targets" role="tab" aria-selected="true">Targets</button>
-        <button data-tab="constants" role="tab" aria-selected="false">Constants</button>
+        <button data-tab="configs" role="tab" aria-selected="false">Configs</button>
       </div>
 
       <div id="targets-panel" role="tabpanel" aria-label="Targets">
@@ -99,7 +99,7 @@
             </fieldset>
           </div>
           <div class="form-actions">
-            <button type="submit" class="button primary" id="btn-save-targets">Save Targets</button>
+            <button type="submit" class="button" id="btn-save-targets">Save Targets</button>
             <button type="button" class="button danger" id="btn-reset-targets">Reset Targets</button>
           </div>
           <p style="margin-top:10px; font-size:0.65rem; color:var(--muted); letter-spacing:0.04em;">
@@ -108,11 +108,11 @@
         </form>
       </div>
 
-      <div id="constants-panel" role="tabpanel" aria-label="Constants" style="display:none;">
-        <form id="constants-form" class="targets-form">
+      <div id="configs-panel" role="tabpanel" aria-label="Configs" style="display:none;">
+        <form id="configs-form" class="targets-form">
           <div class="targets-form-grid">
             <fieldset class="form-fieldset">
-              <legend>Vehicle Constants</legend>
+              <legend>Vehicle Configs</legend>
               <div class="form-group">
                 <label>Caster Angle Input Mode</label>
                 <div style="display:flex; gap:16px; align-items:center; padding:6px 0;">
@@ -155,7 +155,7 @@
               </div>
             </fieldset>
             <fieldset class="form-fieldset">
-              <legend>Derived / Fixed Constants</legend>
+              <legend>Derived / Fixed Configs</legend>
               <div class="form-group">
                 <label for="effective-wheel-angle-input">Effective Wheel Angle (°)</label>
                 <div id="effective-wheel-angle-display" style="padding:10px 0; color:var(--text);"></div>
@@ -175,11 +175,11 @@
             </fieldset>
           </div>
           <div class="form-actions">
-            <button type="submit" class="button primary" id="btn-save-constants">Save Constants</button>
-            <button type="button" class="button danger" id="btn-reset-constants">Reset Constants</button>
+            <button type="submit" class="button" id="btn-save-configs">Save Configs</button>
+            <button type="button" class="button danger" id="btn-reset-configs">Reset Configs</button>
           </div>
           <p style="margin-top:10px; font-size:0.65rem; color:var(--muted); letter-spacing:0.04em;">
-            Report calculations use stored values only. Edits apply after you click Save Constants.
+            Report calculations use stored values only. Edits apply after you click Save Configs.
           </p>
         </form>
       </div>

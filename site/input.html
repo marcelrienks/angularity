@@ -19,7 +19,7 @@
 
   <header class="page-header">
     <h1>Input Sheet</h1>
-    <p class="subtitle">Enter camber at 360° ACW, 0°, and 360° CW steering wheel positions</p>
+    <p class="subtitle" id="input-subtitle">Enter camber at 360° ACW, 0°, and 360° CW steering wheel positions</p>
   </header>
 
   <main class="grid-container">
@@ -76,6 +76,12 @@
 
   <script type="module" src="../js/error-handler.js"></script>
   <script type="module" src="../js/input-grid.js"></script>
+  <script type="module">
+    import { updateMeasurementMethodText, getCurrentMeasurementMode, getCurrentDensity } from '../js/measurement-utils.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      updateMeasurementMethodText(getCurrentMeasurementMode(), getCurrentDensity());
+    });
+  </script>
 
   <script type="module">
     // Set active nav link

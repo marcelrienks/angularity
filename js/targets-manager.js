@@ -1,5 +1,6 @@
 import { calculateEffectiveWheelAngle, calculateCasterMultiplier } from './math-utils.js';
 import { getRequiredPositions, getBoltRange, getBoltPositions } from './constants.js';
+import { updateMeasurementMethodText, getCurrentDensity } from './measurement-utils.js';
 
 const TARGET_STORAGE = {
   camber: 'alignment_target_camber',
@@ -77,7 +78,7 @@ function getTargets() {
   };
 }
 
-function getConstants() {
+function getConfigs() {
   const casterInputModeRaw = localStorage.getItem(CONSTANT_STORAGE.casterInputMode);
   const casterInputMode = casterInputModeRaw === 'wheel-degrees' ? 'wheel-degrees' : CONSTANT_DEFAULTS.casterInputMode;
 
@@ -105,7 +106,7 @@ function saveTargets(values) {
   localStorage.setItem(TARGET_STORAGE.toeRear, String(values.toeRear));
 }
 
-function saveConstants(values) {
+function saveConfigs(values) {
   localStorage.setItem(CONSTANT_STORAGE.casterInputMode, values.casterInputMode);
   localStorage.setItem(CONSTANT_STORAGE.steeringRatio, String(values.steeringRatio));
   localStorage.setItem(CONSTANT_STORAGE.casterWheelDegrees, String(values.casterWheelDegrees));
@@ -122,7 +123,7 @@ function resetTargets() {
   Object.values(TARGET_STORAGE).forEach((key) => localStorage.removeItem(key));
 }
 
-function resetConstants() {
+function resetConfigs() {
   Object.values(CONSTANT_STORAGE).forEach((key) => localStorage.removeItem(key));
   localStorage.removeItem(LEGACY_STORAGE.steeringRatio);
 }
@@ -135,7 +136,7 @@ function setTargetInputs(values) {
   document.getElementById('toe-rear-input').value = formatNumber(values.toeRear, 2);
 }
 
-function setConstantInputs(values) {
+function setConfigInputs(values) {
   const ratioModeRadio = document.getElementById('caster-mode-ratio');
   const wheelModeRadio = document.getElementById('caster-mode-wheel');
   if (ratioModeRadio) ratioModeRadio.checked = values.casterInputMode === 'steering-ratio';
@@ -157,10 +158,10 @@ function setConstantInputs(values) {
     densitySelect.value = String(values.measurementDensity);
   }
 
-  updateDerivedConstants(values);
+  updateDerivedConfigs(values);
 }
 
-function updateDerivedConstants(values) {
+function updateDerivedConfigs(values) {
   const effectiveWheelAngle = values.casterInputMode === 'wheel-degrees'
     ? Number(values.casterWheelDegrees)
     : calculateEffectiveWheelAngle(values.steeringRatio);
@@ -198,7 +199,7 @@ function readTargetInputs() {
   };
 }
 
-function readConstantInputs() {
+function readConfigInputs() {
   const parseNumber = (str) => Number(str.replace(',', '.'));
   const mode = document.getElementById('caster-mode-wheel')?.checked ? 'wheel-degrees' : 'steering-ratio';
   const densitySelect = document.getElementById('measurement-density-select');
@@ -219,7 +220,7 @@ function isValidTargets(values) {
     && Number.isFinite(values.toeRear);
 }
 
-function isValidConstants(values) {
+function isValidConfigs(values) {
   const ratioValid = Number.isFinite(values.steeringRatio) && values.steeringRatio > 0;
   const wheelDegreesValid = Number.isFinite(values.casterWheelDegrees) && values.casterWheelDegrees > 0;
 
@@ -237,7 +238,7 @@ function setActiveTab(tab) {
   });
 
   document.getElementById('targets-panel').style.display = tab === 'targets' ? '' : 'none';
-  document.getElementById('constants-panel').style.display = tab === 'constants' ? '' : 'none';
+  document.getElementById('configs-panel').style.display = tab === 'configs' ? '' : 'none';
 }
 
 function bindTabEvents() {
@@ -248,10 +249,24 @@ function bindTabEvents() {
 
 function bindTargetEvents() {
   const form = document.getElementById('targets-form');
+  const saveBtn = document.getElementById('btn-save-targets');
+
+  const markDirty = () => {
+    if (saveBtn) saveBtn.classList.add('primary');
+  };
+
+  const markClean = () => {
+    if (saveBtn) saveBtn.classList.remove('primary');
+  };
 
   document.getElementById('btn-reset-targets').addEventListener('click', () => {
     resetTargets();
     setTargetInputs(getTargets());
+    markClean();
+  });
+
+  form.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', markDirty);
   });
 
   form.addEventListener('submit', (event) => {
@@ -259,11 +274,13 @@ function bindTargetEvents() {
     const values = readTargetInputs();
     if (!isValidTargets(values)) return;
     saveTargets(values);
+    markClean();
   });
 }
 
-function bindConstantEvents() {
-  const form = document.getElementById('constants-form');
+function bindConfigEvents() {
+  const form = document.getElementById('configs-form');
+  const saveBtn = document.getElementById('btn-save-configs');
   const ratioModeRadio = document.getElementById('caster-mode-ratio');
   const wheelModeRadio = document.getElementById('caster-mode-wheel');
   const steeringRatioInput = document.getElementById('steering-ratio-input');
@@ -271,9 +288,18 @@ function bindConstantEvents() {
   const wheelDiameterInput = document.getElementById('wheel-diameter-input');
   const densitySelect = document.getElementById('measurement-density-select');
 
-  document.getElementById('btn-reset-constants').addEventListener('click', () => {
-    resetConstants();
-    setConstantInputs(getConstants());
+  const markDirty = () => {
+    if (saveBtn) saveBtn.classList.add('primary');
+  };
+
+  const markClean = () => {
+    if (saveBtn) saveBtn.classList.remove('primary');
+  };
+
+  document.getElementById('btn-reset-configs').addEventListener('click', () => {
+    resetConfigs();
+    setConfigInputs(getConfigs());
+    markClean();
   });
 
   const toggleVisibility = () => {
@@ -283,40 +309,58 @@ function bindConstantEvents() {
 
     if (steeringRatioGroup) steeringRatioGroup.style.display = isRatioMode ? '' : 'none';
     if (wheelDegreesGroup) wheelDegreesGroup.style.display = isRatioMode ? 'none' : '';
-    
-    updateDerivedConstants(readConstantInputs());
+
+    markDirty();
+    const values = readConfigInputs();
+    updateDerivedConfigs(values);
   };
 
-  const rerenderDerivedConstants = () => {
-    const values = readConstantInputs();
+  const rerenderDerivedConfigs = () => {
+    const values = readConfigInputs();
     if (values.casterInputMode !== 'wheel-degrees' && (!Number.isFinite(values.steeringRatio) || values.steeringRatio <= 0)) return;
     if (values.casterInputMode === 'wheel-degrees' && (!Number.isFinite(values.casterWheelDegrees) || values.casterWheelDegrees <= 0)) return;
     if (!Number.isFinite(values.wheelDiameter) || values.wheelDiameter <= 0) return;
-    updateDerivedConstants(values);
+    updateDerivedConfigs(values);
   };
 
   if (ratioModeRadio) ratioModeRadio.addEventListener('change', toggleVisibility);
   if (wheelModeRadio) wheelModeRadio.addEventListener('change', toggleVisibility);
-  if (steeringRatioInput) steeringRatioInput.addEventListener('input', rerenderDerivedConstants);
-  if (wheelDegreesInput) wheelDegreesInput.addEventListener('input', rerenderDerivedConstants);
-  if (wheelDiameterInput) wheelDiameterInput.addEventListener('input', rerenderDerivedConstants);
-  if (densitySelect) densitySelect.addEventListener('change', rerenderDerivedConstants);
+  if (steeringRatioInput) {
+    steeringRatioInput.addEventListener('input', markDirty);
+    steeringRatioInput.addEventListener('input', rerenderDerivedConfigs);
+  }
+  if (wheelDegreesInput) {
+    wheelDegreesInput.addEventListener('input', markDirty);
+    wheelDegreesInput.addEventListener('input', rerenderDerivedConfigs);
+  }
+  if (wheelDiameterInput) {
+    wheelDiameterInput.addEventListener('input', markDirty);
+    wheelDiameterInput.addEventListener('input', rerenderDerivedConfigs);
+  }
+  if (densitySelect) {
+    densitySelect.addEventListener('change', markDirty);
+    densitySelect.addEventListener('change', rerenderDerivedConfigs);
+  }
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    const values = readConstantInputs();
-    if (!isValidConstants(values)) return;
-    saveConstants(values);
-    setConstantInputs(values);
+    const values = readConfigInputs();
+    if (!isValidConfigs(values)) return;
+    saveConfigs(values);
+    setConfigInputs(values);
+    updateMeasurementMethodText(values.casterInputMode, values.measurementDensity);
+    markClean();
   });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  const initialConfigs = getConfigs();
   setTargetInputs(getTargets());
-  setConstantInputs(getConstants());
+  setConfigInputs(initialConfigs);
   setActiveTab('targets');
+  updateMeasurementMethodText(initialConfigs.casterInputMode, initialConfigs.measurementDensity);
 
   bindTabEvents();
   bindTargetEvents();
-  bindConstantEvents();
+  bindConfigEvents();
 });
