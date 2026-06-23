@@ -235,10 +235,62 @@ describe('interpolation.js', () => {
         { camberBolt: 0, casterBolt: 0, neg20: 0, zero: 0, pos20: 0 },
       ];
       const result = interpolateGrid(input);
-      
+
       // Center should be at [6][6] (13 positions from -6 to +6)
       expect(result[6][6].camberBolt).toBe(0);
       expect(result[6][6].casterBolt).toBe(0);
+    });
+
+    // T033: Sparse data behavior (10-30 measured points)
+    test('T033.1: Should handle sparse grid (10 measured points out of 169)', () => {
+      const sparseData = [
+        { camberBolt: -6, casterBolt: -6, neg20: -1.5, zero: -1.6, pos20: -1.7 },
+        { camberBolt: -6, casterBolt: 0, neg20: -1.3, zero: -1.4, pos20: -1.5 },
+        { camberBolt: -6, casterBolt: 6, neg20: -1.1, zero: -1.2, pos20: -1.3 },
+        { camberBolt: 0, casterBolt: -6, neg20: -1.0, zero: -1.1, pos20: -1.2 },
+        { camberBolt: 0, casterBolt: 0, neg20: -1.1, zero: -1.1, pos20: -1.1 },
+        { camberBolt: 0, casterBolt: 6, neg20: -1.0, zero: -1.0, pos20: -1.0 },
+        { camberBolt: 6, casterBolt: -6, neg20: -0.7, zero: -0.8, pos20: -0.9 },
+        { camberBolt: 6, casterBolt: 0, neg20: -0.8, zero: -0.9, pos20: -1.0 },
+        { camberBolt: 6, casterBolt: 6, neg20: -0.9, zero: -1.0, pos20: -1.1 },
+        { camberBolt: 3, casterBolt: 3, neg20: -1.0, zero: -1.05, pos20: -1.1 }
+      ];
+
+      const result = interpolateGrid(sparseData);
+      expect(result).toHaveLength(13);
+      expect(result[0]).toHaveLength(13);
+
+      // Count interpolated vs measured
+      let interpolatedCount = 0;
+      for (let i = 0; i < 13; i++) {
+        for (let j = 0; j < 13; j++) {
+          if (result[i][j].isInterpolated) interpolatedCount++;
+        }
+      }
+
+      expect(interpolatedCount).toBe(169 - sparseData.length);
+    });
+
+    test('T033.2: Interpolated points should fall within measured value range', () => {
+      const data = [
+        { camberBolt: -6, casterBolt: -6, neg20: -1.5, zero: -1.5, pos20: -1.5 },
+        { camberBolt: 6, casterBolt: 6, neg20: -0.5, zero: -0.5, pos20: -0.5 }
+      ];
+
+      const result = interpolateGrid(data);
+
+      // All interpolated values should be between -1.5 and -0.5
+      for (let i = 0; i < 13; i++) {
+        for (let j = 0; j < 13; j++) {
+          const cell = result[i][j];
+          expect(cell.neg20).toBeGreaterThanOrEqual(-1.5);
+          expect(cell.neg20).toBeLessThanOrEqual(-0.5);
+          expect(cell.zero).toBeGreaterThanOrEqual(-1.5);
+          expect(cell.zero).toBeLessThanOrEqual(-0.5);
+          expect(cell.pos20).toBeGreaterThanOrEqual(-1.5);
+          expect(cell.pos20).toBeLessThanOrEqual(-0.5);
+        }
+      }
     });
   });
 });
