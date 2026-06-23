@@ -34,124 +34,21 @@ npm run start
 #   http://localhost:8080/report.html    (Report - Analysis)
 ```
 
-### Workflow: From Measurements to Recommendations
+### Quick Workflow (7 Steps)
 
-#### Step 1: Set Your Target Alignment (Home Page)
+1. **Home**: Set target alignment (Camber −1.1°, Caster 5.0°) → Click Save
+2. **Input**: Enter camber measurements in 13×13 grid per wheel (FL/FR/RL/RR)
+   - Each cell: three steering angles (−20°, 0°, +20°)
+   - Auto-saves to localStorage on each entry
+3. **Optional**: Load sample data or import CSV for quick testing
+4. **Optional**: Export to CSV for backup
+5. **Report**: Navigate to report page → system analyzes measurements
+6. **Interpret**: Three bolt position recommendations shown (best compromise, best camber, best caster)
+7. **Adjust**: Physically adjust bolts to match recommendation, re-measure to verify
 
-1. Navigate to `http://localhost:8080/`
-2. View or edit your target alignment values:
-   - Target Camber (default: −1.1°)
-   - Target Caster (default: 5.0°)
-   - Target Toe (default: 0.10 mm)
-3. Click "Save" to persist, or "Reset" to restore defaults
-4. Values auto-save to browser localStorage
+For detailed step-by-step instructions, see [ARCHITECTURE.md](ARCHITECTURE.md) § Input/Report Screen Architecture.
 
-**Tip**: Target values should match your vehicle's specs or your desired setup. Typical MX-5 targets: Camber −1.1°, Caster 5.0°.
-
-#### Step 2: Enter Measurements (Input Page)
-
-1. Navigate to `http://localhost:8080/input.html`
-2. Select your wheel: FL (Front Left), FR (Front Right), RL (Rear Left), RR (Rear Right)
-3. Enter camber values in the 13×13 grid:
-   - **Rows**: Front bolt position (−6 to +6)
-   - **Columns**: Rear bolt position (−6 to +6)
-   - **Each cell**: Camber value at 0° steering angle
-4. Each cell also requires three steering angle readings:
-   - **0° steering**: Your main measurement
-   - **−20° steering**: For caster calculation
-   - **+20° steering**: For caster calculation
-
-**Example workflow**:
-```
-1. Set front bolt to position -1, rear bolt to position +2
-2. Measure camber at three steering angles:
-   - At -20° steering: 1.45°
-   - At 0° steering: 1.50°
-   - At +20° steering: 1.48°
-3. Enter 1.50 in the grid (system uses all three for caster)
-4. Press Tab or click next cell to auto-save to localStorage
-```
-
-**Grid layout**:
-```
-           Rear Bolt Position →
-           −6  −5  −4  −3  −2  −1   0  +1  +2  +3  +4  +5  +6
-Front
-Bolt  −6  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]
-      −5  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]
-      ...
-       0  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [*]  [ ]  [ ]  [ ]  [ ]  [ ]  ← Center
-      ...
-      +6  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]  [ ]
-```
-
-#### Step 3: Import Sample Data (Optional)
-
-1. On Input page, click "Load Sample Data"
-2. System pre-populates the grid with realistic measurement patterns
-3. Useful for testing without manual entry
-4. Can then modify specific cells to experiment
-
-#### Step 4: Export Measurements for Backup
-
-1. On Input page, click "Export to CSV"
-2. Browser downloads `alignment-FL.csv` (or FR/RL/RR)
-3. Save file locally for backup or sharing
-4. Format: `front_bolt, rear_bolt, camber_neg20, camber_0, camber_pos20, toe`
-
-**Example CSV**:
-```csv
-front_bolt,rear_bolt,camber_neg20,camber_0,camber_pos20,toe
--6,-6,-1.50,-1.48,-1.45,
--6,-5,-1.42,-1.40,-1.38,
--6,-4,-1.35,-1.32,-1.30,0.05
-...
-+6,+6,-0.95,-0.92,-0.90,
-```
-
-#### Step 5: Generate Report & Get Recommendations (Report Page)
-
-1. Navigate to `http://localhost:8080/report.html`
-2. Report automatically loads your measurements from localStorage
-3. System shows:
-   - **Raw Data Summary**: All 169 cells in your grid
-   - **Data Charts**: Camber and caster curves across bolt positions
-   - **Washer Diagram**: Visual representation of your three recommended positions
-   - **Symmetry Analysis**: Compare FL ↔ FR alignment (if both wheels measured)
-
-#### Step 6: Interpret the Three Recommendations
-
-The report shows three optimization options:
-
-1. **Best Compromise (bestCell)**
-   - Balances camber and caster equally
-   - Front bolt position: X
-   - Rear bolt position: Y
-   - Resulting camber: Z°
-   - Resulting caster: W°
-   - **Use this if**: You want a balanced setup
-
-2. **Best Camber (bestCamberCell)**
-   - Optimizes for camber accuracy
-   - Sacrifices some caster accuracy if needed
-   - **Use this if**: Tire wear is your priority
-
-3. **Best Caster (bestCasterCell)**
-   - Optimizes for caster accuracy
-   - Sacrifices some camber accuracy if needed
-   - **Use this if**: Handling feel is your priority
-
-**Color coding in charts**:
-- 🟢 **Green**: Within target tolerance (good)
-- 🟠 **Orange**: Acceptable but off-target (caution)
-- 🔴 **Red**: Unacceptable alignment (problem)
-
-#### Step 7: Adjust Bolts Based on Recommendations
-
-1. For each wheel, note the recommended bolt positions
-2. Physically adjust the front and rear eccentric bolts to match
-3. Re-measure alignment at your chosen position
-4. Enter new measurement in the grid to verify
+**Grid layout**: 13×13 (rows = front bolt −6 to +6, columns = rear bolt −6 to +6)
 
 ---
 
@@ -383,8 +280,6 @@ npm run test:all-sync
 
 ## Related Documentation
 
-- **Module reference & APIs**: [API.md](API.md)
-- **System architecture**: [ARCHITECTURE.md](ARCHITECTURE.md)
-- **Production deployment**: [OPERATIONS.md](OPERATIONS.md)
-- **Testing standards**: [CONTRIBUTING.md](CONTRIBUTING.md)
-- **Algorithm details**: [INTERNALS.md](INTERNALS.md)
+- **System architecture & design**: [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Algorithm deep-dives**: [INTERNALS.md](INTERNALS.md)
+- **Current blockers**: [todo.md](todo.md)
