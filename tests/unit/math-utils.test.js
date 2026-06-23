@@ -59,6 +59,41 @@ describe('math-utils.js', () => {
       const expected = 1 / (2 * Math.sin((24 * Math.PI) / 180));
       expect(calculateCasterMultiplier(15)).toBeCloseTo(expected, 12);
     });
+
+    test('T051.5: Custom steering ratios produce different multipliers', () => {
+      const ratio10 = calculateCasterMultiplier(10);
+      const ratio15 = calculateCasterMultiplier(15);
+      const ratio20 = calculateCasterMultiplier(20);
+
+      // Higher ratio = smaller effective wheel angle = smaller multiplier
+      expect(ratio10).toBeGreaterThan(ratio15);
+      expect(ratio15).toBeGreaterThan(ratio20);
+    });
+
+    test('T051.6: Explicit wheel degrees mode produces expected multiplier', () => {
+      const multiplierFromRatio = calculateCasterMultiplier({ steeringRatio: 15 });
+      const multiplierFromDegrees = calculateCasterMultiplier({ wheelDegrees: 24 });
+
+      // Both should produce same result for 15:1 ratio (360° / 15 = 24°)
+      expect(multiplierFromDegrees).toBeCloseTo(multiplierFromRatio, 8);
+    });
+
+    test('T051.7: Rear wheel caster calculation uses same formula as front (angle-based, not ratio-specific)', () => {
+      const camberFL_neg20 = -0.8;
+      const camberFL_pos20 = -1.2;
+      const casterFL = calculateCaster(camberFL_neg20, camberFL_pos20, { steeringRatio: 15 });
+
+      const camberRL_acw = -1.5;  // Rear measurements typically different magnitude
+      const camberRL_cw = -2.0;
+      const casterRL = calculateCaster(camberRL_acw, camberRL_cw, { steeringRatio: 15 });
+
+      // Same formula applied. Caster is independent of measurement magnitude, depends on sweep.
+      // FL sweep: 0.4°, RL sweep: 0.5°. Ratio should match sweep ratio.
+      const sweepFL = Math.abs(camberFL_pos20 - camberFL_neg20);
+      const sweepRL = Math.abs(camberRL_cw - camberRL_acw);
+
+      expect(casterRL / casterFL).toBeCloseTo(sweepRL / sweepFL, 5);
+    });
   });
 
   // ─────────────────────────────────────────────────────────────
