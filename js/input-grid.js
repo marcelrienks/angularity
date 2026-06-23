@@ -367,8 +367,8 @@ function _onInputFocus(f, r) {
   if (colHeader) colHeader.classList.add('col-highlight');
 
   // Highlight cells in same row/col
-  document.querySelectorAll(`.grid-cell[data-rear="${r}"]`).forEach(el => el.classList.add('row-highlight'));
-  document.querySelectorAll(`.grid-cell[data-front="${f}"]`).forEach(el => el.classList.add('col-highlight'));
+  document.querySelectorAll(`.grid-cell[data-caster="${r}"]`).forEach(el => el.classList.add('row-highlight'));
+  document.querySelectorAll(`.grid-cell[data-camber="${f}"]`).forEach(el => el.classList.add('col-highlight'));
 }
 
 function _onInputBlur() {
@@ -404,7 +404,7 @@ function _onKeyDown(e) {
 // ── Cell class management ─────────────────────────────────────────────────
 
 function _updateCellClass(f, r) {
-  const cell = document.querySelector(`.grid-cell[data-front="${f}"][data-rear="${r}"]`);
+  const cell = document.querySelector(`.grid-cell[data-camber="${f}"][data-caster="${r}"]`);
   if (!cell) return;
 
   const { neg20, zero, pos20 } = gridState[activeWheel][f][r];
