@@ -1,5 +1,7 @@
 # TODO — Open Issues & Blockers
 
+**Eccentric Bolt Alignment System**
+
 ## Current Work
 
 ### [ ] Fix Front-Left Caster Calculation
@@ -22,7 +24,7 @@ FL: caster = (camber_at_+20° - camber_at_-20°) / 40  [NEEDS VERIFICATION]
 **Blocker**: API clarity  
 **Details**: Current system assumes ±20° symmetric sweep. Verify if custom angles (e.g., ±10°, ±30°) supported.
 
-**Current**: ARCHITECTURE.md and GUIDE.md document ±20° only.
+**Current**: architecture.md and guide.md document ±20° only.
 
 **Action**: Test with non-standard angles; update algorithm if needed.
 
@@ -34,8 +36,8 @@ FL: caster = (camber_at_+20° - camber_at_-20°) / 40  [NEEDS VERIFICATION]
 **Details**: Move from `docs/` to `wiki/`, consolidate duplicates, simplify.
 
 **Status**: 
-- [x] Removed ARCHITECTURE.md duplication (lines 1411–1799)
-- [x] Consolidated GUIDE.md workflow section (120 → 60 lines)
+- [x] Removed architecture.md duplication (lines 1411–1799)
+- [x] Consolidated guide.md workflow section (120 → 60 lines)
 - [x] Removed dead cross-references
 - [ ] Archive deprecated `docs/` directory safely
 - [ ] Verify all wiki cross-references work

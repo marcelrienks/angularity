@@ -1,6 +1,6 @@
-# MX-5 NC1 Wheel Alignment System
+# Eccentric Bolt Alignment System
 
-**Web-based digital analysis tool for home wheel alignment on a Mazda MX-5 NC1.**
+**Web-based digital analysis tool for home wheel alignment on vehicles with eccentric bolt adjustment.**
 
 > **Status**: ✅ MVP Complete — 149 integration tests passing, AWS deployment ready
 
@@ -19,7 +19,7 @@
 - **Three Independent Optima** — Each wheel shows: best compromise + best camber + best caster
 - **Client-Side Only** — All calculations in browser; data never leaves your machine
 - **Discrete Grid** — 13×13 represents physical detents (169 combinations per wheel)
-- **Universal Concept** — Methodology applies to any eccentric-bolt vehicle (BMW E30/E36, Honda Civic, Nissan S13/S14)
+- **Universal Concept** — Works with any eccentric-bolt vehicle (BMW E30/E36, Honda Civic, Nissan S13/S14, Mazda MX-5, etc.)
 
 ---
 
@@ -53,12 +53,13 @@ alignment/
 │   ├── input.html         # Input (measurements)
 │   ├── report.html        # Report (analysis)
 │   └── css/shared.css     # Styling
-├── js/                    # Business logic (21 modules)
+├── js/                    # Business logic (17 modules)
 │   ├── report-engine.js   # Core algorithms
 │   ├── constants.js       # Configuration
-│   └── ... (19 more)
+│   ├── error-handler.js   # Error handling
+│   └── ... (10 more)
 ├── tests/                 # 149 integration tests
-├── docs/                  # Technical reference
+├── wiki/                  # Technical documentation
 └── package.json
 ```
 
@@ -68,10 +69,10 @@ alignment/
 
 | Audience | Start Here | What's In It |
 |----------|-----------|-------------|
-| **Developers** | [docs/QUICKSTART.md](docs/QUICKSTART.md) | Setup, project structure, dev tasks |
-| | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, algorithms, data flow |
-| **Mechanics** | [README.md](docs/README.md) § Alignment Targets | Physical procedures, adjustment workflows |
-| **All** | [docs/](docs/) | Complete reference (16 focused docs) |
+| **Developers** | [wiki/guide.md](wiki/guide.md) | Setup, project structure, dev tasks |
+| | [wiki/architecture.md](wiki/architecture.md) | System design, algorithms, data flow |
+| **Mechanics** | [README.md](README.md) § Alignment Targets | Physical procedures, adjustment workflows |
+| **All** | [wiki/](wiki/) | Complete reference (3 focused docs) |
 
 ---
 
@@ -80,9 +81,9 @@ alignment/
 - **MVP Status**: 95% feature-complete
 - **Test Coverage**: 149 Puppeteer integration tests (all passing)
 - **Architecture**: Browser-based, no server/database
-- **Deployment**: AWS S3 + CloudFront (see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md))
+- **Deployment**: AWS S3 + CloudFront (see wiki/guide.md § Development Tasks)
 - **Data Privacy**: All data stays in your browser
-- **Alignment Targets**: Caster 5.0°, Camber −1.1° (front) / −1.5° (rear), Toe +0.58 mm per wheel
+- **Configurable Targets**: Set alignment goals per vehicle (example: Caster 5.0°, Camber −1.1° front)
 
 ---
 
@@ -92,11 +93,11 @@ alignment/
 |---------|----------|
 | Tests hang | Increase timeout in jest.config.js; verify port 8080 free |
 | localStorage not persisting | Check browser privacy settings |
-| CSV import fails | Verify CSV header format (see [docs/GUIDE.md](docs/GUIDE.md)) |
+| CSV import fails | Verify CSV header format (see [wiki/guide.md](wiki/guide.md)) |
 
 ---
 
-**Questions?** See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for design deep-dives, or [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for development standards.
+**Questions?** See [wiki/architecture.md](wiki/architecture.md) for design deep-dives, or [wiki/guide.md](wiki/guide.md) for development standards.
 
 **Last Updated**: June 23, 2026  
 **Repository**: https://github.com/marcelrienks/mx5-nc1
