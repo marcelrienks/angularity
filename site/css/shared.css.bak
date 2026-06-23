@@ -5,64 +5,22 @@
 }
 
 /* ============================================================================
-   TYPOGRAPHY SYSTEM (3 standard styles ONLY, applied globally and consistently)
+   TYPOGRAPHY UTILITY CLASSES (3 standard styles used across entire site)
    ============================================================================ */
 
-/* HEADER: Bold, largest size, blue color */
-h1, h2 {
+.typography-h {
   font-size: var(--font-size-h);
   font-weight: var(--font-weight-h);
-  color: var(--blue);
 }
 
-/* SUB-HEADER: Bold, high size, black text — used for buttons, labels, grid text, value fields */
-h3, h4, h5, h6,
-button,
-.button,
-label,
-.label,
-legend,
-.card-heading,
-.grid-corner,
-.grid-col-header,
-.grid-row-header,
-.data-table th,
-.data-table th *,
-.cell-label,
-.cell-value,
-.group-heading,
-.target-value,
-.washer-bolt-name,
-.washer-section-title,
-.symmetry-analysis-section h2,
-.washer-section h2,
-.page-header .subtitle {
+.typography-sh {
   font-size: var(--font-size-sh);
   font-weight: var(--font-weight-sh);
-  color: var(--text);
 }
 
-/* PARAGRAPH: Standard weight, standard size, gray text */
-p,
-body,
-span,
-.desc,
-.card-desc,
-.chart-note,
-.warning-banner,
-.symmetry-status {
+.typography-p {
   font-size: var(--font-size-p);
   font-weight: var(--font-weight-p);
-  color: var(--muted);
-}
-
-/* Form controls use Sub Header style */
-input,
-select,
-textarea {
-  font-size: var(--font-size-sh);
-  font-weight: var(--font-weight-sh);
-  color: var(--text);
 }
 
 :root {
@@ -93,11 +51,11 @@ textarea {
   --req-band-hdr: #3a6b9f;
 
   /* ── Typography Scale (3 standard styles) ── */
-  --font-size-h:   1.625rem;
+  --font-size-h:   1.4rem;
   --font-weight-h: 700;
   --font-size-sh:  1.0rem;
   --font-weight-sh: 600;
-  --font-size-p:   0.75rem;
+  --font-size-p:   0.875rem;
   --font-weight-p: 400;
 }
 
@@ -137,6 +95,7 @@ textarea {
 
 body {
   background: var(--bg);
+  color: var(--text);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   min-height: 100vh;
   padding: 20px;
@@ -161,9 +120,11 @@ body {
 }
 
 .navbar .title {
+  font-size: var(--font-size-sh);
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin: 0;
+  color: var(--text);
 }
 
 .navbar .nav-links {
@@ -173,13 +134,14 @@ body {
 }
 
 .navbar a {
+  font-size: var(--font-size-p);
+  color: var(--muted);
   text-decoration: none;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   border-bottom: 2px solid transparent;
   padding-bottom: 2px;
   transition: all 0.2s;
-  color: var(--muted);
 }
 
 .navbar a:hover,
@@ -195,10 +157,17 @@ body {
 }
 
 .page-header h1 {
+  font-size: var(--font-size-h);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
   margin-bottom: 8px;
 }
 
 .page-header .subtitle {
+  font-size: var(--font-size-p);
+  color: var(--muted);
   letter-spacing: 0.1em;
 }
 
@@ -212,12 +181,13 @@ body {
   left: 0;
   right: 0;
   background: var(--red);
+  color: var(--bg);
   padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 9999;
-  font-size: var(--font-size-sh);
+  font-size: 0.9rem;
   box-shadow: 0 2px 8px var(--shadow);
   animation: slideInDown 0.3s ease-out;
 }
@@ -234,7 +204,8 @@ body {
 .error-banner #error-close {
   background: none;
   border: none;
-  font-size: var(--font-size-h);
+  color: #fff;
+  font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
   width: 24px;
@@ -256,7 +227,7 @@ body {
   background: var(--panel-alt);
   border-left: 4px solid var(--orange);
   color: var(--orange);
-  font-size: var(--font-size-p);
+  font-size: 0.85rem;
   border-radius: 2px;
   display: none;
 }
@@ -301,6 +272,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: var(--font-size-p);
+  color: var(--muted);
   text-decoration: none;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -344,8 +317,10 @@ body {
 .theme-option {
   padding: 10px 16px;
   background: transparent;
+  color: var(--text);
   border: none;
   cursor: pointer;
+  font-size: 0.875rem;
   font-family: inherit;
   text-align: left;
   transition: background 0.2s;
@@ -367,13 +342,21 @@ body {
    SHARED HEADER STYLING (Input & Report Grids)
    ============================================================================ */
 
-/* Grid headers use Sub Header style */
+/* Header font standard: 0.85rem, weight 700, muted-strong color */
 .grid-corner,
 .grid-col-header,
 .grid-row-header,
 .data-table th.col-label-row,
-.data-table .row-label {
+.data-table .row-label,
+.data-table th {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted-strong);
   letter-spacing: 0.08em;
+}
+
+.grid-corner {
+  font-size: 0.65rem;
   line-height: 1.1;
 }
 
@@ -424,7 +407,10 @@ body {
   padding: 8px 14px;
   border: 1px solid var(--border);
   background: var(--panel);
+  color: var(--text);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
@@ -441,6 +427,7 @@ body {
 .wheel-selector button:hover,
 .wheel-selector button.active {
   background: var(--blue);
+  color: var(--bg);
   border-color: var(--blue);
 }
 
@@ -453,18 +440,20 @@ body {
   padding: 8px 14px;
   border: 1px solid var(--border);
   background: var(--panel);
+  color: var(--muted);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
-  color: var(--muted);
 }
 
 .color-coding-selector button:hover,
 .color-coding-selector button.active {
   background: var(--green);
+  color: var(--bg);
   border-color: var(--green);
 }
 
@@ -485,18 +474,20 @@ body {
   padding: 8px 14px;
   border: 1px solid var(--border);
   background: var(--panel);
+  color: var(--muted);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
-  color: var(--muted);
 }
 
 .mode-toggle-selector button:hover,
 .mode-toggle-selector button.active {
   background: var(--red);
+  color: var(--bg);
   border-color: var(--red);
 }
 
@@ -504,7 +495,10 @@ body {
   padding: 8px 14px;
   border: 1px solid var(--border);
   background: var(--panel);
+  color: var(--text);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
@@ -526,6 +520,7 @@ body {
 
 .button.primary {
   background: var(--blue);
+  color: var(--bg);
   border-color: var(--blue);
 }
 
@@ -536,10 +531,12 @@ body {
 
 .button.danger {
   border-color: var(--red);
+  color: var(--red);
 }
 
 .button.danger:hover {
   background: var(--red);
+  color: var(--bg);
 }
 
 /* Input Grid Matrix */
@@ -631,6 +628,8 @@ body {
 }
 
 .grid-cell:has(input.cell-input:focus) .cell-label {
+  color: var(--subtle);
+  font-weight: bold;
 }
 
 /* Inline label+input row inside each cell */
@@ -642,6 +641,8 @@ body {
 }
 
 .cell-label {
+  font-size: 0.65rem;
+  color: var(--muted-strong);
   letter-spacing: 0.03em;
   width: 60px;
   text-align: right;
@@ -659,6 +660,7 @@ body {
   background: var(--panel);
   color: var(--text);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-size: 0.8rem;
   text-align: right;
   border-radius: 3px;
   transition: all 0.15s;
@@ -695,6 +697,8 @@ body {
 }
 
 .csv-loader .file-info {
+  font-size: 0.85rem;  /* increased from 0.7rem */
+  color: var(--muted);
 }
 
 /* Summary Table */
@@ -704,14 +708,18 @@ body {
 }
 
 .summary-table h2 {
+  font-size: 1.15rem;  /* increased from 0.9rem */
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: var(--blue);
   margin-bottom: 12px;
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.85rem;  /* increased from 0.7rem */
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -729,6 +737,7 @@ body {
   padding: 12px 10px;
   text-align: center;
   border-bottom: 1px solid #21262d;
+  color: var(--subtle);
 }
 
 .data-table tr:last-child td {
@@ -748,16 +757,22 @@ body {
 
 .cell-value .camber {
   color: var(--text);
+  font-weight: 700;
+  font-size: 0.85rem;  /* increased from 0.7rem */
   transition: all 0.2s ease;
 }
 
 .cell-value .caster {
   color: var(--text);
+  font-weight: 700;
+  font-size: 0.85rem;  /* increased from 0.7rem */
   transition: all 0.2s ease;
 }
 
 .cell-value .toe {
   color: var(--text);
+  font-weight: 700;
+  font-size: 0.85rem;  /* increased from 0.7rem */
   transition: all 0.2s ease;
 }
 
@@ -765,9 +780,28 @@ body {
 .cell-value .camber.muted,
 .cell-value .caster.muted {
   color: var(--muted);
+  font-size: 0.7rem;  /* increased from 0.55rem */
+  font-weight: 500;
 }
 
-/* Status indicators use Sub Header style uniformly */
+/* Colour Coding for Cells */
+.camber.target-met,
+.caster.target-met,
+.toe.target-met {
+  color: var(--green);
+}
+
+.camber.near-target,
+.caster.near-target,
+.toe.near-target {
+  color: var(--orange);
+}
+
+.camber.off-target,
+.caster.off-target,
+.toe.off-target {
+  color: var(--red);
+}
 
 /* Chart Container */
 .chart-section {
@@ -780,8 +814,11 @@ body {
 }
 
 .chart-section h2 {
+  font-size: 1.15rem;  /* increased from 0.9rem */
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: var(--blue);
   margin-bottom: 16px;
 }
 
@@ -793,16 +830,20 @@ body {
 }
 
 .chart-note {
+  font-size: 0.85rem;  /* increased from 0.65rem */
+  color: var(--muted);
   text-align: center;
   line-height: 1.6;
 }
 
 #chart-note-camber {
   color: var(--blue);
+  font-weight: 600;
 }
 
 #chart-note-caster {
   color: var(--orange);
+  font-weight: 600;
 }
 
 /* ── Heatmap Visualizations (OPT-1) ────────────────────────────────────── */
@@ -817,12 +858,17 @@ body {
 }
 
 .heatmap-section h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: var(--blue);
   margin-bottom: 8px;
 }
 
 .heatmap-section h3 {
+  font-size: 0.9rem;
+  color: var(--subtle);
   margin-top: 12px;
 }
 
@@ -889,9 +935,16 @@ body {
 }
 
 .sessions-section h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: var(--blue);
   margin-bottom: 8px;
+}
+
+.sessions-section button {
+  font-size: 0.7rem;
 }
 
 #sessions-list > div {
@@ -912,6 +965,7 @@ body {
 
 #sessions-list > div .session-date {
   color: var(--muted-strong);
+  font-weight: 600;
 }
 
 #sessions-list > div .session-status {
@@ -920,6 +974,8 @@ body {
 }
 
 #trend-container h3 {
+  font-size: 0.9rem;
+  color: var(--subtle);
   margin-bottom: 12px;
 }
 
@@ -929,6 +985,7 @@ body {
   padding: 8px 12px;
   background: var(--panel-alt);
   border-radius: 4px;
+  font-size: 0.7rem;
 }
 
 #trend-container .trend-stat strong {
@@ -948,8 +1005,11 @@ body {
 }
 
 .washer-section h2 {
+  font-size: 1.15rem;  /* increased from 0.9rem */
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: var(--blue);
   margin-bottom: 20px;
 }
 
@@ -971,6 +1031,8 @@ body {
 }
 
 .washer-section-title {
+  font-size: 0.95rem;  /* increased from 0.7rem */
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
@@ -994,6 +1056,8 @@ body {
 }
 
 .washer-wheel-label {
+  font-size: 0.95rem;  /* increased from 0.75rem */
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--blue);
@@ -1029,11 +1093,15 @@ body {
 }
 
 .washer-bolt-name {
+  font-size: 0.9rem;  /* increased from 0.7rem */
+  font-weight: 700;
   color: var(--blue);
   letter-spacing: 0.05em;
 }
 
 .washer-bolt-effect {
+  font-size: 0.8rem;  /* increased from 0.65rem */
+  font-weight: 500;
   color: var(--muted);
   font-style: italic;
 }
@@ -1052,7 +1120,9 @@ body {
 
 /* Position label */
 .washer-position {
+  font-size: 0.85rem;  /* increased from 0.65rem */
   color: var(--green);
+  font-weight: 500;
 }
 
 .washer-position-placeholder {
@@ -1121,28 +1191,28 @@ body {
   }
 
   .symmetry-analysis-section h2 {
-    font-size: var(--font-size-sh);
+    font-size: 0.95rem;
   }
 
   .symmetry-subsection h3 {
-    font-size: var(--font-size-p);
+    font-size: 0.85rem;
   }
   
   /* Consolidation table mobile fix */
   .symmetry-consolidation-table {
     max-width: 100%;
-    font-size: var(--font-size-p);
+    font-size: 0.65rem;
   }
 
   .symmetry-consolidation-table th,
   .symmetry-consolidation-table td {
     padding: 6px 4px;
-    font-size: var(--font-size-p);
+    font-size: 0.65rem;
   }
   
   /* Status block mobile fix */
   .symmetry-status {
-    font-size: var(--font-size-p);
+    font-size: 0.7rem;
     padding: 10px;
     line-height: 1.4;
   }
@@ -1156,7 +1226,7 @@ body {
   }
 
   .symmetry-analysis-section h2 {
-    font-size: var(--font-size-p);
+    font-size: 0.85rem;
     margin-bottom: 8px;
   }
 
@@ -1165,28 +1235,28 @@ body {
   }
 
   .symmetry-subsection h3 {
-    font-size: var(--font-size-p);
+    font-size: 0.75rem;
     margin-bottom: 8px;
   }
 
   .symmetry-card {
     padding: 12px 12px;
-    font-size: var(--font-size-p);
+    font-size: 0.7rem;
   }
 
   .symmetry-consolidation-table {
     max-width: 100%;
-    font-size: var(--font-size-p);
+    font-size: 0.6rem;
   }
 
   .symmetry-consolidation-table th,
   .symmetry-consolidation-table td {
     padding: 4px 2px;
-    font-size: var(--font-size-p);
+    font-size: 0.6rem;
   }
 
   .symmetry-status {
-    font-size: var(--font-size-p);
+    font-size: 0.65rem;
     padding: 8px;
     margin: 8px 0;
     line-height: 1.3;
@@ -1217,14 +1287,18 @@ body {
 }
 
 .symmetry-analysis-section h2 {
+  font-size: 1rem;
+  font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: none;
-  color: var(--blue);
+  color: var(--text);
   margin-bottom: 12px;
   margin-top: 0;
 }
 
 .symmetry-analysis-section > p {
+  font-size: 0.75rem;
+  color: var(--muted);
   line-height: 1.6;
   margin: 0 0 16px 0;
 }
@@ -1239,12 +1313,17 @@ body {
 }
 
 .symmetry-subsection h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
   letter-spacing: 0.05em;
+  color: var(--accent);
   margin: 0 0 12px 0;
   text-transform: none;
 }
 
 .symmetry-section h2 {
+  font-size: 0.9rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--blue);
@@ -1276,8 +1355,8 @@ body {
 }
 
 .scenario-header {
-  font-size: var(--font-size-p);
-  font-weight: var(--font-weight-h);
+  font-size: 0.65rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
@@ -1287,6 +1366,8 @@ body {
 }
 
 .symmetry-card .title {
+  font-size: 0.75rem;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--subtle);
@@ -1345,16 +1426,60 @@ body {
 }
 
 .symmetry-metric .label {
+  font-size: 0.65rem;
+  color: var(--muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+.symmetry-metric.camber .label {
+  color: var(--purple);
+}
+
+.symmetry-metric.caster .label {
+  color: var(--orange);
+}
+
+.symmetry-metric .value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.symmetry-metric.camber-bolt .value {
+  color: var(--blue);
+}
+
+.symmetry-metric.caster-bolt .value {
+  color: var(--green);
+}
+
+.symmetry-metric.camber .value {
+  color: var(--purple);
+}
+
+.symmetry-metric.caster .value {
+  color: var(--orange);
+}
+
+.camber-label {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.caster-label {
+  color: var(--orange);
+  font-weight: 700;
+}
+
 .symmetry-delta {
+  font-size: 0.6rem;
   color: var(--muted);
   margin-top: 2px;
 }
 
 .symmetry-target {
+  font-size: 0.6rem;
   color: var(--muted-strong);
   margin-top: 1px;
 }
@@ -1415,14 +1540,14 @@ body {
 .grid-col-header.required {
   background: var(--bg);
   color: var(--red);
-  font-weight: var(--font-weight-h);
+  font-weight: 900;
   border-bottom-color: transparent;
 }
 
 .grid-row-header.required {
   background: var(--bg);
   color: var(--red);
-  font-weight: var(--font-weight-h);
+  font-weight: 900;
   border-right-color: transparent;
 }
 
@@ -1464,7 +1589,7 @@ body {
   display: flex;
   gap: 16px;
   align-items: center;
-  font-size: var(--font-size-p);
+  font-size: 0.65rem;
   letter-spacing: 0.08em;
   color: var(--muted);
   text-transform: uppercase;
@@ -1477,8 +1602,8 @@ body {
 }
 
 .progress-stat .count {
-  font-size: var(--font-size-sh);
-  font-weight: var(--font-weight-h);
+  font-size: 0.9rem;
+  font-weight: 700;
   color: var(--text);
 }
 
@@ -1537,7 +1662,7 @@ body {
 .data-table td.required-header {
   color: var(--red);
   background: var(--panel-alt);
-  font-weight: var(--font-weight-h);
+  font-weight: 700;
 }
 
 /* Row/column labels */
@@ -1568,7 +1693,7 @@ body {
   border: 1px solid var(--red);
   border-radius: 4px;
   padding: 10px 14px;
-  font-size: var(--font-size-p);
+  font-size: 0.7rem;
   color: var(--red);
   letter-spacing: 0.04em;
   display: none;
@@ -1585,7 +1710,7 @@ body {
   border: 1px solid var(--orange);
   border-radius: 4px;
   padding: 10px 14px;
-  font-size: var(--font-size-p);
+  font-size: 0.7rem;
   color: var(--orange);
   letter-spacing: 0.04em;
   display: none;
@@ -1618,12 +1743,15 @@ body {
 }
 
 .csv-loader-card .card-title {
+  font-size: 0.75rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--subtle);
 }
 
 .csv-loader-card .file-status {
+  font-size: 0.65rem;
   color: var(--muted);
 }
 
@@ -1632,6 +1760,7 @@ body {
 }
 
 .csv-loader-card .row-count {
+  font-size: 0.65rem;
   color: var(--muted);
 }
 
@@ -1649,6 +1778,8 @@ body {
 }
 
 .heatmap-section h2 {
+  font-size: 0.9rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--blue);
@@ -1656,6 +1787,7 @@ body {
 }
 
 .heatmap-section .section-subtitle {
+  font-size: 0.65rem;
   color: var(--muted);
   letter-spacing: 0.06em;
   margin-bottom: 20px;
@@ -1677,8 +1809,11 @@ body {
 }
 
 .heatmap-item .heatmap-title {
+  font-size: 0.7rem;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: var(--subtle);
 }
 
 .heatmap-canvas-wrap {
@@ -1697,6 +1832,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 0.6rem;
   color: var(--muted);
 }
 
@@ -1709,12 +1845,14 @@ body {
 
 /* Axis labels for heatmap */
 .heatmap-x-label {
+  font-size: 0.6rem;
   color: var(--muted);
   text-align: center;
   letter-spacing: 0.06em;
 }
 
 .heatmap-y-label {
+  font-size: 0.6rem;
   color: var(--muted);
   writing-mode: vertical-rl;
   text-orientation: mixed;
@@ -1742,6 +1880,8 @@ body {
 }
 
 .weight-control .weight-label {
+  font-size: 0.65rem;
+  color: var(--muted);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   display: flex;
@@ -1750,6 +1890,7 @@ body {
 
 .weight-control .weight-label .weight-value {
   color: var(--text);
+  font-weight: 700;
 }
 
 .weight-slider {
@@ -1798,6 +1939,8 @@ body {
 }
 
 .home-intro .desc {
+  font-size: 0.75rem;
+  color: var(--muted);
   line-height: 1.8;
   letter-spacing: 0.04em;
   max-width: 600px;
@@ -1845,16 +1988,31 @@ body {
 }
 
 .home-card .card-heading {
+  font-size: 0.85rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: var(--text);
+}
+
+.home-card.input-card .card-heading {
+  color: var(--green);
+}
+
+.home-card.report-card .card-heading {
+  color: var(--blue);
 }
 
 .home-card .card-desc {
+  font-size: 0.7rem;
+  color: var(--muted);
   line-height: 1.7;
   letter-spacing: 0.04em;
 }
 
 .home-card .card-arrow {
+  font-size: 0.7rem;
+  color: var(--muted-strong);
   letter-spacing: 0.06em;
   margin-top: auto;
   padding-top: 8px;
@@ -1885,6 +2043,8 @@ body {
   border-bottom: 1px solid var(--border);
   padding: 6px 8px;
   text-align: center;
+  font-weight: 600;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text);
@@ -1893,6 +2053,7 @@ body {
 .symmetry-corner-table td {
   padding: 6px 6px;
   text-align: center;
+  font-size: 0.75rem;
   color: var(--text);
   line-height: 1;
   font-family: monospace;
@@ -1911,6 +2072,7 @@ body {
   max-width: 420px;
   margin: 0 auto;
   border-collapse: collapse;
+  font-size: 0.75rem;
   background-color: var(--panel);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -1924,6 +2086,8 @@ body {
   border-bottom: 1px solid var(--border);
   padding: 8px;
   text-align: center;
+  font-weight: 600;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -1932,17 +2096,22 @@ body {
   border-bottom: 1px solid var(--border);
   padding: 8px;
   text-align: center;
+  font-size: 0.7rem;
   color: var(--text);
 }
 
 /* Highlight values that are already symmetric */
 .symmetry-consolidation-table td.already-symmetric {
   background-color: rgba(78, 192, 99, 0.15);
+  color: var(--green);
+  font-weight: 600;
 }
 
 /* Highlight where tolerance is violated */
 .symmetry-consolidation-table td.tolerance-violated {
   background-color: rgba(252, 110, 104, 0.15);
+  color: var(--red);
+  font-weight: 600;
 }
 
 /* Central Vehicle Diagram */
@@ -1976,6 +2145,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 600;
+  font-size: 0.65rem;
 }
 
 .vehicle-wheel.fl { top: 20px; left: 20px; }
@@ -1988,7 +2159,9 @@ body {
   margin: 12px 0;
   padding: 12px;
   border-radius: 4px;
+  font-size: 0.75rem;
   line-height: 1.6;
+  font-weight: 600;
   border: 1px solid;
   background-color: var(--panel);
 }
@@ -1997,34 +2170,44 @@ body {
 .symmetry-status.green {
   background-color: rgba(78, 192, 99, 0.15);
   border-color: rgba(78, 192, 99, 0.4);
+  color: var(--green);
 }
 
 /* Orange: Match found but not at target (compromise) */
 .symmetry-status.orange {
   background-color: rgba(224, 169, 53, 0.15);
   border-color: rgba(224, 169, 53, 0.4);
+  color: var(--orange);
 }
 
 /* Red: No match possible */
 .symmetry-status.red {
   background-color: rgba(252, 110, 104, 0.15);
   border-color: rgba(252, 110, 104, 0.4);
+  color: var(--red);
 }
 
 /* Legacy aliases for backward compatibility */
 .symmetry-status.match {
   background-color: rgba(78, 192, 99, 0.15);
   border-color: rgba(78, 192, 99, 0.4);
+  color: var(--green);
 }
 
 .symmetry-status.no-match {
   background-color: rgba(252, 110, 104, 0.15);
   border-color: rgba(252, 110, 104, 0.4);
+  color: var(--red);
 }
 
 .symmetry-status.partial {
   background-color: rgba(224, 169, 53, 0.15);
   border-color: rgba(224, 169, 53, 0.4);
+  color: var(--orange);
+}
+
+.home-card.input-card:hover .card-arrow {
+  color: var(--green);
 }
 
 /* Spec table on home page */
@@ -2034,9 +2217,11 @@ body {
   border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
+  font-size: 0.7rem;
 }
 
 .spec-table caption {
+  font-size: 0.65rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
@@ -2050,6 +2235,7 @@ body {
 .spec-table td {
   padding: 8px 12px;
   border-bottom: 1px solid #21262d;
+  color: var(--subtle);
 }
 
 .spec-table td:first-child {
@@ -2072,9 +2258,11 @@ body {
 }
 
 .targets-section h2 {
+  font-size: 0.85rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--blue);
+  color: var(--text);
   margin-bottom: 16px;
 }
 
@@ -2096,8 +2284,11 @@ body {
 }
 
 .group-heading {
+  font-size: 0.7rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: var(--muted);
   margin-bottom: 4px;
 }
 
@@ -2108,11 +2299,16 @@ body {
 }
 
 .target-item label {
+  font-size: 0.65rem;
+  color: var(--muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .target-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--blue);
   letter-spacing: 0.04em;
 }
 
@@ -2142,10 +2338,18 @@ body {
 }
 
 .form-fieldset legend {
+  font-size: 0.7rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: var(--muted);
   margin-bottom: 4px;
   padding: 0;
+}
+
+.form-fieldset legend strong {
+  font-weight: 900;
+  color: var(--text);
 }
 
 .form-group {
@@ -2155,6 +2359,8 @@ body {
 }
 
 .form-group label {
+  font-size: 0.65rem;
+  color: var(--muted);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2165,6 +2371,7 @@ body {
   background: var(--panel-alt);
   color: var(--text);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-size: 0.85rem;
   border-radius: 4px;
   transition: all 0.2s;
 }
@@ -2193,6 +2400,7 @@ body {
 
 .button.secondary:hover {
   background: var(--blue);
+  color: var(--bg);
 }
 
 /* ============================================================================
@@ -2249,7 +2457,7 @@ body {
 
   .nav-links a {
     padding: 6px 10px;
-    font-size: var(--font-size-p);
+    font-size: 0.7rem;
   }
 
   /* Section adjustments */
@@ -2269,7 +2477,7 @@ body {
 
   /* Table responsiveness */
   .summary-table table {
-    font-size: var(--font-size-p);
+    font-size: 0.6rem;
   }
 
   .summary-table th,
@@ -2302,20 +2510,20 @@ body {
 
   .wheel-selector button {
     flex: 1;
-    font-size: var(--font-size-p);
+    font-size: 0.7rem;
     padding: 6px 8px;
   }
 
   .color-coding-selector button {
     flex: 1;
-    font-size: var(--font-size-p);
+    font-size: 0.65rem;
     padding: 6px 8px;
   }
 
   /* Button sizing */
   .button {
     padding: 8px 12px !important;
-    font-size: var(--font-size-p) !important;
+    font-size: 0.7rem !important;
     min-height: 36px;  /* Touch-friendly size */
   }
 
@@ -2332,7 +2540,7 @@ body {
   input[type="file"],
   select {
     padding: 8px 10px !important;
-    font-size: var(--font-size-p) !important;
+    font-size: 0.75rem !important;
     min-height: 36px;
   }
 
@@ -2367,7 +2575,7 @@ body {
 
   /* Symmetry tables */
   .symmetry-table {
-    font-size: var(--font-size-p);
+    font-size: 0.65rem;
   }
 
   .symmetry-table td,
@@ -2411,16 +2619,16 @@ body {
 
   /* Header sizing */
   h1, h2 {
-    font-size: var(--font-size-sh) !important;
+    font-size: 0.95rem !important;
   }
 
   h3 {
-    font-size: var(--font-size-p) !important;
+    font-size: 0.85rem !important;
   }
 
   /* Spec table */
   .spec-table {
-    font-size: var(--font-size-p);
+    font-size: 0.65rem;
   }
 
   .spec-table td {
@@ -2447,7 +2655,7 @@ body {
 @media (max-width: 480px) {
   body {
     padding: 8px;
-    font-size: var(--font-size-p);
+    font-size: 0.8rem;
   }
 
   section {
@@ -2461,7 +2669,7 @@ body {
   }
 
   .navbar .title {
-    font-size: var(--font-size-sh);
+    font-size: 0.9rem;
   }
 
   .nav-links {
@@ -2469,12 +2677,12 @@ body {
   }
 
   .nav-links a {
-    font-size: var(--font-size-p);
+    font-size: 0.65rem;
     padding: 4px 6px;
   }
 
   .button {
-    font-size: var(--font-size-p) !important;
+    font-size: 0.65rem !important;
     padding: 6px 8px !important;
   }
 
@@ -2495,15 +2703,15 @@ body {
   }
 
   h1, h2 {
-    font-size: var(--font-size-p) !important;
+    font-size: 0.85rem !important;
   }
 
   h3 {
-    font-size: var(--font-size-p) !important;
+    font-size: 0.75rem !important;
   }
 
   .summary-table table {
-    font-size: var(--font-size-p);
+    font-size: 0.5rem;
   }
 
   /* Horizontal scroll for tables on tiny screens */
@@ -2520,10 +2728,10 @@ body {
   }
 
   .card-title {
-    font-size: var(--font-size-p);
+    font-size: 0.75rem;
   }
 
   .card-description {
-    font-size: var(--font-size-p);
+    font-size: 0.65rem;
   }
 }

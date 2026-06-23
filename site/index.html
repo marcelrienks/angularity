@@ -15,7 +15,7 @@
 <body>
 
   <nav class="navbar">
-    <span class="title">Home Vehicle Suspension Alignment</span>
+    <h1 class="title">Home Vehicle Suspension Alignment</h1>
     <ul class="nav-links">
       <li><a href="index.html" class="active">Home</a></li>
       <li><a href="input.html">Input Sheet</a></li>
@@ -24,8 +24,7 @@
   </nav>
 
   <header class="page-header">
-    <h1>Home Vehicle Suspension Alignment</h1>
-    <p class="subtitle">Digital angle gauge method — eccentric bolt optimisation</p>
+    <h1>Digital angle gauge method — eccentric bolt optimisation</h1>
   </header>
 
   <div id="error-banner" class="error-banner" role="alert" style="display: none;">
@@ -108,7 +107,7 @@
             <button type="submit" class="button" id="btn-save-targets">Save Targets</button>
             <button type="button" class="button danger" id="btn-reset-targets">Reset Targets</button>
           </div>
-          <p style="margin-top:10px; font-size:0.65rem; color:var(--muted); letter-spacing:0.04em;">
+          <p style="margin-top:10px; letter-spacing:0.04em;">
             Report calculations use stored values only. Edits apply after you click Save Targets.
           </p>
         </form>
@@ -122,11 +121,11 @@
               <div class="form-group">
                 <label>Caster Angle Input Mode</label>
                 <div style="display:flex; gap:16px; align-items:center; padding:6px 0;">
-                  <label style="display:flex; gap:6px; align-items:center; font-size:0.85rem; color:var(--text);">
+                  <label style="display:flex; gap:6px; align-items:center;">
                     <input type="radio" name="caster-input-mode" id="caster-mode-ratio" value="steering-ratio" checked>
                     Steering Ratio
                   </label>
-                  <label style="display:flex; gap:6px; align-items:center; font-size:0.85rem; color:var(--text);">
+                  <label style="display:flex; gap:6px; align-items:center;">
                     <input type="radio" name="caster-input-mode" id="caster-mode-wheel" value="wheel-degrees">
                     Wheel Degrees
                   </label>
@@ -146,11 +145,11 @@
               </div>
               <div class="form-group">
                 <label for="steering-sweep-input">Steering Wheel Sweep (°)</label>
-                <div id="steering-sweep-display" style="padding:10px 0; color:var(--text);">360 each direction</div>
+                <div id="steering-sweep-display" style="padding:10px 0;">360 each direction</div>
               </div>
               <div class="form-group">
                 <label for="measurement-density-select">Measurement Points Per Bolt Axis</label>
-                <select id="measurement-density-select" style="padding:6px 10px; border:1px solid var(--border); border-radius:4px; background:var(--panel); color:var(--text); font-family:ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace; font-size:0.85rem;">
+                <select id="measurement-density-select" style="padding:6px 10px; border:1px solid var(--border); border-radius:4px; background:var(--panel); font-family:ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;">
                   <option value="3">3 points (−1 to +1)</option>
                   <option value="5" selected>5 points (−2 to +2)</option>
                   <option value="7">7 points (−3 to +3)</option>
@@ -164,19 +163,19 @@
               <legend>Derived / Fixed Configs</legend>
               <div class="form-group">
                 <label for="effective-wheel-angle-input">Effective Wheel Angle (°)</label>
-                <div id="effective-wheel-angle-display" style="padding:10px 0; color:var(--text);"></div>
+                <div id="effective-wheel-angle-display" style="padding:10px 0;"></div>
               </div>
               <div class="form-group">
                 <label for="caster-multiplier-input">Caster Multiplier</label>
-                <div id="caster-multiplier-display" style="padding:10px 0; color:var(--text);"></div>
+                <div id="caster-multiplier-display" style="padding:10px 0;"></div>
               </div>
               <div class="form-group">
                 <label for="bolt-range-input">Adjustment Bolt Positions</label>
-                <div id="bolt-range-display" style="padding:10px 0; color:var(--text);">−6 to +6 (13 positions)</div>
+                <div id="bolt-range-display" style="padding:10px 0;">−6 to +6 (13 positions)</div>
               </div>
               <div class="form-group">
                 <label for="required-points-input">Minimum Required Washer Points</label>
-                <div id="required-points-display" style="padding:10px 0; color:var(--text);">−6, −3, 0, +3, +6 (5 points)</div>
+                <div id="required-points-display" style="padding:10px 0;">−6, −3, 0, +3, +6 (5 points)</div>
               </div>
             </fieldset>
           </div>
@@ -184,7 +183,7 @@
             <button type="submit" class="button" id="btn-save-configs">Save Configs</button>
             <button type="button" class="button danger" id="btn-reset-configs">Reset Configs</button>
           </div>
-          <p style="margin-top:10px; font-size:0.65rem; color:var(--muted); letter-spacing:0.04em;">
+          <p style="margin-top:10px; letter-spacing:0.04em;">
             Report calculations use stored values only. Edits apply after you click Save Configs.
           </p>
         </form>
@@ -209,7 +208,7 @@
     import { initTheme, buildConfigMenu } from './js/theme-manager.js';
     document.addEventListener('DOMContentLoaded', () => {
       initTheme();
-      document.body.appendChild(buildConfigMenu());
+      document.querySelector('.nav-links').appendChild(buildConfigMenu());
     });
   </script>
 

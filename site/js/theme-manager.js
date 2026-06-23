@@ -16,9 +16,8 @@ export function setTheme(value) {
 }
 
 export function buildConfigMenu() {
-  const container = document.createElement('div');
-  container.id = 'theme-config';
-  container.className = 'theme-config';
+  const listItem = document.createElement('li');
+  listItem.className = 'theme-config-item';
 
   const button = document.createElement('button');
   button.id = 'theme-toggle';
@@ -58,8 +57,8 @@ export function buildConfigMenu() {
     dropdown.classList.remove('visible');
   });
 
-  container.appendChild(button);
-  container.appendChild(dropdown);
+  listItem.appendChild(button);
+  listItem.appendChild(dropdown);
 
-  return container;
+  return listItem;
 }
