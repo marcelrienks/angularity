@@ -337,7 +337,6 @@ curl -I https://dxfocr58kmlsu.cloudfront.net/index.html | grep -i "x-cache"
 ### Documentation Files Created
 
 - **`.github/GITHUB_ACTIONS_SETUP.md`**: Complete setup guide for GitHub Actions secrets
-- **`infrastructure/README.md`**: Terraform module documentation and deployment procedures
 - **`docs/DEPLOYMENT.md`**: Deployment verification procedures
 - **`docs/TROUBLESHOOTING.md`**: Common issues and solutions
 
