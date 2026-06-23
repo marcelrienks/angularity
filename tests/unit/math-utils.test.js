@@ -8,14 +8,15 @@
  * Target: ≥12 test cases, ≥80% line coverage, ≥85% branch coverage
  */
 
-import { 
-  calculateCaster, 
+import {
+  calculateCaster,
   calculateCasterMultiplier,
   calculateEffectiveWheelAngle,
-  calculateDeltas, 
-  getColorThreshold, 
-  formatAngle, 
+  calculateDeltas,
+  getColorThreshold,
+  formatAngle,
   formatMillimeters,
+  toeDegreesToResultantMm,
   DEFAULT_STEERING_RATIO
 } from '../../js/math-utils.js';
 
@@ -272,6 +273,78 @@ describe('math-utils.js', () => {
       expect(toeFormatted).toBe('0.58 mm');
       expect(camberFormatted).toContain('°');
       expect(toeFormatted).toContain('mm');
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // toeDegreesToResultantMm — previously untested
+  // ─────────────────────────────────────────────────────────────
+  describe('toeDegreesToResultantMm()', () => {
+    test('T060.1: Zero degrees yields zero mm offset', () => {
+      expect(toeDegreesToResultantMm(0, 469)).toBeCloseTo(0, 5);
+    });
+
+    test('T060.2: Small angle approximation: result ≈ diameter × angle_rad', () => {
+      // For small angles, tan(θ) ≈ θ in radians
+      const deg = 0.07;
+      const diameter = 469;
+      const rad = deg * (Math.PI / 180);
+      const expected = diameter * Math.tan(rad);
+      expect(toeDegreesToResultantMm(deg, diameter)).toBeCloseTo(expected, 8);
+    });
+
+    test('T060.3: Standard MX-5 toe: 0.07° per wheel, 469 mm diameter → ~0.574 mm', () => {
+      const result = toeDegreesToResultantMm(0.07, 469);
+      expect(result).toBeCloseTo(0.574, 2);
+    });
+
+    test('T060.4: Negative toe degrees gives negative offset', () => {
+      const pos = toeDegreesToResultantMm(0.07, 469);
+      const neg = toeDegreesToResultantMm(-0.07, 469);
+      expect(neg).toBeCloseTo(-pos, 8);
+    });
+
+    test('T060.5: Larger wheel diameter gives proportionally larger offset', () => {
+      const r1 = toeDegreesToResultantMm(0.07, 469);
+      const r2 = toeDegreesToResultantMm(0.07, 938); // double diameter
+      expect(r2).toBeCloseTo(r1 * 2, 6);
+    });
+
+    test('T060.6: Throws on invalid inputs', () => {
+      expect(() => toeDegreesToResultantMm(NaN, 469)).toThrow();
+      expect(() => toeDegreesToResultantMm(0.07, 0)).toThrow();
+      expect(() => toeDegreesToResultantMm(0.07, -100)).toThrow();
+    });
+
+    test('T060.7: Result uses tan(), not linear approximation for larger angles', () => {
+      // At 45°, tan(45°) = 1, so result = diameter
+      const result = toeDegreesToResultantMm(45, 100);
+      expect(result).toBeCloseTo(100, 4);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // calculateCasterMultiplier — explicit value check
+  // ─────────────────────────────────────────────────────────────
+  describe('calculateCasterMultiplier() — value verification', () => {
+    test('T061.1: 15:1 ratio, 360° sweep → 24° wheel angle → multiplier = 1/(2·sin24°)', () => {
+      const expected = 1 / (2 * Math.sin(24 * Math.PI / 180));
+      expect(calculateCasterMultiplier({ steeringRatio: 15, steeringWheelSweepDegrees: 360 })).toBeCloseTo(expected, 8);
+    });
+
+    test('T061.2: Explicit wheel degrees override', () => {
+      const expected = 1 / (2 * Math.sin(20 * Math.PI / 180));
+      expect(calculateCasterMultiplier({ wheelDegrees: 20 })).toBeCloseTo(expected, 8);
+    });
+
+    test('T061.3: Throws on zero wheel angle (division by zero)', () => {
+      expect(() => calculateCasterMultiplier({ wheelDegrees: 0 })).toThrow();
+    });
+
+    test('T061.4: For 5° caster with 24° wheel angle, sweep = multiplier⁻¹ × 5 × 2', () => {
+      const mult = calculateCasterMultiplier({ steeringRatio: 15 });
+      const expectedSweepForFiveDegCaster = 2 * Math.sin(24 * Math.PI / 180) * 5;
+      expect(1 / mult * 5).toBeCloseTo(expectedSweepForFiveDegCaster, 6);
     });
   });
 });

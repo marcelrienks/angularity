@@ -511,4 +511,92 @@ describe('report-engine.js', () => {
       });
     });
   });
+
+  // ─────────────────────────────────────────────────────────────
+  // Additional correctness tests
+  // ─────────────────────────────────────────────────────────────
+  describe('topByCamberDelta — absolute sort correctness', () => {
+    test('With data spanning positive and negative camberDelta, top 4 are closest by |delta|', () => {
+      // Multi-point data: some cells land above target (positive delta), some below (negative)
+      // camberTarget = -1.1; cell.zero varies so deltas span both signs
+      const input = [
+        { camberBolt: -3, casterBolt: 0, neg20: -0.8, zero: -0.9, pos20: -1.0 },  // camber -0.9, delta +0.2
+        { camberBolt:  0, casterBolt: 0, neg20: -1.0, zero: -1.1, pos20: -1.2 },  // camber -1.1, delta  0.0 ← best
+        { camberBolt:  3, casterBolt: 0, neg20: -1.2, zero: -1.3, pos20: -1.4 },  // camber -1.3, delta -0.2
+        { camberBolt: -6, casterBolt: 0, neg20: -0.5, zero: -0.6, pos20: -0.7 },  // camber -0.6, delta +0.5
+        { camberBolt:  6, casterBolt: 0, neg20: -1.5, zero: -1.7, pos20: -1.9 },  // camber -1.7, delta -0.6
+      ];
+
+      const result = processWheel(input);
+
+      // topByCamberDelta should be sorted by |camberDelta|, not signed camberDelta
+      for (let i = 1; i < result.topByCamberDelta.length; i++) {
+        const prev = Math.abs(result.topByCamberDelta[i - 1].camberDelta);
+        const curr = Math.abs(result.topByCamberDelta[i].camberDelta);
+        expect(curr).toBeGreaterThanOrEqual(prev);
+      }
+
+      // The first entry must be the one closest to target (delta ≈ 0)
+      expect(Math.abs(result.topByCamberDelta[0].camberDelta)).toBeLessThan(0.01);
+    });
+
+    test('topByCasterDelta sorted by |casterDelta| with multi-point data', () => {
+      const input = [
+        { camberBolt: -3, casterBolt:  3, neg20: -0.8, zero: -1.1, pos20: -5.0 },  // big sweep → high caster
+        { camberBolt:  0, casterBolt:  0, neg20: -0.8, zero: -1.1, pos20: -1.2 },  // small sweep → low caster
+        { camberBolt:  3, casterBolt: -3, neg20: -0.6, zero: -1.1, pos20: -3.0 },  // medium sweep
+      ];
+
+      const result = processWheel(input);
+
+      for (let i = 1; i < result.topByCasterDelta.length; i++) {
+        const prev = Math.abs(result.topByCasterDelta[i - 1].casterDelta);
+        const curr = Math.abs(result.topByCasterDelta[i].casterDelta);
+        expect(curr).toBeGreaterThanOrEqual(prev);
+      }
+    });
+  });
+
+  describe('Rear fallback recommendation bolt positions', () => {
+    test('Rear fallback uses camberOptCamberBolt / camberOptCasterBolt (not undefined)', () => {
+      const rlResult = processWheel([excellentCamberGoodCaster], { targetCaster: null, targetCamber: -1.5 });
+      const rrResult = processWheel([veryPoorCamberRedTier], { targetCaster: null, targetCamber: -1.5 });
+
+      const result = symmetryAnalysis(null, null, rlResult, rrResult);
+
+      // Rear recommendation must exist and have defined bolt positions
+      expect(result.rear).toBeDefined();
+      expect(result.rear.recommendation).toBeDefined();
+      expect(result.rear.recommendation.rlCamberBolt).toBeDefined();
+      expect(result.rear.recommendation.rlCasterBolt).toBeDefined();
+      expect(result.rear.recommendation.rrCamberBolt).toBeDefined();
+      expect(result.rear.recommendation.rrCasterBolt).toBeDefined();
+      // All bolt positions must be valid integers in [-6, 6]
+      const validPositions = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6];
+      expect(validPositions).toContain(result.rear.recommendation.rlCamberBolt);
+      expect(validPositions).toContain(result.rear.recommendation.rlCasterBolt);
+    });
+  });
+
+  describe('Caster formula absolute value check', () => {
+    test('Caster is always non-negative regardless of sweep direction', () => {
+      // Sweep that goes "the wrong way" (neg20 > pos20)
+      const input = [{ camberBolt: 0, casterBolt: 0, neg20: -1.5, zero: -1.1, pos20: -0.8 }];
+      const result = processWheel(input);
+      result.rows169.forEach(row => {
+        expect(row.caster).toBeGreaterThanOrEqual(0);
+      });
+    });
+
+    test('Caster value for known sweep matches formula: multiplier × |pos20 - neg20|', () => {
+      // sweep = |pos20 - neg20| = |(-1.5) - (-0.5)| = 1.0°
+      // multiplier = 1 / (2 * sin(24°)) ≈ 1.2285
+      // caster ≈ 1.2285
+      const input = [{ camberBolt: 0, casterBolt: 0, neg20: -0.5, zero: -1.0, pos20: -1.5 }];
+      const result = processWheel(input);
+      const sweep = Math.abs(-1.5 - (-0.5));
+      const expectedCaster = (1 / (2 * Math.sin(24 * Math.PI / 180))) * sweep;
+      expect(result.bestCell.caster).toBeCloseTo(expectedCaster, 4);
+    });
+  });
 });

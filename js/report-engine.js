@@ -198,17 +198,17 @@ export function processWheel(parsedCSV, options = {}) {
     a.camberBolt !== b.camberBolt ? a.camberBolt - b.camberBolt : a.casterBolt - b.casterBolt
   );
 
-  // Pre-sort for quick access to top matches (optimization: avoid re-sorting in report-page.js)
+  // Pre-sort for quick access to top matches (by absolute delta — closest to target)
   const topByCamberDelta = rows169
     .slice()
-    .sort((a, b) => a.camberDelta - b.camberDelta)
+    .sort((a, b) => Math.abs(a.camberDelta) - Math.abs(b.camberDelta))
     .slice(0, 4);
 
   const topByCasterDelta = targetCaster == null
     ? []
     : rows169
         .slice()
-        .sort((a, b) => a.casterDelta - b.casterDelta)
+        .sort((a, b) => Math.abs(a.casterDelta) - Math.abs(b.casterDelta))
         .slice(0, 4);
 
   // Best compromise (using Golden Rule weighted score)
@@ -415,10 +415,10 @@ export function symmetryAnalysis(flResult, frResult, rlResult = null, rrResult =
         // No symmetric pair; use individual best positions
         rearRecommendation = {
           camber: (rl.bestCamber + rr.bestCamber) / 2,
-          rlCamberBolt: rl.camberFront,
-          rlCasterBolt: rl.camberRear,
-          rrCamberBolt: rr.camberFront,
-          rrCasterBolt: rr.camberRear,
+          rlCamberBolt: rl.camberOptCamberBolt,
+          rlCasterBolt: rl.camberOptCasterBolt,
+          rrCamberBolt: rr.camberOptCamberBolt,
+          rrCasterBolt: rr.camberOptCasterBolt,
           rlToe: rl.bestToe,
           rrToe: rr.bestToe,
           toeMismatch: rl.bestToe != null && rr.bestToe != null ? Math.abs(rl.bestToe - rr.bestToe) : null,
@@ -453,20 +453,21 @@ export function symmetryAnalysis(flResult, frResult, rlResult = null, rrResult =
  */
 function _summariseIndependent(result) {
   const { bestCamberCell, bestCasterCell } = result;
-  
+
   return {
     // Best camber scenario: values from the position that minimizes camber error
     bestCamber: bestCamberCell.camber,
-    bestCamberValue: bestCamberCell.camber,  // Alias for clarity
-    camberCasterAtBestCamber: bestCamberCell.caster,  // What caster results from best camber position
+    bestCamberValue: bestCamberCell.camber,
+    camberCasterAtBestCamber: bestCamberCell.caster,
     camberOptCamberBolt: bestCamberCell.camberBolt,
     camberOptCasterBolt: bestCamberCell.casterBolt,
     camberDelta: bestCamberCell.camberDelta,
+    bestToe: bestCamberCell.toe ?? null,
 
     // Best caster scenario: values from the position that minimizes caster error
     bestCaster: bestCasterCell.caster,
-    bestCasterValue: bestCasterCell.caster,  // Alias for clarity
-    casterCamberAtBestCaster: bestCasterCell.camber,  // What camber results from best caster position
+    bestCasterValue: bestCasterCell.caster,
+    casterCamberAtBestCaster: bestCasterCell.camber,
     casterOptCamberBolt: bestCasterCell.camberBolt,
     casterOptCasterBolt: bestCasterCell.casterBolt,
     casterDelta: bestCasterCell.casterDelta,
