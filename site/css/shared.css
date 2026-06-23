@@ -98,11 +98,11 @@ body {
 }
 
 .navbar .title {
-  font-size: 1.1rem;  /* increased from 0.85rem */
-  font-weight: 700;
+  font-size: var(--font-size-sh);
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--subtle);
+  color: var(--text);
 }
 
 .navbar .nav-links {
@@ -112,7 +112,7 @@ body {
 }
 
 .navbar a {
-  font-size: 0.85rem;  /* increased from 0.75rem */
+  font-size: var(--font-size-p);
   color: var(--muted);
   text-decoration: none;
   letter-spacing: 0.08em;
@@ -135,8 +135,8 @@ body {
 }
 
 .page-header h1 {
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: var(--font-size-h);
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text);
@@ -144,7 +144,7 @@ body {
 }
 
 .page-header .subtitle {
-  font-size: 0.85rem;  /* increased from 0.7rem */
+  font-size: var(--font-size-p);
   color: var(--muted);
   letter-spacing: 0.1em;
 }
@@ -158,15 +158,15 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  background: #EF5350;
-  color: #fff;
+  background: var(--red);
+  color: var(--bg);
   padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 9999;
   font-size: 0.9rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px var(--shadow);
   animation: slideInDown 0.3s ease-out;
 }
 
@@ -477,7 +477,7 @@ body {
 }
 
 .button.primary:hover {
-  background: #58a6ff;
+  background: var(--accent);
   opacity: 0.9;
 }
 
@@ -2355,8 +2355,8 @@ body {
 
 .form-group input:focus {
   outline: none;
-  border-color: var(--blue);
-  background: #1a1f2f;
+  border-color: var(--accent);
+  background: var(--panel-alt);
 }
 
 .form-actions {

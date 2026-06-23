@@ -80,12 +80,12 @@ description: "Task list for White-Label Theming System implementation"
 
 **Independent Test**: Clear localStorage, hard-reload each page — no dark background (`#12171e`), no `Share Tech Mono` Google Font loading in Network tab. Heatmap and bolt diagram colors unchanged. See quickstart.md Scenarios 1 and 6.
 
-- [ ] T018 [US2] Replace all hard-coded color values in `site/css/shared.css` selectors that use non-functional decoration (background colors on `.navbar`, `.page-header`, `.home-card`, `.error-banner`, etc.) — replace with CSS variable references (`var(--bg)`, `var(--panel)`, `var(--border)`, `var(--text)`, `var(--muted)`)
-- [ ] T019 [US2] Replace all remaining hard-coded `color:`, `background:`, `background-color:`, `border-color:`, `box-shadow:` CSS property values in `site/css/shared.css` that are not functional colors — use the appropriate `var(--*)` reference
-- [ ] T020 [P] [US2] Replace inline `style="..."` hard-coded color values in `site/index.html` with CSS variable references; move any layout-only inline styles to `site/css/shared.css` rule classes
-- [ ] T021 [P] [US2] Replace inline `style="..."` hard-coded color values in `site/input.html` with CSS variable references; move layout-only inline styles to `site/css/shared.css`
-- [ ] T022 [P] [US2] Replace inline `style="..."` hard-coded color values in `site/report.html` with CSS variable references; move layout-only inline styles to `site/css/shared.css`
-- [ ] T023 [US2] Verify `--green`, `--orange`, `--red`, `--blue`, `--purple`, `--req-band`, `--req-band-hdr` remain unchanged in `:root` of `site/css/shared.css` and are NOT referenced in any `[data-theme]` block
+- [x] T018 [US2] Replace all hard-coded color values in `site/css/shared.css` selectors that use non-functional decoration (background colors on `.navbar`, `.page-header`, `.home-card`, `.error-banner`, etc.) — replace with CSS variable references (`var(--bg)`, `var(--panel)`, `var(--border)`, `var(--text)`, `var(--muted)`)
+- [x] T019 [US2] Replace all remaining hard-coded `color:`, `background:`, `background-color:`, `border-color:`, `box-shadow:` CSS property values in `site/css/shared.css` that are not functional colors — use the appropriate `var(--*)` reference
+- [x] T020 [P] [US2] Replace inline `style="..."` hard-coded color values in `site/index.html` with CSS variable references; move any layout-only inline styles to `site/css/shared.css` rule classes
+- [x] T021 [P] [US2] Replace inline `style="..."` hard-coded color values in `site/input.html` with CSS variable references; move layout-only inline styles to `site/css/shared.css`
+- [x] T022 [P] [US2] Replace inline `style="..."` hard-coded color values in `site/report.html` with CSS variable references; move layout-only inline styles to `site/css/shared.css`
+- [x] T023 [US2] Verify `--green`, `--orange`, `--red`, `--blue`, `--purple`, `--req-band`, `--req-band-hdr` remain unchanged in `:root` of `site/css/shared.css` and are NOT referenced in any `[data-theme]` block
 
 **Checkpoint**: White-label base clean. Pages usable without a theme. Functional colors intact.
 
@@ -97,13 +97,13 @@ description: "Task list for White-Label Theming System implementation"
 
 **Independent Test**: Open index.html, input.html, report.html side by side. Compare `<h1>`, `.navbar .title`, and body text — all must be visually identical in size and weight per element type. See quickstart.md Scenario 7.
 
-- [ ] T024 [US3] Apply Header style to `site/css/shared.css` — all `h1`, `.page-header h1`, `.card-heading` must use `font-size: var(--font-size-h)` and `font-weight: 700`; remove any per-selector font-size overrides for these elements
-- [ ] T025 [US3] Apply Sub-header style to `site/css/shared.css` — all `h2`, `h3`, `.navbar .title`, `.section-title`, `[role="tab"]`, `.wheel-tab`, `.tab-btn` must use `font-size: var(--font-size-sh)` and `font-weight: 600`; remove any per-selector overrides
-- [ ] T026 [US3] Apply Paragraph style to `site/css/shared.css` — `body`, `p`, `label`, `.card-desc`, `.subtitle`, `button`, `input`, `select`, `textarea`, `.muted`, `.nav-links a` must use `font-size: var(--font-size-p)` and `font-weight: 400`; remove any per-selector overrides
-- [ ] T027 [P] [US3] Remove per-element `font-size` and `font-weight` inline style attributes from `site/index.html` (those overriding the stylesheet — not layout styles)
-- [ ] T028 [P] [US3] Remove per-element `font-size` and `font-weight` inline style attributes from `site/input.html`
-- [ ] T029 [P] [US3] Remove per-element `font-size` and `font-weight` inline style attributes from `site/report.html`
-- [ ] T030 [US3] Standardize non-functional text color: any CSS rule using a hard-coded non-functional text color must switch to `var(--text)` (primary) or `var(--muted)` (secondary) in `site/css/shared.css`
+- [x] T024 [US3] Apply Header style to `site/css/shared.css` — all `h1`, `.page-header h1`, `.card-heading` must use `font-size: var(--font-size-h)` and `font-weight: 700`; remove any per-selector font-size overrides for these elements
+- [x] T025 [US3] Apply Sub-header style to `site/css/shared.css` — all `h2`, `h3`, `.navbar .title`, `.section-title`, `[role="tab"]`, `.wheel-tab`, `.tab-btn` must use `font-size: var(--font-size-sh)` and `font-weight: 600`; remove any per-selector overrides
+- [x] T026 [US3] Apply Paragraph style to `site/css/shared.css` — `body`, `p`, `label`, `.card-desc`, `.subtitle`, `button`, `input`, `select`, `textarea`, `.muted`, `.nav-links a` must use `font-size: var(--font-size-p)` and `font-weight: 400`; remove any per-selector overrides
+- [x] T027 [P] [US3] Remove per-element `font-size` and `font-weight` inline style attributes from `site/index.html` (those overriding the stylesheet — not layout styles)
+- [x] T028 [P] [US3] Remove per-element `font-size` and `font-weight` inline style attributes from `site/input.html`
+- [x] T029 [P] [US3] Remove per-element `font-size` and `font-weight` inline style attributes from `site/report.html`
+- [x] T030 [US3] Standardize non-functional text color: any CSS rule using a hard-coded non-functional text color must switch to `var(--text)` (primary) or `var(--muted)` (secondary) in `site/css/shared.css`
 
 **Checkpoint**: Typography consistent. Side-by-side page comparison shows uniform heading/body sizing.
 
@@ -115,8 +115,8 @@ description: "Task list for White-Label Theming System implementation"
 
 **Independent Test**: Select Light theme — inspect `--bg` = `#FFFFFF`, `--text` = `#000000`, `--panel` = `#F3F3F3`, `--accent` = `#007ACC` via browser DevTools. See quickstart.md Scenario 4.
 
-- [ ] T031 [US4] Verify `[data-theme="light"]` block in `site/css/shared.css` covers all eight palette variables from data-model.md ThemePalette Light+ section; add any missing variables
-- [ ] T032 [US4] Audit Light theme visual QA: open all three pages with Light theme active, check all interactive elements (buttons, active nav link, tabs, form inputs, dropdowns) use `--accent` or `--hover` correctly; fix any selector that still uses a hard-coded non-functional color in light mode
+- [x] T031 [US4] Verify `[data-theme="light"]` block in `site/css/shared.css` covers all eight palette variables from data-model.md ThemePalette Light+ section; add any missing variables
+- [x] T032 [US4] Audit Light theme visual QA: open all three pages with Light theme active, check all interactive elements (buttons, active nav link, tabs, form inputs, dropdowns) use `--accent` or `--hover` correctly; fix any selector that still uses a hard-coded non-functional color in light mode
 
 **Checkpoint**: Light theme complete and visually consistent across all pages.
 
@@ -128,8 +128,8 @@ description: "Task list for White-Label Theming System implementation"
 
 **Independent Test**: Select Dark theme — inspect `--bg` = `#1E1E1E`, `--text` = `#D4D4D4`, `--panel` = `#252526`, `--accent` = `#007ACC` via browser DevTools. See quickstart.md Scenario 5.
 
-- [ ] T033 [US5] Verify `[data-theme="dark"]` block in `site/css/shared.css` covers all eight palette variables from data-model.md ThemePalette Dark+ section; add any missing variables
-- [ ] T034 [US5] Audit Dark theme visual QA: open all three pages with Dark theme active, check all interactive elements use correct dark palette variables; fix any selector that uses a hard-coded light color that would be invisible on dark background
+- [x] T033 [US5] Verify `[data-theme="dark"]` block in `site/css/shared.css` covers all eight palette variables from data-model.md ThemePalette Dark+ section; add any missing variables
+- [x] T034 [US5] Audit Dark theme visual QA: open all three pages with Dark theme active, check all interactive elements use correct dark palette variables; fix any selector that uses a hard-coded light color that would be invisible on dark background
 
 **Checkpoint**: Dark theme complete and visually consistent across all pages.
 
@@ -139,11 +139,11 @@ description: "Task list for White-Label Theming System implementation"
 
 **Purpose**: Regression validation, mobile accessibility, and final integration verification.
 
-- [ ] T035 Verify functional colors invariant across themes: open report.html and input.html in both Light and Dark themes — `--green`, `--orange`, `--red`, `--blue`, `--purple` values must be identical; see quickstart.md Scenario 6
-- [ ] T036 [P] Config menu mobile accessibility: verify gear button visible and tappable at 375px viewport width; dropdown usable at narrow width; see quickstart.md Scenario 10
-- [ ] T037 Run new theme tests: `npx jest tests/theme/theme-switching.test.js` — all theme tests must pass
-- [ ] T038 Run full regression: `npm run test:all-sync` — all 149 existing tests must pass (constitution Principle III gate)
-- [ ] T039 Validate quickstart.md Scenarios 1–10 manually — document any failures and fix before merge
+- [x] T035 Verify functional colors invariant across themes: open report.html and input.html in both Light and Dark themes — `--green`, `--orange`, `--red`, `--blue`, `--purple` values must be identical; see quickstart.md Scenario 6
+- [x] T036 [P] Config menu mobile accessibility: verify gear button visible and tappable at 375px viewport width; dropdown usable at narrow width; see quickstart.md Scenario 10
+- [x] T037 Run new theme tests: `npx jest tests/theme/theme-switching.test.js` — all theme tests must pass
+- [x] T038 Run full regression: `npm run test:all-sync` — all 149 existing tests must pass (constitution Principle III gate)
+- [x] T039 Validate quickstart.md Scenarios 1–10 manually — document any failures and fix before merge
 
 ---
 
