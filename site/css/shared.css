@@ -241,32 +241,35 @@ body {
    THEME CONFIG MENU
    ============================================================================ */
 
-.theme-config {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
+.theme-config-item {
+  position: relative;
+  list-style: none;
 }
 
 .theme-toggle {
-  padding: 8px 12px;
-  background: var(--panel);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  font-size: var(--font-size-p);
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
+  transition: all 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  width: auto;
+  height: auto;
+  padding: 0;
 }
 
 .theme-toggle:hover {
-  background: var(--hover);
-  border-color: var(--accent);
+  color: var(--blue);
+  border-bottom-color: var(--blue);
 }
 
 .theme-dropdown {
@@ -282,6 +285,7 @@ body {
   gap: 0;
   min-width: 120px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
 }
 
 .theme-dropdown.visible {
@@ -310,6 +314,28 @@ body {
 
 .theme-option:last-child {
   border-radius: 0 0 3px 3px;
+}
+
+/* ============================================================================
+   SHARED HEADER STYLING (Input & Report Grids)
+   ============================================================================ */
+
+/* Header font standard: 0.85rem, weight 700, muted-strong color */
+.grid-corner,
+.grid-col-header,
+.grid-row-header,
+.data-table .col-label-row th,
+.data-table .row-label,
+.data-table th {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted-strong);
+  letter-spacing: 0.08em;
+}
+
+.grid-corner {
+  font-size: 0.65rem;
+  line-height: 1.1;
 }
 
 /* ============================================================================
@@ -521,11 +547,6 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 0.5rem;
-  color: var(--muted);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  line-height: 1.1;
   white-space: pre-line;
 }
 
@@ -541,12 +562,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;  /* increased from 0.85rem */
-  font-weight: 800;
-  color: var(--muted-strong);
   text-align: center;
   padding: 4px;
-  letter-spacing: 0.06em;
 }
 
 .grid-row-header {
@@ -560,9 +577,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;  /* increased from 0.8rem */
-  font-weight: 800;
-  color: var(--muted-strong);
   padding: 4px;
 }
 
@@ -692,13 +706,9 @@ body {
 
 .data-table th {
   background: var(--panel-alt);
-  color: var(--muted);
   padding: 12px 10px;
   text-align: center;
-  letter-spacing: 0.08em;
   border-bottom: 1px solid var(--border);
-  font-weight: 700;
-  font-size: 0.9rem;
 }
 
 .data-table td {
@@ -1508,7 +1518,6 @@ body {
 .grid-col-header.required {
   background: var(--bg);
   color: var(--red);
-  font-size: 0.9rem;
   font-weight: 900;
   border-bottom-color: transparent;
 }
@@ -1516,7 +1525,6 @@ body {
 .grid-row-header.required {
   background: var(--bg);
   color: var(--red);
-  font-size: 0.9rem;
   font-weight: 900;
   border-right-color: transparent;
 }
@@ -1637,22 +1645,15 @@ body {
 
 /* Row/column labels */
 .data-table .row-label {
-  color: var(--green);
-  font-weight: 700;
   background: var(--panel-alt);
   white-space: nowrap;
   padding: 12px 14px;
-  font-size: 0.95rem;
   min-width: 3em;
 }
 
 .data-table .col-label-row th {
-  color: var(--blue);
   background: var(--panel-alt);
   padding: 8px 4px;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0;
   width: 56px;
   white-space: pre-wrap;
   line-height: 1.1;
