@@ -1,21 +1,9 @@
-# INTERNALS — Technical Deep-Dives & Algorithms
+# Internals — Technical Deep-Dives & Algorithms
 
-**MX-5 NC1 Wheel Alignment System**  
+**Eccentric Bolt Alignment System**  
 Last updated: April 26, 2026
 
 In-depth technical documentation: algorithms, optimizations, debugging, and edge cases.
-
----
-
-## Table of Contents
-
-1. [Bilinear Interpolation Algorithm](#bilinear-interpolation-algorithm)
-2. [Report Generation & Three Optima](#report-generation--three-optima)
-3. [Golden Rule Scoring](#golden-rule-scoring)
-4. [Data Transformation Pipeline](#data-transformation-pipeline)
-5. [Error Handling Patterns](#error-handling-patterns)
-6. [Performance Optimizations](#performance-optimizations)
-7. [Debugging & Tracing](#debugging--tracing)
 
 ---
 
@@ -270,65 +258,6 @@ Score (Tier 2) = (1.5 × 0.02) + (3.0 × 0.02) = 0.09  ← Best compromise
 
 ---
 
-## Data Transformation Pipeline
-
-### Complete Tracing Flow
-
-```
-INPUT PAGE (User enters measurement)
-  ↓
-  User clicks cell: Front -1, Rear +2
-  Enters value: -1.15° (at 0° steering)
-  ↓
-VALIDATION LAYER
-  Range check: -3.0 to +3.0 ✓
-  Type check: numeric ✓
-  Precision: 0.01 ✓
-  ↓
-PERSISTENCE LAYER
-  Save to localStorage
-  Key: wheel-FL-gridState
-  Data: { frontBolt: -1, rearBolt: +2, neg20: ?, zero: -1.15, pos20: ? }
-  (User must enter all three steering angles, not just 0°)
-  ↓ (user navigates to report)
-REPORT PAGE LOAD
-  ↓
-LOAD FROM STORAGE
-  Read: wheel-FL-gridState (all 169 cells)
-  Sparse: ~50 cells measured, ~119 empty
-  ↓
-INTERPOLATION LAYER
-  Input: 50 measured cells
-  Process: Bilinear interpolation on 13×13 grid
-  Output: All 169 cells filled (measured + interpolated)
-  ↓
-ANALYSIS ENGINE
-  Input: Dense 13×13 grid
-  Process:
-    1. Calculate camber & caster for each cell (average 3 steering angles)
-    2. Score each position (Golden Rule)
-    3. Extract best 3 (compromise, camber, caster)
-  Output: {
-    bestCell: { front: -1, rear: +2, camber: -1.10, caster: 5.05, score: 0.15 },
-    bestCamberCell: { ... },
-    bestCasterCell: { ... }
-  }
-  ↓ (rendering layer - all independent)
-  ├─ Raw Data Summary: reads dense grid directly
-  ├─ Chart Generator: reads dense grid directly
-  ├─ Bolt Diagram: reads best cells directly
-  └─ Symmetry Analysis: compares FL & FR independent analyses
-```
-
-### Validation Checkpoints
-
-1. **Input**: User data type & range
-2. **Persistence**: localStorage quota & permissions
-3. **Interpolation**: Handle NaN and sparse data
-4. **Analysis**: Reject if too few measurements
-5. **Rendering**: Graceful fallback if component fails
-
----
 
 ## Error Handling Patterns
 
@@ -525,20 +454,11 @@ const casterDiff = Math.abs(flData.bestCell.caster - frData.bestCell.caster);
 console.log(`Camber diff: ${camberDiff}°, Caster diff: ${casterDiff}°`);
 ```
 
-### Browser DevTools Tips
-
-| Task | How |
-|------|-----|
-| **Inspect grid state** | `console.log(JSON.parse(localStorage['wheel-FL-gridState']))` |
-| **Watch interpolation** | Set breakpoint in interpolation.js → step through bilinear formula |
-| **Check scoring** | `console.log(result.bestCell.score)` → verify against calculated |
-| **Trace data flow** | Add `console.log()` at each pipeline step → follow output |
-| **Performance profile** | DevTools → Performance → record interaction → analyze |
-
----
 
 ## Related Documentation
 
-- **System architecture & design**: [ARCHITECTURE.md](ARCHITECTURE.md)
-- **How to use the tool**: [GUIDE.md](GUIDE.md)
-- **Current blockers**: [todo.md](todo.md)
+- **System architecture & design**: [architecture.md](architecture.md) — module layers, data flow, algorithms
+- **How to use the tool**: [guide.md](guide.md) — user workflow, dev tasks, troubleshooting
+- **Current blockers**: [todo.md](todo.md) — known issues and open work
+
+**Note**: architecture.md § Module Responsibilities documents the primary module layers. Additional utility modules (error-handler, measurement-utils, dummy-data-generator) support these core layers but are not shown in the layered diagram.
