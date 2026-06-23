@@ -231,8 +231,7 @@ function _buildGrid() {
   // ── Row 0: corner + column headers (front bolt positions) ──────────────
   const corner = _el('div', 'grid-corner');
   corner.setAttribute('aria-hidden', 'true');
-  corner.innerHTML = 'Caster→<br>Camber↓';
-  corner.title = 'Caster Bolt (→) and Camber Bolt (↓) — the eccentric bolt positions, not the wheel alignment values';
+  corner.textContent = 'Front →\nRear ↓';
   grid.appendChild(corner);
 
   for (const f of boltPositions) {
