@@ -59,7 +59,8 @@ export function calculateRotationAngle(boltPosition) {
  *   x = centerX + radius * cos(angle * π/180)
  *   y = centerY - radius * sin(angle * π/180)
  *
- * Note: SVG y-axis increases downward; we subtract sin() to flip.
+ * Note: SVG y-axis increases downward; we add sin() (not subtract) because the
+ *   angle mapping already places 90° at the bottom (6 o'clock), making +sin correct.
  *
  * Examples (100×100 canvas, center (50, 50), radius 50):
  *   Position 0 (90°) → (50, 100) — 6 o-clock (bottom)

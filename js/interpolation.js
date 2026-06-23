@@ -118,18 +118,42 @@ function _bilinear(c, s, channel, map, cambers, casters) {
 
 /**
  * Get a measurement value from the map.
- * If the exact position isn't measured, returns the nearest measured point
- * on each axis (fallback for partial-grid extrapolation edge cases).
+ * If the exact position isn't measured, returns the nearest measured point.
+ *
+ * Strategy (in order):
+ *   1. Exact match
+ *   2. Nearest measured caster in the nearest measured camber row
+ *   3. Globally nearest measured point (Manhattan distance)
+ *
+ * This avoids the 0-fallback that would corrupt bilinear interpolation when
+ * the bracket corners are unmeasured (e.g. off-diagonal cells in sparse data).
  */
 function _get(map, c, s, channel, cambers, casters) {
   if (map[c]?.[s] !== undefined) return map[c][s][channel];
 
-  // Find closest measured camber row
+  // Nearest camber row
   const cc = _nearest(cambers, c);
-  // Find closest measured caster col
-  const cs = _nearest(casters, s);
 
-  return (map[cc]?.[cs] ?? {})[channel] ?? 0;
+  if (map[cc]) {
+    const rowCasters = Object.keys(map[cc]).map(Number);
+    const cs = _nearest(rowCasters, s);
+    if (map[cc][cs] !== undefined) return map[cc][cs][channel];
+  }
+
+  // Globally nearest measured point (fallback for degenerate data)
+  let bestDist = Infinity;
+  let bestVal = 0;
+  for (const mc of cambers) {
+    if (!map[mc]) continue;
+    for (const ms of Object.keys(map[mc]).map(Number)) {
+      const dist = Math.abs(c - mc) + Math.abs(s - ms);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestVal = map[mc][ms][channel];
+      }
+    }
+  }
+  return bestVal;
 }
 
 // ── Linear interpolation / extrapolation ──────────────────────────────────
