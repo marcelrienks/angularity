@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home Vehicle Suspension Alignment</title>
+  <script>
+    const theme = localStorage.getItem('angularity-theme');
+    if (theme === 'light' || theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  </script>
   <link rel="stylesheet" href="css/shared.css">
 </head>
 <body>
@@ -196,6 +202,14 @@
     const current = location.pathname.split('/').pop() || 'index.html';
     links.forEach(a => {
       a.classList.toggle('active', a.getAttribute('href') === current);
+    });
+  </script>
+
+  <script type="module" defer>
+    import { initTheme, buildConfigMenu } from './js/theme-manager.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      document.body.appendChild(buildConfigMenu());
     });
   </script>
 

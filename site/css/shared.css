@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -7,36 +5,76 @@
 }
 
 :root {
-  /* ── Backgrounds ── */
-  --bg:           #12171e;   /* slightly lighter than pure GitHub dark */
-  --panel:        #1c2230;   /* card/panel surface */
-  --panel-alt:    #161d28;   /* header bars, inset areas */
-  --panel-deep:   #0f1520;   /* optional cells — keep them darker */
+  /* ── White-Label System Colors (CSS named colors) ── */
+  --bg:           Canvas;
+  --panel:        rgba(0, 0, 0, 0.04);
+  --panel-alt:    rgba(0, 0, 0, 0.08);
+  --panel-deep:   rgba(0, 0, 0, 0.12);
+  --border:       ButtonBorder;
+  --text:         CanvasText;
+  --muted:        GrayText;
+  --muted-strong: rgba(0, 0, 0, 0.5);
+  --subtle:       rgba(0, 0, 0, 0.7);
+  --shadow:       rgba(0, 0, 0, 0.1);
+  --accent:       Highlight;
+  --hover:        rgba(0, 0, 0, 0.06);
+  --selection:    rgba(0, 0, 0, 0.10);
 
-  /* ── Borders & Text ── */
-  --border:       #2d3748;   /* clearer border */
-  --muted:        #8fa3b3;   /* lightened — easier to read */
-  --muted-strong: #6b7d8f;
-  --text:         #eaf0f6;   /* slightly warmer white */
-  --subtle:       #cdd6e0;
-
-  /* ── Accents ── */
-  --blue:         #6ab4ff;   /* a touch brighter */
+  /* ── Functional Colors (preserved across themes) ── */
+  --blue:         #6ab4ff;
   --green:        #4ec063;
   --orange:       #e0a935;
   --purple:       #c89eff;
   --red:          #fc6e68;
-  --shadow:       #0005;
 
-  /* ── Required-position band tint ── */
-  --req-band:     #254470;    /* distinct dark blue for required cells */
-  --req-band-hdr: #3a6b9f;    /* header version, brighter */
+  /* ── Required-Position Band (preserved across themes) ── */
+  --req-band:     #254470;
+  --req-band-hdr: #3a6b9f;
+
+  /* ── Typography Scale ── */
+  --font-size-h:  1.4rem;
+  --font-size-sh: 1.0rem;
+  --font-size-p:  0.875rem;
+}
+
+/* ── Light Theme (VS Code Light+) ── */
+[data-theme="light"] {
+  --bg:           #FFFFFF;
+  --panel:        #F3F3F3;
+  --panel-alt:    #ECECEC;
+  --panel-deep:   #E8E8E8;
+  --text:         #000000;
+  --muted:        #767676;
+  --muted-strong: #666666;
+  --subtle:       #555555;
+  --border:       #D4D4D4;
+  --accent:       #007ACC;
+  --hover:        #E8E8E8;
+  --selection:    #E5EBF1;
+  --shadow:       rgba(0, 0, 0, 0.15);
+}
+
+/* ── Dark Theme (VS Code Dark+) ── */
+[data-theme="dark"] {
+  --bg:           #1E1E1E;
+  --panel:        #252526;
+  --panel-alt:    #2D2D30;
+  --panel-deep:   #1F1F1F;
+  --text:         #D4D4D4;
+  --muted:        #A6A6A6;
+  --muted-strong: #999999;
+  --subtle:       #858585;
+  --border:       #3A3D41;
+  --accent:       #007ACC;
+  --hover:        #2D2D30;
+  --selection:    #3A3D41;
+  --shadow:       rgba(0, 0, 0, 0.4);
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   min-height: 100vh;
   padding: 20px;
 }
@@ -200,6 +238,81 @@ body {
 }
 
 /* ============================================================================
+   THEME CONFIG MENU
+   ============================================================================ */
+
+.theme-config {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.theme-toggle {
+  padding: 8px 12px;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.theme-toggle:hover {
+  background: var(--hover);
+  border-color: var(--accent);
+}
+
+.theme-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-top: 4px;
+  display: none;
+  flex-direction: column;
+  gap: 0;
+  min-width: 120px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.theme-dropdown.visible {
+  display: flex;
+}
+
+.theme-option {
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--text);
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.theme-option:hover {
+  background: var(--hover);
+}
+
+.theme-option:first-child {
+  border-radius: 3px 3px 0 0;
+}
+
+.theme-option:last-child {
+  border-radius: 0 0 3px 3px;
+}
+
+/* ============================================================================
    INPUT GRID (INPUT SHEET PAGE)
    ============================================================================ */
 
@@ -247,7 +360,7 @@ body {
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   font-size: 0.7rem;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -280,7 +393,7 @@ body {
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--muted);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -314,7 +427,7 @@ body {
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--muted);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -335,7 +448,7 @@ body {
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   font-size: 0.7rem;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -510,7 +623,7 @@ body {
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   font-size: 0.8rem;
   text-align: right;
   border-radius: 3px;
@@ -2234,7 +2347,7 @@ body {
   border: 1px solid var(--border);
   background: var(--panel-alt);
   color: var(--text);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   font-size: 0.85rem;
   border-radius: 4px;
   transition: all 0.2s;

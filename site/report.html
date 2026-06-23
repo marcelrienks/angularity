@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MX5 NC1 — Report</title>
+  <script>
+    const theme = localStorage.getItem('angularity-theme');
+    if (theme === 'light' || theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  </script>
   <link rel="stylesheet" href="css/shared.css">
   <!-- Chart.js v4 via CDN (only page that uses it) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
@@ -198,6 +204,14 @@
     const current = location.pathname.split('/').pop() || 'index.html';
     links.forEach(a => {
       a.classList.toggle('active', a.getAttribute('href') === current);
+    });
+  </script>
+
+  <script type="module" defer>
+    import { initTheme, buildConfigMenu } from './js/theme-manager.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      document.body.appendChild(buildConfigMenu());
     });
   </script>
 

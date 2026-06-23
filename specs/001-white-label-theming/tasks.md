@@ -25,8 +25,8 @@ description: "Task list for White-Label Theming System implementation"
 
 **Purpose**: Audit existing code to establish a clear baseline before changes begin.
 
-- [ ] T001 Audit `site/css/shared.css` — produce inline comment inventory separating functional variables (`--green`, `--orange`, `--red`, `--blue`, `--purple`, `--req-band`, `--req-band-hdr`) from non-functional decorative variables
-- [ ] T002 [P] Audit `site/index.html`, `site/input.html`, `site/report.html` — list all inline `style="..."` attributes that use hard-coded colors or `var(--*)` references for documentation before changes
+- [x] T001 Audit `site/css/shared.css` — produce inline comment inventory separating functional variables (`--green`, `--orange`, `--red`, `--blue`, `--purple`, `--req-band`, `--req-band-hdr`) from non-functional decorative variables
+- [x] T002 [P] Audit `site/index.html`, `site/input.html`, `site/report.html` — list all inline `style="..."` attributes that use hard-coded colors or `var(--*)` references for documentation before changes
 
 **Checkpoint**: Baseline documented — safe to begin CSS restructure.
 
@@ -38,12 +38,12 @@ description: "Task list for White-Label Theming System implementation"
 
 **⚠️ CRITICAL**: Theme switching, white-label base, typography, and both themes all build on this foundation.
 
-- [ ] T003 Remove `@import url('https://fonts.googleapis.com/...')` from `site/css/shared.css` and replace with system monospace font stack: `ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace`
-- [ ] T004 Replace `:root` decorative color variables in `site/css/shared.css` with CSS system color white-label defaults: `--bg: Canvas`, `--panel: rgba(0,0,0,0.04)`, `--text: CanvasText`, `--muted: GrayText`, `--border: ButtonBorder`, `--accent: Highlight`, `--hover: rgba(0,0,0,0.06)`, `--selection: rgba(0,0,0,0.10)` — keep `--green`, `--orange`, `--red`, `--blue`, `--purple`, `--req-band`, `--req-band-hdr`, `--shadow` unchanged
-- [ ] T005 [P] Add `[data-theme="light"]` block to `site/css/shared.css` with VS Code Light+ palette: `--bg:#FFFFFF`, `--panel:#F3F3F3`, `--text:#000000`, `--muted:#767676`, `--border:#D4D4D4`, `--accent:#007ACC`, `--hover:#E8E8E8`, `--selection:#E5EBF1`
-- [ ] T006 [P] Add `[data-theme="dark"]` block to `site/css/shared.css` with VS Code Dark+ palette: `--bg:#1E1E1E`, `--panel:#252526`, `--text:#D4D4D4`, `--muted:#A6A6A6`, `--border:#3A3D41`, `--accent:#007ACC`, `--hover:#2D2D30`, `--selection:#3A3D41`
-- [ ] T007 Add typography scale variables to `:root` in `site/css/shared.css`: `--font-size-h:1.4rem`, `--font-size-sh:1.0rem`, `--font-size-p:0.875rem`
-- [ ] T008 Create `site/js/theme-manager.js` with: (a) exported `initTheme()` function that reads `localStorage.getItem('angularity-theme')`, validates value is `'light'`|`'dark'`, and calls `document.documentElement.setAttribute('data-theme', value)`; (b) exported `setTheme(value)` function that validates, writes to localStorage, and applies the attribute; (c) exported `buildConfigMenu()` that creates the gear button and dropdown DOM nodes (do not attach to document yet)
+- [x] T003 Remove `@import url('https://fonts.googleapis.com/...')` from `site/css/shared.css` and replace with system monospace font stack: `ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace`
+- [x] T004 Replace `:root` decorative color variables in `site/css/shared.css` with CSS system color white-label defaults: `--bg: Canvas`, `--panel: rgba(0,0,0,0.04)`, `--text: CanvasText`, `--muted: GrayText`, `--border: ButtonBorder`, `--accent: Highlight`, `--hover: rgba(0,0,0,0.06)`, `--selection: rgba(0,0,0,0.10)` — keep `--green`, `--orange`, `--red`, `--blue`, `--purple`, `--req-band`, `--req-band-hdr`, `--shadow` unchanged
+- [x] T005 [P] Add `[data-theme="light"]` block to `site/css/shared.css` with VS Code Light+ palette: `--bg:#FFFFFF`, `--panel:#F3F3F3`, `--text:#000000`, `--muted:#767676`, `--border:#D4D4D4`, `--accent:#007ACC`, `--hover:#E8E8E8`, `--selection:#E5EBF1`
+- [x] T006 [P] Add `[data-theme="dark"]` block to `site/css/shared.css` with VS Code Dark+ palette: `--bg:#1E1E1E`, `--panel:#252526`, `--text:#D4D4D4`, `--muted:#A6A6A6`, `--border:#3A3D41`, `--accent:#007ACC`, `--hover:#2D2D30`, `--selection:#3A3D41`
+- [x] T007 Add typography scale variables to `:root` in `site/css/shared.css`: `--font-size-h:1.4rem`, `--font-size-sh:1.0rem`, `--font-size-p:0.875rem`
+- [x] T008 Create `site/js/theme-manager.js` with: (a) exported `initTheme()` function that reads `localStorage.getItem('angularity-theme')`, validates value is `'light'`|`'dark'`, and calls `document.documentElement.setAttribute('data-theme', value)`; (b) exported `setTheme(value)` function that validates, writes to localStorage, and applies the attribute; (c) exported `buildConfigMenu()` that creates the gear button and dropdown DOM nodes (do not attach to document yet)
 
 **Checkpoint**: CSS variable infrastructure complete — user story implementation can begin.
 
@@ -57,18 +57,18 @@ description: "Task list for White-Label Theming System implementation"
 
 ### Tests for User Story 1 (Constitution Principle III — REQUIRED)
 
-- [ ] T009 [US1] Write Puppeteer tests in `tests/theme/theme-switching.test.js` covering: config menu visibility, theme selection applies correct CSS variable values, localStorage persistence across navigation, FOUC prevention on reload, invalid localStorage value fallback (quickstart.md Scenarios 1–3, 9)
+- [x] T009 [US1] Write Puppeteer tests in `tests/theme/theme-switching.test.js` covering: config menu visibility, theme selection applies correct CSS variable values, localStorage persistence across navigation, FOUC prevention on reload, invalid localStorage value fallback (quickstart.md Scenarios 1–3, 9)
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Add FOUC-prevention inline `<script>` to `<head>` of `site/index.html` — must appear before the CSS `<link>` tag: reads `localStorage.getItem('angularity-theme')`, sets `document.documentElement.setAttribute('data-theme', value)` if valid
-- [ ] T011 [P] [US1] Add identical FOUC-prevention inline `<script>` to `<head>` of `site/input.html`
-- [ ] T012 [P] [US1] Add identical FOUC-prevention inline `<script>` to `<head>` of `site/report.html`
-- [ ] T013 [US1] Add config menu HTML to `site/index.html` — fixed top-right `<div id="theme-config">` containing `<button id="theme-toggle">⚙</button>` and `<div id="theme-dropdown">` with Light and Dark buttons; add `<script src="js/theme-manager.js" defer></script>` before `</body>`
-- [ ] T014 [P] [US1] Add identical config menu HTML and script tag to `site/input.html`
-- [ ] T015 [P] [US1] Add identical config menu HTML and script tag to `site/report.html`
-- [ ] T016 [US1] Implement `buildConfigMenu()` attachment and event listeners in `site/js/theme-manager.js`: on DOMContentLoaded call `buildConfigMenu()`, attach to document body, wire Light/Dark buttons to call `setTheme()`, wire gear button to toggle dropdown visibility, wire document click-outside to close dropdown
-- [ ] T017 [US1] Add `.theme-config` and `.theme-dropdown` CSS rules to `site/css/shared.css` — fixed position top-right, z-index above all content, dropdown panel using `--panel`, `--border`, `--text` variables, button hover using `--hover`
+- [x] T010 [US1] Add FOUC-prevention inline `<script>` to `<head>` of `site/index.html` — must appear before the CSS `<link>` tag: reads `localStorage.getItem('angularity-theme')`, sets `document.documentElement.setAttribute('data-theme', value)` if valid
+- [x] T011 [P] [US1] Add identical FOUC-prevention inline `<script>` to `<head>` of `site/input.html`
+- [x] T012 [P] [US1] Add identical FOUC-prevention inline `<script>` to `<head>` of `site/report.html`
+- [x] T013 [US1] Add config menu HTML to `site/index.html` — fixed top-right `<div id="theme-config">` containing `<button id="theme-toggle">⚙</button>` and `<div id="theme-dropdown">` with Light and Dark buttons; add `<script src="js/theme-manager.js" defer></script>` before `</body>`
+- [x] T014 [P] [US1] Add identical config menu HTML and script tag to `site/input.html`
+- [x] T015 [P] [US1] Add identical config menu HTML and script tag to `site/report.html`
+- [x] T016 [US1] Implement `buildConfigMenu()` attachment and event listeners in `site/js/theme-manager.js`: on DOMContentLoaded call `buildConfigMenu()`, attach to document body, wire Light/Dark buttons to call `setTheme()`, wire gear button to toggle dropdown visibility, wire document click-outside to close dropdown
+- [x] T017 [US1] Add `.theme-config` and `.theme-dropdown` CSS rules to `site/css/shared.css` — fixed position top-right, z-index above all content, dropdown panel using `--panel`, `--border`, `--text` variables, button hover using `--hover`
 
 **Checkpoint**: Theme switching fully functional. Config menu visible on all pages. Dark/Light toggle persists across reloads and navigation. 
 
