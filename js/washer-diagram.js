@@ -236,7 +236,7 @@ const LABEL_RADIUS = R_OUTER - 36; // adjusted scale: 18 * 2 = 36
 
 /**
  * Build washer SVG with position scale (-6 to +6).
- * 
+ *
  * Coordinate system:
  *   SVG standard: X right, Y down, angles clockwise from right (0° = right)
  *   Washer layout: 180° arc from 9 o'clock (180°) through 6 o'clock (90°) to 3 o'clock (0°)
@@ -259,8 +259,16 @@ function _buildWasherSVG(position, colour) {
   svgEl.setAttribute('class', 'washer-svg');
   svgEl.setAttribute('aria-label', `Eccentric bolt position ${_sign(position)}`);
 
+  // Get theme-aware colors from CSS variables
+  const rootStyles = getComputedStyle(document.documentElement);
+  const panelAltColor = rootStyles.getPropertyValue('--panel-alt').trim();
+  const panelDeepColor = rootStyles.getPropertyValue('--panel-deep').trim();
+  const borderColor = rootStyles.getPropertyValue('--border').trim();
+  const mutedColor = rootStyles.getPropertyValue('--muted').trim();
+  const mutedStrongColor = rootStyles.getPropertyValue('--muted-strong').trim();
+
   // ── Background disc (washer outer ring) ──────────────────────────────────
-  svgEl.appendChild(_circle(CX, CY, R_OUTER, '#1c2430', '#30363d', 2.4));  // scaled: 1.2 * 2 = 2.4
+  svgEl.appendChild(_circle(CX, CY, R_OUTER, panelDeepColor, borderColor, 2.4));  // scaled: 1.2 * 2 = 2.4
 
   // ── Create rotation group ────────────────────────────────────────────────
   // All washer components (markers, labels, bolt hole) rotate together.
@@ -270,14 +278,14 @@ function _buildWasherSVG(position, colour) {
   const numPositions = selectedPositions.length;
   const anglePerPosition = numPositions > 1 ? 180 / (numPositions - 1) : 180;
   const rotationDegrees = position * anglePerPosition;
-  
+
   const rotationGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   rotationGroup.setAttribute('transform', `rotate(${rotationDegrees} ${CX} ${CY})`);
 
   // ── Position marking scale (dynamic based on measurement density) ─────────
   // Markers span bottom semicircle (180° arc): 9 o'clock to 3 o'clock via 6 o'clock
   // Marker for position i is at angle: 180 - (i + 6) × anglePerPosition degrees
-  
+
   // Get measurement density range (e.g., 6 for 13-point, 2 for 5-point)
   const currentDensity = getCurrentMeasurementDensity();
   const densityRange = Math.floor((currentDensity - 1) / 2);
@@ -301,19 +309,19 @@ function _buildWasherSVG(position, colour) {
     if (isEndpoint) {
       tickLength = 24;
       tickStrokeWidth = 4.2;
-      tickColor = COLOURS.muted;
+      tickColor = mutedColor;
       fontSize = '20';
       fontWeight = '700';
     } else if (isEven) {
       tickLength = 15;
       tickStrokeWidth = 2.8;
-      tickColor = COLOURS.muted;
+      tickColor = mutedColor;
       fontSize = '16';
       fontWeight = '700';
     } else if (isOdd) {
       tickLength = 8;
       tickStrokeWidth = 1.6;
-      tickColor = COLOURS.mutedStrong;
+      tickColor = mutedStrongColor;
       fontSize = '13';
       fontWeight = '600';
     }
@@ -355,7 +363,7 @@ function _buildWasherSVG(position, colour) {
       text.setAttribute('font-size', fontSize);
       text.setAttribute('font-weight', fontWeight);
       text.setAttribute('font-family', "'Share Tech Mono', monospace");
-      text.setAttribute('fill', isEndpoint ? COLOURS.muted : COLOURS.mutedStrong);
+      text.setAttribute('fill', isEndpoint ? mutedColor : mutedStrongColor);
       // Rotate text to align with radial direction, then rotate 90° counter-clockwise
       const textRotation = markerAngleDeg - 90;
       text.setAttribute('transform', `rotate(${textRotation} ${lx.toFixed(2)} ${(ly + yOffset).toFixed(2)})`);
@@ -418,13 +426,17 @@ function _buildBlankWasherSVG() {
   svgEl.setAttribute('class', 'washer-svg-placeholder');
   svgEl.setAttribute('aria-label', 'Blank washer placeholder (Phase 2)');
 
+  // Get theme-aware colors from CSS variables
+  const rootStyles = getComputedStyle(document.documentElement);
+  const mutedColor = rootStyles.getPropertyValue('--muted').trim();
+
   // ── Outer ring (dashed, muted) ──────────────────────────────────────────
   const outerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   outerCircle.setAttribute('cx', CX.toFixed(2));
   outerCircle.setAttribute('cy', CY.toFixed(2));
   outerCircle.setAttribute('r', R_OUTER.toFixed(2));
   outerCircle.setAttribute('fill', 'none');
-  outerCircle.setAttribute('stroke', COLOURS.mutedStrong);
+  outerCircle.setAttribute('stroke', mutedColor);
   outerCircle.setAttribute('stroke-width', '2.4');  // scaled: 1.2 * 2 = 2.4
   outerCircle.setAttribute('stroke-dasharray', '8 8');  // scaled: 4 4 * 2 = 8 8
   svgEl.appendChild(outerCircle);
@@ -435,7 +447,7 @@ function _buildBlankWasherSVG() {
   centerCircle.setAttribute('cy', CY.toFixed(2));
   centerCircle.setAttribute('r', '16');  // scaled: 8 * 2 = 16
   centerCircle.setAttribute('fill', 'none');
-  centerCircle.setAttribute('stroke', COLOURS.mutedStrong);
+  centerCircle.setAttribute('stroke', mutedColor);
   centerCircle.setAttribute('stroke-width', '2.4');  // scaled: 1.2 * 2 = 2.4
   centerCircle.setAttribute('stroke-dasharray', '4 4');  // keep proportional
   svgEl.appendChild(centerCircle);
@@ -449,7 +461,7 @@ function _buildBlankWasherSVG() {
   text.setAttribute('font-size', '20');  // scaled: 10 * 2 = 20
   text.setAttribute('font-weight', '400');
   text.setAttribute('font-style', 'italic');
-  text.setAttribute('fill', COLOURS.mutedStrong);
+  text.setAttribute('fill', mutedColor);
   text.textContent = 'Coming Soon';
   svgEl.appendChild(text);
 
