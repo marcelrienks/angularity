@@ -749,6 +749,8 @@ h3, h4, h5, h6 {
   padding: 12px 10px;
   text-align: center;
   border-bottom: 1px solid var(--border);
+  font-size: var(--font-size-p);
+  font-weight: var(--font-weight-sh);
 }
 
 .data-table td {
@@ -756,6 +758,7 @@ h3, h4, h5, h6 {
   text-align: center;
   border-bottom: 1px solid #21262d;
   color: var(--subtle);
+  font-weight: var(--font-weight-p);
 }
 
 .data-table tr:last-child td {
