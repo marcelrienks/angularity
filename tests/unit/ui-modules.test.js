@@ -7,41 +7,41 @@
 import { BOLT_POSITIONS, WHEELS, TARGET_CAMBER, TARGET_CASTER } from '../../js/constants.js';
 
 describe('UI Modules', () => {
-  describe('T072-T073+: UI module structure validation', () => {
-    test('T072.1: Constants support 13x13 grid for UI rendering', () => {
+  describe('UI module structure validation', () => {
+    test('Constants support 13x13 grid for UI rendering', () => {
       expect(BOLT_POSITIONS).toHaveLength(13);
       const gridSize = BOLT_POSITIONS.length * BOLT_POSITIONS.length;
       expect(gridSize).toBe(169);
     });
 
-    test('T072.2: Wheel identifiers match expected UI tabs', () => {
+    test('Wheel identifiers match expected UI tabs', () => {
       expect(WHEELS).toContain('FL');
       expect(WHEELS).toContain('FR');
       expect(WHEELS.length).toBe(4);  // FL, FR, RL, RR
     });
 
-    test('T073.1: Target values are numeric for display', () => {
+    test('Target values are numeric for display', () => {
       expect(typeof TARGET_CAMBER).toBe('number');
       expect(typeof TARGET_CASTER).toBe('number');
       expect(TARGET_CAMBER).toBeLessThan(0);  // Negative camber
       expect(TARGET_CASTER).toBeGreaterThan(0);  // Positive caster
     });
 
-    test('T073.2: Grid dimensions consistent for table rendering', () => {
+    test('Grid dimensions consistent for table rendering', () => {
       const rows = BOLT_POSITIONS.length;
       const cols = BOLT_POSITIONS.length;
       expect(rows).toBe(cols);
       expect(rows * cols).toBe(169);
     });
 
-    test('T073.3: Corner positions exist for boundary testing', () => {
+    test('Corner positions exist for boundary testing', () => {
       const corners = [-6, 6];
       corners.forEach(corner => {
         expect(BOLT_POSITIONS).toContain(corner);
       });
     });
 
-    test('T073.4: Center position (0,0) present for diagram rendering', () => {
+    test('Center position (0,0) present for diagram rendering', () => {
       expect(BOLT_POSITIONS).toContain(0);
       const centerIndex = BOLT_POSITIONS.indexOf(0);
       expect(centerIndex).toBe(6);  // Middle of 13 positions

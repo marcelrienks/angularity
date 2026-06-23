@@ -26,7 +26,7 @@ describe('math-utils.js', () => {
   // T051: calculateCaster formula
   // ─────────────────────────────────────────────────────────────
   describe('calculateCaster()', () => {
-    test('T051.1: Should calculate caster as dynamic multiplier × |camberCW - camberACW|', () => {
+    test('Should calculate caster as dynamic multiplier × |camberCW - camberACW|', () => {
       const camberNeg20 = -0.8;
       const camberPos20 = -1.2;
       const sweep = Math.abs(camberPos20 - camberNeg20);  // 0.4°
@@ -37,7 +37,7 @@ describe('math-utils.js', () => {
       expect(result).toBeCloseTo(expectedCaster, 4);
     });
 
-    test('T051.2: Should work with various camber sweeps', () => {
+    test('Should work with various camber sweeps', () => {
       const testCases = [
         { neg20: -1.0, pos20: -1.0, expectedSweep: 0 },
         { neg20: -0.5, pos20: -1.5, expectedSweep: 1.0 },
@@ -52,11 +52,11 @@ describe('math-utils.js', () => {
       });
     });
 
-    test('T051.3: 15:1 steering ratio produces 24° effective wheel angle', () => {
+    test('15:1 steering ratio produces 24° effective wheel angle', () => {
       expect(calculateEffectiveWheelAngle(15)).toBeCloseTo(24, 8);
     });
 
-    test('T051.4: Rear wheel caster calculation uses same formula as front', () => {
+    test('Rear wheel caster calculation uses same formula as front', () => {
       const camberFL_neg20 = -0.8;
       const camberFL_pos20 = -1.2;
       const casterFL = calculateCaster(camberFL_neg20, camberFL_pos20, { steeringRatio: 15 });
@@ -77,7 +77,7 @@ describe('math-utils.js', () => {
   // T052: calculateDeltas returns object (CRITICAL!)
   // ─────────────────────────────────────────────────────────────
   describe('calculateDeltas()', () => {
-    test('T052.1: Should return object with delta and absDelta (not single number)', () => {
+    test('Should return object with delta and absDelta (not single number)', () => {
       const value = -1.1;
       const target = -1.0;
       
@@ -89,7 +89,7 @@ describe('math-utils.js', () => {
       expect(result).toHaveProperty('absDelta');
     });
 
-    test('T052.2: delta should be signed difference (value - target)', () => {
+    test('delta should be signed difference (value - target)', () => {
       const testCases = [
         { value: -1.1, target: -1.0, expectedDelta: -0.1 },
         { value: -0.9, target: -1.0, expectedDelta: 0.1 },
@@ -103,7 +103,7 @@ describe('math-utils.js', () => {
       });
     });
 
-    test('T052.3: absDelta should be absolute value of delta', () => {
+    test('absDelta should be absolute value of delta', () => {
       const testCases = [
         { value: -1.1, target: -1.0, expectedAbsDelta: 0.1 },
         { value: -0.9, target: -1.0, expectedAbsDelta: 0.1 },
@@ -122,32 +122,32 @@ describe('math-utils.js', () => {
   // T053: getColorThreshold boundary values (integration tests tier logic)
   // ─────────────────────────────────────────────────────────────
   describe('getColorThreshold() - boundary values', () => {
-    test('T053.4: Camber boundary 0.15° (green threshold)', () => {
+    test('Camber boundary 0.15° (green threshold)', () => {
       expect(getColorThreshold(0.15, 'camber')).toBe('target-met');
       expect(getColorThreshold(0.151, 'camber')).toBe('near-target');
     });
 
-    test('T053.5: Camber boundary 0.40° (orange/red boundary)', () => {
+    test('Camber boundary 0.40° (orange/red boundary)', () => {
       expect(getColorThreshold(0.40, 'camber')).toBe('near-target');
       expect(getColorThreshold(0.401, 'camber')).toBe('off-target');
     });
 
-    test('T053.6: Caster boundary 0.25° (green threshold)', () => {
+    test('Caster boundary 0.25° (green threshold)', () => {
       expect(getColorThreshold(0.25, 'caster')).toBe('target-met');
       expect(getColorThreshold(0.251, 'caster')).toBe('near-target');
     });
 
-    test('T053.7: Caster boundary 0.60° (orange/red boundary)', () => {
+    test('Caster boundary 0.60° (orange/red boundary)', () => {
       expect(getColorThreshold(0.60, 'caster')).toBe('near-target');
       expect(getColorThreshold(0.601, 'caster')).toBe('off-target');
     });
 
-    test('T053.8: Toe boundary 0.10° (green threshold)', () => {
+    test('Toe boundary 0.10° (green threshold)', () => {
       expect(getColorThreshold(0.10, 'toe')).toBe('target-met');
       expect(getColorThreshold(0.101, 'toe')).toBe('near-target');
     });
 
-    test('T053.9: Toe boundary 0.20° (orange/red boundary)', () => {
+    test('Toe boundary 0.20° (orange/red boundary)', () => {
       expect(getColorThreshold(0.20, 'toe')).toBe('near-target');
       expect(getColorThreshold(0.201, 'toe')).toBe('off-target');
     });
@@ -158,12 +158,12 @@ describe('math-utils.js', () => {
   // T057: formatAngle with degree symbol
   // ─────────────────────────────────────────────────────────────
   describe('formatAngle()', () => {
-    test('T057.1: Should include degree symbol', () => {
+    test('Should include degree symbol', () => {
       const result = formatAngle(2.456, 2);
       expect(result).toContain('°');
     });
 
-    test('T057.2: Should format with specified precision', () => {
+    test('Should format with specified precision', () => {
       const testCases = [
         { value: 2.456, precision: 2, expected: '2.46°' },
         { value: 1.234, precision: 2, expected: '1.23°' },
@@ -177,17 +177,17 @@ describe('math-utils.js', () => {
       });
     });
 
-    test('T057.3: Default precision should be 2 decimal places', () => {
+    test('Default precision should be 2 decimal places', () => {
       const result = formatAngle(1.234);
       expect(result).toBe('1.23°');
     });
 
-    test('T057.4: Should work with negative angles', () => {
+    test('Should work with negative angles', () => {
       const result = formatAngle(-1.1);
       expect(result).toBe('-1.10°');
     });
 
-    test('T057.5: Should work with zero', () => {
+    test('Should work with zero', () => {
       const result = formatAngle(0);
       expect(result).toBe('0.00°');
     });
@@ -197,12 +197,12 @@ describe('math-utils.js', () => {
   // T058: formatMillimeters with mm suffix
   // ─────────────────────────────────────────────────────────────
   describe('formatMillimeters()', () => {
-    test('T058.1: Should include mm suffix', () => {
+    test('Should include mm suffix', () => {
       const result = formatMillimeters(0.375, 2);
       expect(result).toContain('mm');
     });
 
-    test('T058.2: Should format with specified precision', () => {
+    test('Should format with specified precision', () => {
       const testCases = [
         { value: 0.375, precision: 2, expected: '0.38 mm' },
         { value: 1.234, precision: 2, expected: '1.23 mm' },
@@ -216,22 +216,22 @@ describe('math-utils.js', () => {
       });
     });
 
-    test('T058.3: Default precision should be 2 decimal places', () => {
+    test('Default precision should be 2 decimal places', () => {
       const result = formatMillimeters(1.234);
       expect(result).toBe('1.23 mm');
     });
 
-    test('T058.4: Should work with negative values', () => {
+    test('Should work with negative values', () => {
       const result = formatMillimeters(-0.5);
       expect(result).toBe('-0.50 mm');
     });
 
-    test('T058.5: Should work with zero', () => {
+    test('Should work with zero', () => {
       const result = formatMillimeters(0);
       expect(result).toBe('0.00 mm');
     });
 
-    test('T058.6: Should use correct spacing (" mm", not "mm")', () => {
+    test('Should use correct spacing (" mm", not "mm")', () => {
       const result = formatMillimeters(1.0);
       expect(result).toMatch(/ mm$/);
       expect(result).not.toMatch(/^.*\d+mm$/);  // Should not match "1.00mm"
@@ -243,7 +243,7 @@ describe('math-utils.js', () => {
   // Integration tests
   // ─────────────────────────────────────────────────────────────
   describe('Integration: Complete calculation pipeline', () => {
-    test('T059.1: Calculate caster, then compute deltas, then determine color', () => {
+    test('Calculate caster, then compute deltas, then determine color', () => {
       const camberNeg20 = -0.8;
       const camberPos20 = -1.2;
       const targetCaster = 5.0;
@@ -262,7 +262,7 @@ describe('math-utils.js', () => {
       expect(['target-met', 'near-target', 'off-target']).toContain(color);
     });
 
-    test('T059.2: Format angle and millimeters in report', () => {
+    test('Format angle and millimeters in report', () => {
       const camber = -1.1;
       const toe = 0.58;
       
@@ -280,11 +280,11 @@ describe('math-utils.js', () => {
   // toeDegreesToResultantMm — previously untested
   // ─────────────────────────────────────────────────────────────
   describe('toeDegreesToResultantMm()', () => {
-    test('T060.1: Zero degrees yields zero mm offset', () => {
+    test('Zero degrees yields zero mm offset', () => {
       expect(toeDegreesToResultantMm(0, 469)).toBeCloseTo(0, 5);
     });
 
-    test('T060.2: Small angle approximation: result ≈ diameter × angle_rad', () => {
+    test('Small angle approximation: result ≈ diameter × angle_rad', () => {
       // For small angles, tan(θ) ≈ θ in radians
       const deg = 0.07;
       const diameter = 469;
@@ -293,30 +293,30 @@ describe('math-utils.js', () => {
       expect(toeDegreesToResultantMm(deg, diameter)).toBeCloseTo(expected, 8);
     });
 
-    test('T060.3: Standard MX-5 toe: 0.07° per wheel, 469 mm diameter → ~0.574 mm', () => {
+    test('Standard MX-5 toe: 0.07° per wheel, 469 mm diameter → ~0.574 mm', () => {
       const result = toeDegreesToResultantMm(0.07, 469);
       expect(result).toBeCloseTo(0.574, 2);
     });
 
-    test('T060.4: Negative toe degrees gives negative offset', () => {
+    test('Negative toe degrees gives negative offset', () => {
       const pos = toeDegreesToResultantMm(0.07, 469);
       const neg = toeDegreesToResultantMm(-0.07, 469);
       expect(neg).toBeCloseTo(-pos, 8);
     });
 
-    test('T060.5: Larger wheel diameter gives proportionally larger offset', () => {
+    test('Larger wheel diameter gives proportionally larger offset', () => {
       const r1 = toeDegreesToResultantMm(0.07, 469);
       const r2 = toeDegreesToResultantMm(0.07, 938); // double diameter
       expect(r2).toBeCloseTo(r1 * 2, 6);
     });
 
-    test('T060.6: Throws on invalid inputs', () => {
+    test('Throws on invalid inputs', () => {
       expect(() => toeDegreesToResultantMm(NaN, 469)).toThrow();
       expect(() => toeDegreesToResultantMm(0.07, 0)).toThrow();
       expect(() => toeDegreesToResultantMm(0.07, -100)).toThrow();
     });
 
-    test('T060.7: Result uses tan(), not linear approximation for larger angles', () => {
+    test('Result uses tan(), not linear approximation for larger angles', () => {
       // At 45°, tan(45°) = 1, so result = diameter
       const result = toeDegreesToResultantMm(45, 100);
       expect(result).toBeCloseTo(100, 4);
@@ -327,21 +327,21 @@ describe('math-utils.js', () => {
   // calculateCasterMultiplier — explicit value check
   // ─────────────────────────────────────────────────────────────
   describe('calculateCasterMultiplier() — value verification', () => {
-    test('T061.1: 15:1 ratio, 360° sweep → 24° wheel angle → multiplier = 1/(2·sin24°)', () => {
+    test('15:1 ratio, 360° sweep → 24° wheel angle → multiplier = 1/(2·sin24°)', () => {
       const expected = 1 / (2 * Math.sin(24 * Math.PI / 180));
       expect(calculateCasterMultiplier({ steeringRatio: 15, steeringWheelSweepDegrees: 360 })).toBeCloseTo(expected, 8);
     });
 
-    test('T061.2: Explicit wheel degrees override', () => {
+    test('Explicit wheel degrees override', () => {
       const expected = 1 / (2 * Math.sin(20 * Math.PI / 180));
       expect(calculateCasterMultiplier({ wheelDegrees: 20 })).toBeCloseTo(expected, 8);
     });
 
-    test('T061.3: Throws on zero wheel angle (division by zero)', () => {
+    test('Throws on zero wheel angle (division by zero)', () => {
       expect(() => calculateCasterMultiplier({ wheelDegrees: 0 })).toThrow();
     });
 
-    test('T061.4: For 5° caster with 24° wheel angle, sweep = multiplier⁻¹ × 5 × 2', () => {
+    test('For 5° caster with 24° wheel angle, sweep = multiplier⁻¹ × 5 × 2', () => {
       const mult = calculateCasterMultiplier({ steeringRatio: 15 });
       const expectedSweepForFiveDegCaster = 2 * Math.sin(24 * Math.PI / 180) * 5;
       expect(1 / mult * 5).toBeCloseTo(expectedSweepForFiveDegCaster, 6);
