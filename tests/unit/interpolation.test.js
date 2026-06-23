@@ -22,14 +22,14 @@ import {
 describe('interpolation.js', () => {
   describe('interpolateGrid()', () => {
     // T025: Basic functionality - sparse grid to dense 13x13
-    test('T025.1: Should return 13x13 grid from single center point', () => {
+    test('Should return 13x13 grid from single center point', () => {
       const result = interpolateGrid(minimalGridSingleCenter);
       expect(result).toHaveLength(13);
       expect(result[0]).toHaveLength(13);
       expect(result.length * result[0].length).toBe(169);
     });
 
-    test('T025.2: Should populate all 169 cells', () => {
+    test('Should populate all 169 cells', () => {
       const result = interpolateGrid(minimalGridFL);
       let populatedCount = 0;
       for (let i = 0; i < 13; i++) {
@@ -45,7 +45,7 @@ describe('interpolation.js', () => {
       expect(populatedCount).toBeGreaterThan(0);
     });
 
-    test('T025.3: Should maintain 2D array structure (not flat)', () => {
+    test('Should maintain 2D array structure (not flat)', () => {
       const result = interpolateGrid(minimalGridFL);
       expect(Array.isArray(result)).toBe(true);
       expect(Array.isArray(result[0])).toBe(true);
@@ -53,7 +53,7 @@ describe('interpolation.js', () => {
     });
 
     // T026: Measured cells return exact values
-    test('T026.1: Should return exact value for measured center cell', () => {
+    test('Should return exact value for measured center cell', () => {
       const input = [
         { camberBolt: 0, casterBolt: 0, neg20: -1.0, zero: -1.1, pos20: -1.2 }
       ];
@@ -69,7 +69,7 @@ describe('interpolation.js', () => {
       });
     });
 
-    test('T026.2: Should mark measured cells with isInterpolated=false', () => {
+    test('Should mark measured cells with isInterpolated=false', () => {
       const result = interpolateGrid(minimalGridFL);
       const centerIdx = 6;
       const cell = result[centerIdx][centerIdx];
@@ -77,7 +77,7 @@ describe('interpolation.js', () => {
     });
 
     // T027: Unmeasured cells use bilinear interpolation
-    test('T027.1: Should interpolate unmeasured cells (isInterpolated=true)', () => {
+    test('Should interpolate unmeasured cells (isInterpolated=true)', () => {
       const input = [
         { camberBolt: -6, casterBolt: -6, neg20: -0.7, zero: -0.8, pos20: -0.9 },
         { camberBolt: 6, casterBolt: 6, neg20: -1.3, zero: -1.4, pos20: -1.5 }
@@ -94,7 +94,7 @@ describe('interpolation.js', () => {
       expect(Number.isNaN(center.neg20)).toBe(false);
     });
 
-    test('T027.2: Should use actual bilinear interpolation (not nearest-neighbor)', () => {
+    test('Should use actual bilinear interpolation (not nearest-neighbor)', () => {
       const input = [
         { camberBolt: 0, casterBolt: 0, neg20: 0.0, zero: 0.0, pos20: 0.0 },
         { camberBolt: 2, casterBolt: 0, neg20: 2.0, zero: 2.0, pos20: 2.0 },
@@ -107,7 +107,7 @@ describe('interpolation.js', () => {
     });
 
     // T028: Single-point grid fallback
-    test('T028.1: Should handle single-point grid gracefully', () => {
+    test('Should handle single-point grid gracefully', () => {
       const result = interpolateGrid(singlePointGrid);
       expect(result).toHaveLength(13);
       expect(result[0]).toHaveLength(13);
@@ -124,7 +124,7 @@ describe('interpolation.js', () => {
       expect(exactMatches).toBe(1);
     });
 
-    test('T028.2: Should not produce NaN or errors for single point', () => {
+    test('Should not produce NaN or errors for single point', () => {
       const result = interpolateGrid(singlePointGrid);
       for (let i = 0; i < 13; i++) {
         for (let j = 0; j < 13; j++) {
@@ -138,7 +138,7 @@ describe('interpolation.js', () => {
     });
 
     // T029: Edge cases with multiple points
-    test('T029.1: Should handle dense grid (many measured points)', () => {
+    test('Should handle dense grid (many measured points)', () => {
       const result = interpolateGrid(denseGrid5x5);
       expect(result).toHaveLength(13);
       expect(result[0]).toHaveLength(13);
@@ -155,7 +155,7 @@ describe('interpolation.js', () => {
       expect(goodCoverage).toBeGreaterThan(150); // Most cells valid
     });
 
-    test('T029.2: Should handle sparse grid with clusters', () => {
+    test('Should handle sparse grid with clusters', () => {
       const result = interpolateGrid(crossPatternGrid);
       expect(result).toHaveLength(13);
       expect(result[0]).toHaveLength(13);
@@ -169,7 +169,7 @@ describe('interpolation.js', () => {
     });
 
     // T030: Empty grid error handling
-    test('T030.1: Should throw error on empty input (no measured points)', () => {
+    test('Should throw error on empty input (no measured points)', () => {
       // Empty input has no measured front/rear positions, causing _nearest() to fail
       // This is expected behavior: code requires at least one measurement
       expect(() => {
@@ -177,14 +177,14 @@ describe('interpolation.js', () => {
       }).toThrow();
     });
 
-    test('T030.2: Empty input throws TypeError from reduce on empty array', () => {
+    test('Empty input throws TypeError from reduce on empty array', () => {
       expect(() => {
         interpolateGrid([]);
       }).toThrow(TypeError);
     });
 
     // T031: Boundary extrapolation
-    test('T031.1: Should handle extrapolation beyond measured range', () => {
+    test('Should handle extrapolation beyond measured range', () => {
       const input = [
         { camberBolt: -2, casterBolt: -2, neg20: -1.0, zero: -1.1, pos20: -1.2 },
         { camberBolt: 0, casterBolt: 0, neg20: -1.1, zero: -1.2, pos20: -1.3 },
@@ -198,7 +198,7 @@ describe('interpolation.js', () => {
       expect(typeof corner.neg20).toBe('number');
     });
 
-    test('T031.2: Should not produce NaN in boundary extrapolation', () => {
+    test('Should not produce NaN in boundary extrapolation', () => {
       const input = [
         { camberBolt: -2, casterBolt: -2, neg20: -1.0, zero: -1.1, pos20: -1.2 },
         { camberBolt: 2, casterBolt: 2, neg20: -1.2, zero: -1.3, pos20: -1.4 },
@@ -212,7 +212,7 @@ describe('interpolation.js', () => {
     });
 
     // T032: BOLT_POSITIONS ordering
-    test('T032.1: Should use correct grid indexing for BOLT_POSITIONS', () => {
+    test('Should use correct grid indexing for BOLT_POSITIONS', () => {
       const input = [
         { camberBolt: -6, casterBolt: -6, neg20: 1, zero: 1, pos20: 1 },
         { camberBolt: 6, casterBolt: 6, neg20: 2, zero: 2, pos20: 2 },
@@ -230,7 +230,7 @@ describe('interpolation.js', () => {
       expect(result[12][12].neg20).toBe(2);
     });
 
-    test('T032.2: Should verify 13x13 BOLT_POSITIONS structure', () => {
+    test('Should verify 13x13 BOLT_POSITIONS structure', () => {
       const input = [
         { camberBolt: 0, casterBolt: 0, neg20: 0, zero: 0, pos20: 0 },
       ];
@@ -242,7 +242,7 @@ describe('interpolation.js', () => {
     });
 
     // T033: Sparse data behavior (10-30 measured points)
-    test('T033.1: Should handle sparse grid (10 measured points out of 169)', () => {
+    test('Should handle sparse grid (10 measured points out of 169)', () => {
       const sparseData = [
         { camberBolt: -6, casterBolt: -6, neg20: -1.5, zero: -1.6, pos20: -1.7 },
         { camberBolt: -6, casterBolt: 0, neg20: -1.3, zero: -1.4, pos20: -1.5 },
@@ -271,7 +271,7 @@ describe('interpolation.js', () => {
       expect(interpolatedCount).toBe(169 - sparseData.length);
     });
 
-    test('T033.2: Interpolated points should fall within measured value range', () => {
+    test('Interpolated points should fall within measured value range', () => {
       const data = [
         { camberBolt: -6, casterBolt: -6, neg20: -1.5, zero: -1.5, pos20: -1.5 },
         { camberBolt: 6, casterBolt: 6, neg20: -0.5, zero: -0.5, pos20: -0.5 }

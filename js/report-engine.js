@@ -61,10 +61,11 @@
  * The Golden Rule prioritizes camber first because missing camber targets severely
  * impacts tire wear and handling, while caster compromises are more tolerant.
  *
- * Scoring tiers (implemented in _computeGoldenRuleScore):
- *   1. If |camberDelta| > 1.0°  → Position is unacceptable (score = 100+ penalty)
- *   2. If |camberDelta| ≤ 0.5° AND |casterDelta| > 0.4° → Prioritize caster (3x weight)
- *   3. Otherwise → Balanced approach with camber preference (1.5x weight on camber)
+ * Scoring formula (implemented in _computeGoldenRuleScore):
+ *   1. |camberDelta| > 1.0°  → unacceptable (score = 100+ penalty)
+ *   2. Otherwise             → absCamber×12 + absCaster×casterWeight + absToe×1.2
+ *      where casterWeight decays linearly from 3.0 (perfect camber) to 1.0 (0.5° error).
+ *      Continuous formula guarantees monotonicity: worsening camber always raises score.
  *
  * See README.md § Prioritisation: The Golden Rule for full discussion of principles.
  */
@@ -81,34 +82,39 @@ import { calculateCaster, calculateCasterMultiplier } from './math-utils.js';
 
 /**
  * Apply the "Golden Rule" to calculate a prioritised score.
- * 
+ *
  * Golden Rule: Camber is fundamental to performance. If you have to miss
  * camber by >1.0° just to hit caster, you're usually hurting the car.
- * 
- * Strategy:
- * - If within 0.5° of camber target but far from caster target → prioritize caster
- * - If camber error would exceed 1.0° → heavily penalize (reject the position)
- * - Otherwise use weighted score (camber 1.5x, caster 1x)
+ *
+ * Design invariant (monotonicity): a position with WORSE camber must NEVER score
+ * better than one with BETTER camber when caster is identical. The original two-tier
+ * formula (abrupt weight drop at 0.5°) violated this — the caster weight dropped from
+ * 3× to 1× at the boundary, so a position with |camberDelta|=0.501° scored lower
+ * (better) than one at 0.499° when |casterDelta|≥0.125°. Fixed by a continuous caster
+ * weight that decays linearly from 3× (perfect camber) to 1× (0.5° camber error), with
+ * a camber weight of 12 that guarantees monotonicity for any |casterDelta| < 3°.
+ *
+ * Scoring tiers:
+ *   1. |camberDelta| > 1.0°  → unacceptable (score ≥ 100)
+ *   2. |camberDelta| ≤ 1.0°  → absCamber×12 + absCaster×casterWeight(absCamber) + absToe×1.2
+ *      casterWeight = 1 + 2×max(0, (0.5 − absCamber)/0.5)  [3× at 0°, 1× at ≥0.5°]
  */
 function _computeGoldenRuleScore(camberDelta, casterDelta, toeDelta = null) {
-  const absCamberDelta = Math.abs(camberDelta);
-  const absCasterDelta = casterDelta == null ? 0 : Math.abs(casterDelta);
-  const absToeDelta = toeDelta == null ? 0 : Math.abs(toeDelta);
+  const absCamber = Math.abs(camberDelta);
+  const absCaster = casterDelta == null ? 0 : Math.abs(casterDelta);
+  const absToe    = toeDelta    == null ? 0 : Math.abs(toeDelta);
 
-  // Rule 1: If camber is VERY bad (>1.0°), heavily penalize regardless of caster
-  if (absCamberDelta > 1.0) {
-    return 100 + absCamberDelta * 10 + absToeDelta * 0.5; // Large penalty: poor camber is unacceptable
+  // Tier 1: camber >1.0° is unacceptable — hard penalty regardless of caster
+  if (absCamber > 1.0) {
+    return 100 + absCamber * 10 + absToe * 0.5;
   }
 
-  // Rule 2: If camber is GOOD (≤0.5°) but caster is BAD (>0.4°),
-  // prioritize caster accuracy (weight it 3x)
-  if (absCamberDelta <= 0.5 && absCasterDelta > 0.4) {
-    return absCamberDelta + absCasterDelta * 3.0 + absToeDelta * 0.8;
-  }
-
-  // Default Rule 3: Balanced approach with slight camber preference
-  // Camber is fundamental, so weight it 1.5x vs caster at 1x
-  return absCamberDelta * 1.5 + absCasterDelta + absToeDelta * 1.2;
+  // Tiers 2+3 unified: caster weight decays continuously as camber error grows.
+  // At absCamber=0:    casterWeight=3.0  (caster prioritised when camber is already perfect)
+  // At absCamber≥0.5°: casterWeight=1.0  (camber is now the bottleneck)
+  // camberWeight=12 ensures d(score)/d(absCamber) > 0 for all |casterDelta| < 3° (12 > 3×4).
+  const casterWeight = 1.0 + 2.0 * Math.max(0, (0.5 - absCamber) / 0.5);
+  return absCamber * 12.0 + absCaster * casterWeight + absToe * 1.2;
 }
 
 /**
@@ -623,7 +629,7 @@ function _findBestSymmetricPosition(flRows, frRows, targetCamber, targetCaster) 
 function _findBestSymmetricCamberPair(flRows, frRows, targetCamber) {
   if (!flRows || !frRows || flRows.length === 0 || frRows.length === 0) return null;
 
-  const CAMBER_TOLERANCE = 0.3;  // ±0.3° matches GREEN threshold in STYLING.md
+  const CAMBER_TOLERANCE = SYMMETRY_TOLERANCE;
   let bestScore = Infinity;
   let bestPair = null;
 
@@ -696,7 +702,7 @@ function _findBestSymmetricCamberPair(flRows, frRows, targetCamber) {
  * This isolates caster optimization: finds positions on each wheel that achieve
  * the same caster value, regardless of what camber those positions produce.
  * 
- * Tolerance: ±0.15° for caster (allows for measurement variability)
+ * Tolerance: ±SYMMETRY_TOLERANCE (0.3°) for caster matching between wheels
  * 
  * @param {DerivedRow[]} flRows - All 169 positions for FL
  * @param {DerivedRow[]} frRows - All 169 positions for FR
@@ -707,7 +713,7 @@ function _findBestSymmetricCamberPair(flRows, frRows, targetCamber) {
 function _findBestSymmetricCasterPair(flRows, frRows, targetCaster) {
   if (!flRows || !frRows || flRows.length === 0 || frRows.length === 0) return null;
 
-  const CASTER_TOLERANCE = 0.15;  // Wider tolerance for caster matching
+  const CASTER_TOLERANCE = SYMMETRY_TOLERANCE;
   let bestScore = Infinity;
   let bestPair = null;
 
@@ -769,7 +775,7 @@ function _findBestSymmetricCasterPair(flRows, frRows, targetCaster) {
     }
   }
 
-  // Search result: return best pair found within ±0.15° caster and ±0.10 mm toe tolerance
+  // Search result: return best pair found within ±SYMMETRY_TOLERANCE caster and TOE_SYMMETRY_TOLERANCE
   // See DECISIONS.md § Decision 3: Symmetry Tolerance
   return bestPair;
 }

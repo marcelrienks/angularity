@@ -17,8 +17,8 @@ describe('localstorage-io.js', () => {
     localStorage.clear();
   });
 
-  describe('T065-T071: localStorage persistence', () => {
-    test('T065.1: loadFullGridState should return object for all wheels', () => {
+  describe('localStorage persistence', () => {
+    test('loadFullGridState should return object for all wheels', () => {
       const state = loadFullGridState();
       
       expect(state).toBeInstanceOf(Object);
@@ -27,23 +27,23 @@ describe('localstorage-io.js', () => {
       });
     });
 
-    test('T065.2: loadWheelFromStorage returns null when not stored', () => {
+    test('loadWheelFromStorage returns null when not stored', () => {
       const state = loadWheelFromStorage('FL');
       expect(state).toBeNull();
     });
 
-    test('T066.1: loadWheelToeFromStorage returns null when not stored', () => {
+    test('loadWheelToeFromStorage returns null when not stored', () => {
       const toe = loadWheelToeFromStorage('FL');
       expect(toe).toBeNull();
     });
 
-    test('T066.2: loadWheelToeFromStorage returns null for invalid data', () => {
+    test('loadWheelToeFromStorage returns null for invalid data', () => {
       localStorage.setItem('mx5-nc1-alignment-toe-FL', 'invalid');
       const toe = loadWheelToeFromStorage('FL');
       expect(toe).toBeNull();
     });
 
-    test('T067.1: loadFullGridState returns all 4 wheels', () => {
+    test('loadFullGridState returns all 4 wheels', () => {
       const state = loadFullGridState();
       
       expect(Object.keys(state)).toContain('FL');
@@ -52,14 +52,14 @@ describe('localstorage-io.js', () => {
       expect(Object.keys(state)).toContain('RR');
     });
 
-    test('T068.1: loadWheelFromStorage handles invalid JSON gracefully', () => {
+    test('loadWheelFromStorage handles invalid JSON gracefully', () => {
       localStorage.setItem('mx5-nc1-alignment-FL', '{invalid-json');
       const state = loadWheelFromStorage('FL');
       
       expect(state).toBeNull();
     });
 
-    test('T069.1: loadWheelToeFromStorage is accessible for all wheels', () => {
+    test('loadWheelToeFromStorage is accessible for all wheels', () => {
       const toeFL = loadWheelToeFromStorage('FL');
       const toeFR = loadWheelToeFromStorage('FR');
       
@@ -67,7 +67,7 @@ describe('localstorage-io.js', () => {
       expect(toeFR === null || typeof toeFR === 'number').toBe(true);
     });
 
-    test('T070.1: loadFullGridState returns same structure on repeated calls', () => {
+    test('loadFullGridState returns same structure on repeated calls', () => {
       const state1 = loadFullGridState();
       const state2 = loadFullGridState();
       
@@ -77,7 +77,7 @@ describe('localstorage-io.js', () => {
       });
     });
 
-    test('T071.1: Invalid JSON in localStorage returns null gracefully', () => {
+    test('Invalid JSON in localStorage returns null gracefully', () => {
       localStorage.setItem('mx5-nc1-alignment-FL', 'invalid-json-{');
       const state = loadWheelFromStorage('FL');
       

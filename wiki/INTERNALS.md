@@ -151,11 +151,13 @@ for (let fi = 0; fi < 13; fi++) {
   for (let ri = 0; ri < 13; ri++) {
     const cell = grid[fi][ri];
     
-    // Average three steering angles for camber
-    const camber = (cell.neg20 + cell.zero + cell.pos20) / 3;
+    // Camber = straight-ahead reading ONLY (wheels pointing forward)
+    // neg20/pos20 readings are for caster only — do NOT average them in
+    const camber = cell.zero;
     
-    // Caster = change in camber across steering angles
-    const caster = (cell.neg20 - cell.pos20) / 40;  // 40° steering range
+    // Caster = trigonometric formula from camber change across steering sweep
+    // = multiplier × |neg20 - pos20|, where multiplier = 1 / (2 × sin(wheelAngle))
+    const caster = calculateCaster(cell.neg20, cell.pos20, casterOptions);
     
     cell.camber = camber;
     cell.caster = caster;
@@ -197,49 +199,53 @@ return {
 
 ## Golden Rule Scoring
 
-### Three-Tier Hierarchy
+### Continuous Formula (monotonic)
 
-Scoring prioritizes camber over caster (tire wear > handling). Tiers:
+Scoring prioritizes camber over caster (tire wear > handling).
 
-#### Tier 1: Camber Lock
-If |camberDelta| > 1.0°, heavily penalize (score = 100+). Camber way off causes tire wear.
+#### Tier 1: Hard Rejection
+If |camberDelta| > 1.0°, score = 100 + |camberDelta|×10. Position is rejected.
 
-#### Tier 2: Conditional Caster (Tier 1 not triggered)
-If |camberDelta| ≤ 0.5° AND |casterDelta| > 0.4°, weight caster 3x. Camber excellent, optimize caster.
+#### Tiers 2+3: Continuous weighted score
+```
+casterWeight = 1.0 + 2.0 × max(0, (0.5 − |camberDelta|) / 0.5)
+score = |camberDelta| × 12.0 + |casterDelta| × casterWeight + |toeDelta| × 1.2
+```
 
-#### Tier 3: Balanced Weighting (Tier 1 & 2 not triggered)
-Default: `score = (1.5 × |camberDelta|) + (1.0 × |casterDelta|)` + optional toe component
+`casterWeight` decays linearly: **3.0** at perfect camber → **1.0** at ≥ 0.5° camber error.  
+`camberWeight = 12` guarantees monotonicity: worsening camber always raises score (safe for |casterDelta| < 3°).
+
+**Invariant**: a position with worse camber must NEVER score better than one with better camber when caster is equal.
 
 ### Scoring Examples
 
 **Position A: Camber -1.10° (perfect), Caster 4.95° (0.05° off)**
 ```
-|camber_error| = |-1.10 - (-1.1)| = 0.0°   ← ≤ 0.5°, so use Tier 2
-|caster_error| = |4.95 - 5.0| = 0.05°
-
-Score (Tier 2) = (1.5 × 0.0) + (3.0 × 0.05) = 0.15  ← Best camber, trades caster
+|camberDelta| = 0.0°, |casterDelta| = 0.05°
+casterWeight = 1.0 + 2.0 × (0.5 − 0.0)/0.5 = 3.0
+Score = 0.0×12 + 0.05×3.0 = 0.15
 ```
 
 **Position B: Camber -1.15° (0.05° off), Caster 5.00° (perfect)**
 ```
-|camber_error| = |-1.15 - (-1.1)| = 0.05°  ← ≤ 0.5°, so use Tier 2
-|caster_error| = |5.00 - 5.0| = 0.0°
-
-Score (Tier 2) = (1.5 × 0.05) + (3.0 × 0.0) = 0.075  ← Best caster, trades camber
+|camberDelta| = 0.05°, |casterDelta| = 0.0°
+casterWeight = 1.0 + 2.0 × (0.5 − 0.05)/0.5 = 2.8
+Score = 0.05×12 + 0.0×2.8 = 0.60
 ```
 
 **Position C: Camber -1.12° (0.02° off), Caster 4.98° (0.02° off)**
 ```
-|camber_error| = |-1.12 - (-1.1)| = 0.02°  ← ≤ 0.5°, so use Tier 2
-|caster_error| = |4.98 - 5.0| = 0.02°
-
-Score (Tier 2) = (1.5 × 0.02) + (3.0 × 0.02) = 0.09  ← Best compromise
+|camberDelta| = 0.02°, |casterDelta| = 0.02°
+casterWeight = 1.0 + 2.0 × (0.5 − 0.02)/0.5 = 2.92
+Score = 0.02×12 + 0.02×2.92 = 0.24 + 0.058 = 0.298
 ```
 
 **Result**:
-- bestCasterCell = Position B (score 0.075, prioritizes caster)
-- bestCamberCell = Position A (score 0.15, prioritizes camber)
-- bestCell (compromise) = Position C (score 0.09, balances both)
+- bestCamberCell = Position A (min |camberDelta| = 0.0°)
+- bestCasterCell = Position B (min |casterDelta| = 0.0°)
+- bestCell (compromise) = Position A (lowest score = 0.15)
+
+Position A wins the compromise because perfect camber + tiny caster error outweighs the alternatives — as the Golden Rule intends.
 
 ---
 
