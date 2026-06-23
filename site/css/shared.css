@@ -395,67 +395,62 @@ body {
 }
 
 .grid-corner {
-  background: var(--panel-alt);
+  background: var(--bg);
   border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
   position: sticky;
   top: 0;
   left: 0;
   z-index: 5;
-  width: 56px;
-  max-width: 56px;
-  height: 56px;
+  width: 44px;
+  height: 34px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem;
-  color: var(--blue);
-  font-weight: 600;
-  letter-spacing: 0;
+  font-size: 0.5rem;
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: 0.06em;
   line-height: 1.1;
-  white-space: normal;
-  overflow-wrap: break-word;
-  padding: 8px 4px;
-  text-align: center;
+  white-space: pre-line;
 }
 
 .grid-col-header {
-  background: var(--panel-alt);
+  background: var(--bg);
   border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 4;
   width: 140px;
-  height: 56px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--muted);
+  font-size: 1rem;  /* increased from 0.85rem */
+  font-weight: 800;
+  color: var(--muted-strong);
   text-align: center;
-  padding: 12px 10px;
-  letter-spacing: 0.08em;
+  padding: 4px;
+  letter-spacing: 0.06em;
 }
 
 .grid-row-header {
-  background: var(--panel-alt);
+  background: var(--bg);
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   position: sticky;
   left: 0;
   z-index: 3;
-  width: 56px;
-  height: 56px;
+  width: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--green);
-  padding: 12px 10px;
+  font-size: 0.95rem;  /* increased from 0.8rem */
+  font-weight: 800;
+  color: var(--muted-strong);
+  padding: 4px;
 }
 
 .grid-cell {
@@ -463,16 +458,12 @@ body {
   flex-direction: column;
   gap: 3px;
   border-right: 1px solid var(--border);
-  border-bottom: 1px solid #21262d;
-  padding: 12px 10px;
+  border-bottom: 1px solid var(--border);
+  padding: 6px 6px 6px 8px;
   min-width: 140px;
-  background: var(--panel);
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: var(--subtle);
+  background: var(--bg);
+  align-items: stretch;
   border-left: 3px solid transparent;
-  height: 56px;
 }
 
 .grid-cell.filled {
@@ -1549,9 +1540,8 @@ body {
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0;
-  max-width: 38px;
+  width: 56px;
   white-space: pre-wrap;
-  overflow-wrap: break-word;
   line-height: 1.1;
   word-wrap: break-word;
 }
