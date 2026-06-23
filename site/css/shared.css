@@ -365,8 +365,7 @@ h3, h4, h5, h6 {
 .grid-col-header,
 .grid-row-header,
 .data-table th.col-label-row,
-.data-table .row-label,
-.data-table th {
+.data-table .row-label {
   font-size: var(--font-size-p);
   font-weight: var(--font-weight-h);
   color: var(--muted-strong);
