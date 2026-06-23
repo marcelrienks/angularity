@@ -31,3 +31,9 @@ Thumbs.db
 
 # Temporary
 *.tmp
+
+# Local tooling config (not tracked)
+.cel/
+.claude/
+.github/
+.specify/
