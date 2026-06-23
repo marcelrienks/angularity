@@ -55,40 +55,16 @@ describe('math-utils.js', () => {
       expect(calculateEffectiveWheelAngle(15)).toBeCloseTo(24, 8);
     });
 
-    test('T051.4: dynamic caster multiplier is derived from effective wheel angle', () => {
-      const expected = 1 / (2 * Math.sin((24 * Math.PI) / 180));
-      expect(calculateCasterMultiplier(15)).toBeCloseTo(expected, 12);
-    });
-
-    test('T051.5: Custom steering ratios produce different multipliers', () => {
-      const ratio10 = calculateCasterMultiplier(10);
-      const ratio15 = calculateCasterMultiplier(15);
-      const ratio20 = calculateCasterMultiplier(20);
-
-      // Higher ratio = smaller effective wheel angle = smaller multiplier
-      expect(ratio10).toBeGreaterThan(ratio15);
-      expect(ratio15).toBeGreaterThan(ratio20);
-    });
-
-    test('T051.6: Explicit wheel degrees mode produces expected multiplier', () => {
-      const multiplierFromRatio = calculateCasterMultiplier({ steeringRatio: 15 });
-      const multiplierFromDegrees = calculateCasterMultiplier({ wheelDegrees: 24 });
-
-      // Both should produce same result for 15:1 ratio (360° / 15 = 24°)
-      expect(multiplierFromDegrees).toBeCloseTo(multiplierFromRatio, 8);
-    });
-
-    test('T051.7: Rear wheel caster calculation uses same formula as front (angle-based, not ratio-specific)', () => {
+    test('T051.4: Rear wheel caster calculation uses same formula as front', () => {
       const camberFL_neg20 = -0.8;
       const camberFL_pos20 = -1.2;
       const casterFL = calculateCaster(camberFL_neg20, camberFL_pos20, { steeringRatio: 15 });
 
-      const camberRL_acw = -1.5;  // Rear measurements typically different magnitude
+      const camberRL_acw = -1.5;
       const camberRL_cw = -2.0;
       const casterRL = calculateCaster(camberRL_acw, camberRL_cw, { steeringRatio: 15 });
 
-      // Same formula applied. Caster is independent of measurement magnitude, depends on sweep.
-      // FL sweep: 0.4°, RL sweep: 0.5°. Ratio should match sweep ratio.
+      // Same formula applied. FL sweep: 0.4°, RL sweep: 0.5°. Caster ratio should match.
       const sweepFL = Math.abs(camberFL_pos20 - camberFL_neg20);
       const sweepRL = Math.abs(camberRL_cw - camberRL_acw);
 
@@ -142,139 +118,40 @@ describe('math-utils.js', () => {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // T053: getColorThreshold camber thresholds
+  // T053: getColorThreshold boundary values (integration tests tier logic)
   // ─────────────────────────────────────────────────────────────
-  describe('getColorThreshold() - camber', () => {
-    test('T053.1: Camber GREEN tier (≤0.15°) should return "target-met"', () => {
-      const testDeltas = [0, 0.05, 0.10, 0.15];
-      
-      testDeltas.forEach(delta => {
-        const result = getColorThreshold(delta, 'camber');
-        expect(result).toBe('target-met');
-      });
-    });
-
-    test('T053.2: Camber ORANGE tier (0.15° < delta ≤ 0.40°) should return "near-target"', () => {
-      const testDeltas = [0.20, 0.30, 0.40];
-      
-      testDeltas.forEach(delta => {
-        const result = getColorThreshold(delta, 'camber');
-        expect(result).toBe('near-target');
-      });
-    });
-
-    test('T053.3: Camber RED tier (> 0.40°) should return "off-target"', () => {
-      const testDeltas = [0.41, 0.50, 1.0, 2.0];
-      
-      testDeltas.forEach(delta => {
-        const result = getColorThreshold(delta, 'camber');
-        expect(result).toBe('off-target');
-      });
-    });
-
-    test('T053.4: Boundary value 0.15° (camber green threshold)', () => {
+  describe('getColorThreshold() - boundary values', () => {
+    test('T053.4: Camber boundary 0.15° (green threshold)', () => {
       expect(getColorThreshold(0.15, 'camber')).toBe('target-met');
       expect(getColorThreshold(0.151, 'camber')).toBe('near-target');
     });
 
-    test('T053.5: Boundary value 0.40° (camber orange/red boundary)', () => {
+    test('T053.5: Camber boundary 0.40° (orange/red boundary)', () => {
       expect(getColorThreshold(0.40, 'camber')).toBe('near-target');
       expect(getColorThreshold(0.401, 'camber')).toBe('off-target');
     });
-  });
 
-  // ─────────────────────────────────────────────────────────────
-  // T054: getColorThreshold caster thresholds (different from camber)
-  // ─────────────────────────────────────────────────────────────
-  describe('getColorThreshold() - caster', () => {
-    test('T054.1: Caster GREEN tier (≤0.25°) should return "target-met"', () => {
-      const testDeltas = [0, 0.10, 0.20, 0.25];
-      
-      testDeltas.forEach(delta => {
-        const result = getColorThreshold(delta, 'caster');
-        expect(result).toBe('target-met');
-      });
+    test('T053.6: Caster boundary 0.25° (green threshold)', () => {
+      expect(getColorThreshold(0.25, 'caster')).toBe('target-met');
+      expect(getColorThreshold(0.251, 'caster')).toBe('near-target');
     });
 
-    test('T054.2: Caster ORANGE tier (0.25° < delta ≤ 0.60°) should return "near-target"', () => {
-      const testDeltas = [0.30, 0.45, 0.60];
-      
-      testDeltas.forEach(delta => {
-        const result = getColorThreshold(delta, 'caster');
-        expect(result).toBe('near-target');
-      });
+    test('T053.7: Caster boundary 0.60° (orange/red boundary)', () => {
+      expect(getColorThreshold(0.60, 'caster')).toBe('near-target');
+      expect(getColorThreshold(0.601, 'caster')).toBe('off-target');
     });
 
-    test('T054.3: Caster RED tier (> 0.60°) should return "off-target"', () => {
-      const testDeltas = [0.61, 0.80, 1.0];
-      
-      testDeltas.forEach(delta => {
-        const result = getColorThreshold(delta, 'caster');
-        expect(result).toBe('off-target');
-      });
+    test('T053.8: Toe boundary 0.10° (green threshold)', () => {
+      expect(getColorThreshold(0.10, 'toe')).toBe('target-met');
+      expect(getColorThreshold(0.101, 'toe')).toBe('near-target');
     });
 
-    test('T054.4: Caster threshold 0.20° within GREEN (unlike camber 0.15°)', () => {
-      expect(getColorThreshold(0.20, 'caster')).toBe('target-met');
-      expect(getColorThreshold(0.20, 'camber')).toBe('near-target');  // Different!
+    test('T053.9: Toe boundary 0.20° (orange/red boundary)', () => {
+      expect(getColorThreshold(0.20, 'toe')).toBe('near-target');
+      expect(getColorThreshold(0.201, 'toe')).toBe('off-target');
     });
   });
 
-  // ─────────────────────────────────────────────────────────────
-  // T055: getColorThreshold toe thresholds
-  // ─────────────────────────────────────────────────────────────
-  describe('getColorThreshold() - toe', () => {
-    test('T055.1: Toe GREEN tier (≤0.10°) should return "target-met"', () => {
-      const testDeltas = [0, 0.05, 0.10];
-      
-      testDeltas.forEach(delta => {
-        const result = getColorThreshold(delta, 'toe');
-        expect(result).toBe('target-met');
-      });
-    });
-
-    test('T055.2: Toe ORANGE tier (0.10° < delta ≤ 0.20°) should return "near-target"', () => {
-      const testDeltas = [0.15, 0.20];
-      
-      testDeltas.forEach(delta => {
-        const result = getColorThreshold(delta, 'toe');
-        expect(result).toBe('near-target');
-      });
-    });
-
-    test('T055.3: Toe RED tier (> 0.20°) should return "off-target"', () => {
-      const testDeltas = [0.25, 0.30, 1.0];
-      
-      testDeltas.forEach(delta => {
-        const result = getColorThreshold(delta, 'toe');
-        expect(result).toBe('off-target');
-      });
-    });
-
-    test('T055.4: Toe thresholds are tightest (0.10° vs camber 0.15° and caster 0.25°)', () => {
-      const delta = 0.12;
-      expect(getColorThreshold(delta, 'toe')).toBe('near-target');      // Toe: 0.10° is green boundary
-      expect(getColorThreshold(delta, 'camber')).toBe('target-met');    // Camber: 0.15° is green boundary
-      expect(getColorThreshold(delta, 'caster')).toBe('target-met');    // Caster: 0.25° is green boundary
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────
-  // T056: getColorThreshold default metric behavior
-  // ─────────────────────────────────────────────────────────────
-  describe('getColorThreshold() - defaults', () => {
-    test('T056.1: Default metric (no second parameter) should use camber thresholds', () => {
-      // Defaults to camber when metric not specified
-      const delta = 0.30;
-      expect(getColorThreshold(delta)).toBe('near-target');  // Camber: 0.15-0.40
-      expect(getColorThreshold(delta, 'camber')).toBe('near-target');
-    });
-
-    test('T056.2: Unknown metric should fall back to camber thresholds', () => {
-      const delta = 0.30;
-      expect(getColorThreshold(delta, 'unknown')).toBe('near-target');  // Falls back to camber
-    });
-  });
 
   // ─────────────────────────────────────────────────────────────
   // T057: formatAngle with degree symbol

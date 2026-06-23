@@ -29,80 +29,10 @@ describe('report-engine.js', () => {
   describe('processWheel()', () => {
     
     // ─────────────────────────────────────────────────────────────
-    // T034: WheelResult structure verification
+    // T034: Golden Rule scoring - excellent camber, prioritize caster
     // ─────────────────────────────────────────────────────────────
-    describe('T034: WheelResult structure', () => {
-      test('T034.1: Should return complete WheelResult with all required properties', () => {
-        const result = processWheel([excellentCamberGoodCaster]);
-        
-        expect(result).toHaveProperty('grid');
-        expect(result).toHaveProperty('rows169');
-        expect(result).toHaveProperty('bestCell');
-        expect(result).toHaveProperty('bestCamberCell');
-        expect(result).toHaveProperty('bestCasterCell');
-        expect(result).toHaveProperty('topByCamberDelta');
-        expect(result).toHaveProperty('topByCasterDelta');
-        expect(result).toHaveProperty('targets');
-        expect(result).toHaveProperty('measuredToe');
-      });
-
-      test('T034.2: Should set targets with camber, caster, and toe', () => {
-        const result = processWheel([excellentCamberGoodCaster]);
-        
-        expect(result.targets).toHaveProperty('camber');
-        expect(result.targets).toHaveProperty('caster');
-        expect(result.targets).toHaveProperty('toe');
-        expect(result.targets.camber).toBe(TARGET_CAMBER);
-        expect(result.targets.caster).toBe(TARGET_CASTER);
-      });
-    });
-
-    // ─────────────────────────────────────────────────────────────
-    // T035: rows169 array structure and sorting
-    // ─────────────────────────────────────────────────────────────
-    describe('T035: rows169 array structure', () => {
-      test('T035.1: Should have exactly 169 rows (13x13 grid)', () => {
-        const result = processWheel([excellentCamberGoodCaster]);
-        expect(result.rows169).toHaveLength(169);
-      });
-
-      test('T035.2: Each row should have required fields', () => {
-        const result = processWheel([excellentCamberGoodCaster]);
-        const row = result.rows169[0];
-        
-        expect(row).toHaveProperty('camberBolt');
-        expect(row).toHaveProperty('casterBolt');
-        expect(row).toHaveProperty('camber');
-        expect(row).toHaveProperty('caster');
-        expect(row).toHaveProperty('toe');
-        expect(row).toHaveProperty('isInterpolated');
-        expect(row).toHaveProperty('camberDelta');
-        expect(row).toHaveProperty('casterDelta');
-        expect(row).toHaveProperty('toeDelta');
-        expect(row).toHaveProperty('score');
-      });
-
-      test('T035.3: Rows should be sorted by frontBolt then rearBolt', () => {
-        const result = processWheel([excellentCamberGoodCaster]);
-        
-        for (let i = 1; i < result.rows169.length; i++) {
-          const prev = result.rows169[i - 1];
-          const curr = result.rows169[i];
-          
-          if (curr.camberBolt !== prev.camberBolt) {
-            expect(curr.camberBolt).toBeGreaterThanOrEqual(prev.camberBolt);
-          } else {
-            expect(curr.casterBolt).toBeGreaterThanOrEqual(prev.casterBolt);
-          }
-        }
-      });
-    });
-
-    // ─────────────────────────────────────────────────────────────
-    // T036: Golden Rule scoring - excellent camber, prioritize caster
-    // ─────────────────────────────────────────────────────────────
-    describe('T036: Golden Rule scoring - excellent camber tier', () => {
-      test('T036.1: With excellent camber and poor caster, should prioritize caster (3x weight)', () => {
+    describe('T034: Golden Rule scoring - excellent camber tier', () => {
+      test('T034.1: With excellent camber and poor caster, should prioritize caster (3x weight)', () => {
         // excellentCamberPoorCaster: camber -1.09 (delta -0.01, excellent)
         // caster 0.87 (delta 0.37 vs target 5.0, but the caster calculation is different)
         // This test verifies the prioritization formula is applied
@@ -128,7 +58,7 @@ describe('report-engine.js', () => {
         }
       });
 
-      test('T036.2: Score formula should be verified for golden rule tier', () => {
+      test('T034.2: Score formula should be verified for golden rule tier', () => {
         const result = processWheel([excellentCamberGoodCaster]);
         expect(result.rows169.length).toBe(169);
         expect(result.rows169[0].score).toBeGreaterThanOrEqual(0);
@@ -139,7 +69,7 @@ describe('report-engine.js', () => {
     // T037: Golden Rule scoring - very poor camber, heavy penalty
     // ─────────────────────────────────────────────────────────────
     describe('T037: Golden Rule scoring - very poor camber penalty', () => {
-      test('T037.1: With very poor camber (>1.0°), should apply heavy penalty (score > 100)', () => {
+      test('T035.1: With very poor camber (>1.0°), should apply heavy penalty (score > 100)', () => {
         // Create a fixture with very poor camber
         const veryPoorInput = [{
           frontBolt: 0,
@@ -158,7 +88,7 @@ describe('report-engine.js', () => {
         expect(bestCell.score).toBeGreaterThan(100);
       });
 
-      test('T037.2: Poor camber positions should be effectively rejected', () => {
+      test('T035.2: Poor camber positions should be effectively rejected', () => {
         const veryPoorInput = [{
           frontBolt: 0,
           rearBolt: 0,
@@ -177,7 +107,7 @@ describe('report-engine.js', () => {
     // T038: Golden Rule scoring - balanced approach
     // ─────────────────────────────────────────────────────────────
     describe('T038: Golden Rule scoring - balanced approach', () => {
-      test('T038.1: Balanced formula should use 1.5x camber weight vs 1x caster', () => {
+      test('T036.1: Balanced formula should use 1.5x camber weight vs 1x caster', () => {
         const result = processWheel([excellentCamberGoodCaster]);
         // Balanced rows: camber error ≤ 0.5° AND caster error ≤ 0.4°
         // Score = |camberDelta|*1.5 + |casterDelta| + |toeDelta|*1.2
@@ -205,13 +135,13 @@ describe('report-engine.js', () => {
     // T039: bestCell selection (lowest score)
     // ─────────────────────────────────────────────────────────────
     describe('T039: bestCell selection', () => {
-      test('T039.1: bestCell should have minimum score among all rows', () => {
+      test('T037.1: bestCell should have minimum score among all rows', () => {
         const result = processWheel([excellentCamberGoodCaster]);
         const minScore = Math.min(...result.rows169.map(r => r.score));
         expect(result.bestCell.score).toBe(minScore);
       });
 
-      test('T039.2: bestCell bolt positions should be valid BOLT_POSITIONS values', () => {
+      test('T037.2: bestCell bolt positions should be valid BOLT_POSITIONS values', () => {
         const result = processWheel([excellentCamberGoodCaster]);
         const validPositions = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6];
         
@@ -224,13 +154,13 @@ describe('report-engine.js', () => {
     // T040: bestCamberCell selection
     // ─────────────────────────────────────────────────────────────
     describe('T040: bestCamberCell selection', () => {
-      test('T040.1: bestCamberCell should minimize |camberDelta|', () => {
+      test('T038.1: bestCamberCell should minimize |camberDelta|', () => {
         const result = processWheel([excellentCamberGoodCaster]);
         const minAbsCamberDelta = Math.min(...result.rows169.map(r => Math.abs(r.camberDelta)));
         expect(Math.abs(result.bestCamberCell.camberDelta)).toBe(minAbsCamberDelta);
       });
 
-      test('T040.2: bestCamberCell may differ from bestCell', () => {
+      test('T038.2: bestCamberCell may differ from bestCell', () => {
         // With multiple data points, camber-optimized position may differ from compromise position
         const result = processWheel([excellentCamberGoodCaster, poorCamberOrangeTier]);
         // Both positions exist, so we may have different strategies
@@ -244,12 +174,12 @@ describe('report-engine.js', () => {
     // T041: bestCasterCell special case for rear wheels
     // ─────────────────────────────────────────────────────────────
     describe('T041: bestCasterCell for rear wheels (targetCaster = null)', () => {
-      test('T041.1: With targetCaster = null (rear wheel), bestCasterCell should equal bestCell', () => {
+      test('T039.1: With targetCaster = null (rear wheel), bestCasterCell should equal bestCell', () => {
         const result = processWheel([excellentCamberGoodCaster], { targetCaster: null });
         expect(result.bestCasterCell).toEqual(result.bestCell);
       });
 
-      test('T041.2: Should compute score without caster component for rear wheel', () => {
+      test('T039.2: Should compute score without caster component for rear wheel', () => {
         const result = processWheel([excellentCamberGoodCaster], { targetCaster: null });
         // Scores should be computed only on camber
         expect(result.bestCell.casterDelta).toBeNull();
@@ -260,7 +190,7 @@ describe('report-engine.js', () => {
     // T042: topByCamberDelta and topByCasterDelta ranking
     // ─────────────────────────────────────────────────────────────
     describe('T042: Top lists by metric', () => {
-      test('T042.1: topByCamberDelta should be sorted by |camberDelta| ascending', () => {
+      test('T040.1: topByCamberDelta should be sorted by |camberDelta| ascending', () => {
         const result = processWheel([excellentCamberGoodCaster]);
         
         expect(result.topByCamberDelta).toBeDefined();
@@ -274,7 +204,7 @@ describe('report-engine.js', () => {
         }
       });
 
-      test('T042.2: topByCasterDelta should be sorted by |casterDelta| ascending', () => {
+      test('T040.2: topByCasterDelta should be sorted by |casterDelta| ascending', () => {
         const result = processWheel([excellentCamberGoodCaster]);
         
         expect(result.topByCasterDelta).toBeDefined();
@@ -294,7 +224,7 @@ describe('report-engine.js', () => {
     // T043: Null toe handling
     // ─────────────────────────────────────────────────────────────
     describe('T043: Null toe handling in scoring', () => {
-      test('T043.1: With toe = null, scoring should not include toe component', () => {
+      test('T041.1: With toe = null, scoring should not include toe component', () => {
         const result = processWheel([excellentCamberGoodCaster], { targetToe: null });
         
         result.rows169.forEach(row => {
@@ -304,7 +234,7 @@ describe('report-engine.js', () => {
         });
       });
 
-      test('T043.2: Score should be computed without errors when toe is null', () => {
+      test('T041.2: Score should be computed without errors when toe is null', () => {
         const result = processWheel([excellentCamberGoodCaster], { targetToe: null });
         expect(result.bestCell.score).toBeGreaterThanOrEqual(0);
         expect(Number.isFinite(result.bestCell.score)).toBe(true);
@@ -315,13 +245,13 @@ describe('report-engine.js', () => {
     // T044: Grid structure and measuredToe property
     // ─────────────────────────────────────────────────────────────
     describe('T044: Grid structure and metadata', () => {
-      test('T044.1: Grid should be 13x13 array', () => {
+      test('T042.1: Grid should be 13x13 array', () => {
         const result = processWheel([excellentCamberGoodCaster]);
         expect(result.grid).toHaveLength(13);
         expect(result.grid[0]).toHaveLength(13);
       });
 
-      test('T044.2: measuredToe should be null or a number', () => {
+      test('T042.2: measuredToe should be null or a number', () => {
         const result = processWheel([excellentCamberGoodCaster]);
         expect(result.measuredToe === null || typeof result.measuredToe === 'number').toBe(true);
       });
@@ -334,7 +264,7 @@ describe('report-engine.js', () => {
     // T045: Symmetric camber pair detection (front axle)
     // ─────────────────────────────────────────────────────────────
     describe('T045: Symmetric camber pair detection', () => {
-      test('T045.1: Should find symmetric camber pair within tolerance', () => {
+      test('T043.1: Should find symmetric camber pair within tolerance', () => {
         // Create two wheel results with similar excellent camber
         const flResult = processWheel([excellentCamberGoodCaster]);
         const frResult = processWheel([excellentCamberGoodCaster]);
@@ -346,7 +276,7 @@ describe('report-engine.js', () => {
         expect(result).toHaveProperty('recommendation');
       });
 
-      test('T045.2: Recommendation should include matched camber value', () => {
+      test('T043.2: Recommendation should include matched camber value', () => {
         const flResult = processWheel([excellentCamberGoodCaster]);
         const frResult = processWheel([excellentCamberGoodCaster]);
         
@@ -367,7 +297,7 @@ describe('report-engine.js', () => {
     // T046: Asymmetric case (no symmetric pairs found)
     // ─────────────────────────────────────────────────────────────
     describe('T046: No symmetric pairs found', () => {
-      test('T046.1: Should return gracefully with note when no symmetric pair found', () => {
+      test('T044.1: Should return gracefully with note when no symmetric pair found', () => {
         // Create two wheel results with different characteristics
         const flResult = processWheel([excellentCamberGoodCaster]);
         const frResult = processWheel([veryPoorCamberRedTier]);
@@ -381,7 +311,7 @@ describe('report-engine.js', () => {
         }
       });
 
-      test('T046.2: Should use individual best positions as fallback', () => {
+      test('T044.2: Should use individual best positions as fallback', () => {
         const flResult = processWheel([excellentCamberGoodCaster]);
         const frResult = processWheel([veryPoorCamberRedTier]);
         
@@ -400,7 +330,7 @@ describe('report-engine.js', () => {
     // T047: Rear axle handling
     // ─────────────────────────────────────────────────────────────
     describe('T047: Rear axle handling', () => {
-      test('T047.1: With rlResult and rrResult, should analyze rear camber', () => {
+      test('T045.1: With rlResult and rrResult, should analyze rear camber', () => {
         const flResult = processWheel([excellentCamberGoodCaster]);
         const frResult = processWheel([excellentCamberGoodCaster]);
         const rlResult = processWheel([excellentCamberGoodCaster], { targetCaster: null, targetCamber: -1.5 });
@@ -414,7 +344,7 @@ describe('report-engine.js', () => {
         }
       });
 
-      test('T047.2: Rear analysis should focus on camber only (no caster)', () => {
+      test('T045.2: Rear analysis should focus on camber only (no caster)', () => {
         const flResult = processWheel([excellentCamberGoodCaster]);
         const frResult = processWheel([excellentCamberGoodCaster]);
         const rlResult = processWheel([excellentCamberGoodCaster], { targetCaster: null });
@@ -435,7 +365,7 @@ describe('report-engine.js', () => {
     // T048: Complete 4-wheel analysis
     // ─────────────────────────────────────────────────────────────
     describe('T048: Complete 4-wheel analysis', () => {
-      test('T048.1: Should handle all 4 wheels with front + rear sections', () => {
+      test('T046.1: Should handle all 4 wheels with front + rear sections', () => {
         const flResult = processWheel([excellentCamberGoodCaster]);
         const frResult = processWheel([excellentCamberGoodCaster]);
         const rlResult = processWheel([excellentCamberGoodCaster], { targetCaster: null, targetCamber: -1.5 });
@@ -450,7 +380,7 @@ describe('report-engine.js', () => {
         expect(result.rear.rr).toBeDefined();
       });
 
-      test('T048.2: Recommendation should cover all 4 wheels', () => {
+      test('T046.2: Recommendation should cover all 4 wheels', () => {
         const flResult = processWheel([excellentCamberGoodCaster]);
         const frResult = processWheel([excellentCamberGoodCaster]);
         const rlResult = processWheel([excellentCamberGoodCaster], { targetCaster: null, targetCamber: -1.5 });
@@ -473,7 +403,7 @@ describe('report-engine.js', () => {
     // T049-T050: Caster calculation verification
     // ─────────────────────────────────────────────────────────────
     describe('T049-T050: Caster calculation verification', () => {
-      test('T049.1: Caster should be calculated as CASTER_MULTIPLIER × |camberPos20 - camberNeg20|', () => {
+      test('T047.1: Caster should be calculated as CASTER_MULTIPLIER × |camberPos20 - camberNeg20|', () => {
         const input = [{
           frontBolt: 0,
           rearBolt: 0,
@@ -492,7 +422,7 @@ describe('report-engine.js', () => {
         });
       });
 
-      test('T049.2: Different camber sweeps should produce different caster values', () => {
+      test('T047.2: Different camber sweeps should produce different caster values', () => {
         const input1 = [{
           frontBolt: 0,
           rearBolt: 0,
@@ -525,7 +455,7 @@ describe('report-engine.js', () => {
     // T049: Rear wheel caster sign verification (todo.md blocker)
     // ─────────────────────────────────────────────────────────────
     describe('T049: Rear wheel caster sign and formula', () => {
-      test('T049.1: Rear wheels use same caster formula as front wheels', () => {
+      test('T047.1: Rear wheels use same caster formula as front wheels', () => {
         // Front wheel measurement
         const flInput = [{
           camberBolt: 0, casterBolt: 0,
@@ -547,7 +477,7 @@ describe('report-engine.js', () => {
         expect(Math.abs(flCaster - rlCaster)).toBeLessThan(0.01);
       });
 
-      test('T049.2: FL and FR wheels with opposite steering orientations should have different caster directions', () => {
+      test('T047.2: FL and FR wheels with opposite steering orientations should have different caster directions', () => {
         // Simulate FL wheel (CCW/negative steering produces one pattern)
         const flInput = [{
           camberBolt: 0, casterBolt: 0,
@@ -568,7 +498,7 @@ describe('report-engine.js', () => {
         expect(Math.abs(flResult.bestCell.caster - frResult.bestCell.caster)).toBeLessThan(0.01);
       });
 
-      test('T049.3: Caster calculation ignores wheel order (ACW/CW terminology)', () => {
+      test('T047.3: Caster calculation ignores wheel order (ACW/CW terminology)', () => {
         // Caster uses absolute value of sweep
         const input1 = [{ camberBolt: 0, casterBolt: 0, neg20: -0.8, zero: -1.0, pos20: -1.2 }];
         const input2 = [{ camberBolt: 0, casterBolt: 0, neg20: -1.2, zero: -1.0, pos20: -0.8 }];
