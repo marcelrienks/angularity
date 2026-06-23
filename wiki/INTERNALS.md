@@ -19,24 +19,21 @@ In-depth technical documentation: algorithms, optimizations, debugging, and edge
 
 ### Mathematical Foundation
 
-Bilinear interpolation estimates a value at point (x, y) using four nearest corner points.
+Bilinear interpolation estimates a value at position (c, s) using the two nearest measured positions on each axis.
 
-**Formula**:
-```
-Let f(x, y) = value at position (x, y)
-Let (x₀, x₁) = two nearest x positions (x₀ < x < x₁)
-Let (y₀, y₁) = two nearest y positions (y₀ < y < y₁)
+**Algorithm**:
+1. Find two nearest measured camber-bolt positions (above/below c)
+2. Find two nearest measured caster-bolt positions (above/below s)
+3. Interpolate linearly on each axis
+4. Combine results using 2D linear weighting
 
-Define normalized distances:
-ux = (x - x₀) / (x₁ - x₀)   where 0 ≤ ux ≤ 1
-uy = (y - y₀) / (y₁ - y₀)   where 0 ≤ uy ≤ 1
+**Fallback**: If only one measured position exists on an axis, use nearest-neighbor (no interpolation on that axis).
 
-Interpolated value:
-f(x, y) = f(x₀,y₀)·(1-ux)·(1-uy) + f(x₁,y₀)·ux·(1-uy)
-        + f(x₀,y₁)·(1-ux)·uy   + f(x₁,y₁)·ux·uy
-```
-
-**In Plain English**: Weight each corner by its distance to the target point. Closer corners have higher weight.
+**Edge cases** (handles gracefully):
+- No measurements → return NaN
+- Single measurement → repeat value (nearest-neighbor)
+- Measurements only on edges → extrapolate using edge values
+- Sparse scattered measurements → linear approximation (best effort)
 
 ### Example: Interpolate at Front -0.5, Rear +1.5
 
@@ -202,28 +199,16 @@ return {
 
 ### Three-Tier Hierarchy
 
-Scoring prioritizes based on camber and caster accuracy.
+Scoring prioritizes camber over caster (tire wear > handling). Tiers:
 
 #### Tier 1: Camber Lock
-```
-If |camber_error| > 1.0°, reject this position entirely
-Score = ∞ (worst possible)
-Rationale: Camber way off causes tire wear and handling issues
-```
+If |camberDelta| > 1.0°, heavily penalize (score = 100+). Camber way off causes tire wear.
 
-#### Tier 2: Conditional Caster
-```
-If |camber_error| ≤ 0.5°:
-  Weight caster 3x (prioritize caster since camber is excellent)
-Else:
-  Fall through to Tier 3
-```
+#### Tier 2: Conditional Caster (Tier 1 not triggered)
+If |camberDelta| ≤ 0.5° AND |casterDelta| > 0.4°, weight caster 3x. Camber excellent, optimize caster.
 
-#### Tier 3: Balanced Weighting
-```
-Default weighted approach:
-  Score = (1.5 × |camber_error|) + (1.0 × |caster_error|)
-```
+#### Tier 3: Balanced Weighting (Tier 1 & 2 not triggered)
+Default: `score = (1.5 × |camberDelta|) + (1.0 × |casterDelta|)` + optional toe component
 
 ### Scoring Examples
 
@@ -255,6 +240,50 @@ Score (Tier 2) = (1.5 × 0.02) + (3.0 × 0.02) = 0.09  ← Best compromise
 - bestCasterCell = Position B (score 0.075, prioritizes caster)
 - bestCamberCell = Position A (score 0.15, prioritizes camber)
 - bestCell (compromise) = Position C (score 0.09, balances both)
+
+---
+
+## Caster Calculation (math-utils.js)
+
+### Steering Ratio vs. Wheel Degrees
+
+Caster is derived from **camber change across a steering sweep**. Two input modes:
+
+#### Mode 1: Steering Ratio (default)
+```
+Steering ratio = Steering wheel rotation ÷ Wheel rotation (e.g., 15:1)
+Default ratio = 15:1
+Steering wheel sweep = 360° (full rotation)
+Effective wheel angle = 360° ÷ 15 = 24°
+```
+
+#### Mode 2: Explicit Wheel Degrees
+```
+Direct wheel steering angle in degrees (e.g., 24°)
+Bypasses ratio calculation
+```
+
+### Caster Formula
+
+```javascript
+const multiplier = 1 / (2 * sin(theta_radians))
+caster = multiplier * |camber_acw - camber_cw|
+
+where theta = effective wheel angle in radians
+```
+
+**Why?** Caster is the rate of camber change per unit steering angle. The trigonometric formula correctly accounts for non-linear steering geometry.
+
+### Example
+```
+Steering ratio = 15:1, Wheel sweep = 24°
+theta = 24° = 0.4189 radians
+sin(0.4189) ≈ 0.4067
+multiplier = 1 / (2 × 0.4067) ≈ 1.229
+
+If camber at CCW ≈ -1.50°, camber at CW ≈ -1.45°:
+caster = 1.229 × |-1.50 - (-1.45)| = 1.229 × 0.05 ≈ 0.061°
+```
 
 ---
 

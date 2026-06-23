@@ -4,29 +4,25 @@
 
 ## Current Work
 
-### [ ] Fix Front-Left Caster Calculation
-**Priority**: High  
-**Blocker**: Phase 1 correctness  
-**Details**: FL wheel steering orientation is opposite to FR (CCW vs CW). Caster formula may need sign flip for FL.
+### [ ] Verify Front-Left Caster Sign Convention
+**Priority**: Medium  
+**Details**: FL wheel steering orientation (CCW) vs FR (CW). Verify caster sign is correct for both wheels.
 
-**Current**:
-```
-FR: caster = (camber_at_-20° - camber_at_+20°) / 40
-FL: caster = (camber_at_+20° - camber_at_-20°) / 40  [NEEDS VERIFICATION]
-```
+**Current**: Uses trigonometric formula `multiplier * |camber_acw - camber_cw|` applied to both wheels.  
+ACW = anti-clockwise (negative steering), CW = clockwise (positive steering).
 
-**Action**: Test FL caster calculation against physical measurements.
+**Action**: Compare calculated caster against physical measurements on test vehicle.
 
 ---
 
-### [ ] Clarify Steering Angle Range
-**Priority**: High  
-**Blocker**: API clarity  
-**Details**: Current system assumes ±20° symmetric sweep. Verify if custom angles (e.g., ±10°, ±30°) supported.
+### [x] Clarify Steering Angle Range
+**Priority**: RESOLVED  
+**Details**: System supports configurable steering geometry via:
+- `TARGET_STEERING_RATIO` (default 15:1) — steering wheel rotation ÷ wheel rotation
+- `TARGET_CASTER_WHEEL_DEGREES` (default 24°) — explicit wheel angle
+- Two caster modes: `'steering-ratio'` or `'wheel-degrees'`
 
-**Current**: architecture.md and guide.md document ±20° only.
-
-**Action**: Test with non-standard angles; update algorithm if needed.
+**Status**: Fully implemented in code (constants.js, math-utils.js). Documentation updated.
 
 ---
 

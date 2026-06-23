@@ -272,46 +272,49 @@ But the actual values shown remain identical; only visual emphasis changes
 
 | Module | Responsibility |
 |--------|---|
-| `constants.js` | Configuration: targets, thresholds, bolt positions, physical constants |
-| `localstorage-io.js` | Read/write localStorage; serialize/deserialize gridState |
+| `constants.js` | Configuration: targets, thresholds, bolt positions, steering ratio, physical constants |
+| `localstorage-io.js` | Read/write localStorage; caching; result aggregation; session state |
 | `csv-io.js` | CSV import/export; file I/O operations |
 
 **gridState Schema** (per wheel):
 ```javascript
-{
-  wheel: 'FL' | 'FR',
-  measurements: [
-    { frontBolt: -6..+6, rearBolt: -6..+6, neg20: number, zero: number, pos20: number },
-    // ... typically 30-100 measurements
-  ]
-}
+measurements: [
+  { camberBolt: -6..+6, casterBolt: -6..+6, neg20: number, zero: number, pos20: number },
+  // ... typically 30-100 measurements
+]
 ```
-Where `neg20`, `zero`, `pos20` are camber readings at −20°, 0°, and +20° steering angles respectively.
-Caster is derived as: `(neg20 − pos20) / 40` (change in camber per degree of steering).
+Where `camberBolt` (front adjustment axis) and `casterBolt` (rear adjustment axis) index the 13×13 grid.
+`neg20`, `zero`, `pos20` are camber readings at three steering angles.
+Caster is derived using trigonometric formula (see internals.md § Caster Calculation).
 
-### **Processing Layer** (Analysis & Calculations)
+### **Calculation Layer** (Analysis & Algorithms)
 
 | Module | Responsibility |
 |--------|---|
-| `report-engine.js` | Core analysis: scoring, grid interpolation, symmetry analysis |
-| `interpolation.js` | Fill gaps in measurement grid using polynomial interpolation |
-| `targets-manager.js` | Calculate target values and acceptable error ranges |
+| `report-engine.js` | Core analysis: Golden Rule scoring, three optima per wheel, symmetry analysis |
+| `interpolation.js` | Bilinear interpolation: fill grid gaps using nearest neighbors |
+| `math-utils.js` | Camber/caster derivation, error calculations, steering geometry |
+| `measurement-utils.js` | Measurement validation, density analysis |
 
 ### **Presentation Layer** (UI & Rendering)
 
 | Module | Responsibility |
 |--------|---|
 | `input-grid.js` | Input sheet: grid rendering, cell editing, auto-save |
-| `report-page.js` | Report: load data, orchestrate rendering, handle events |
-| `chart-builder.js` | Chart.js wrapper: generate camber/caster line charts |
-| `washer-diagram.js` | SVG rendering: eccentric bolt position diagrams |
+| `report-page.js` | Report orchestration: load data, route to renderers, handle UI events, rebuild sections |
+| `report-ui.js` | Shared UI utilities, table building, button management |
+| `chart-builder.js` | Chart.js wrapper: camber/caster line charts |
+| `washer-diagram.js` | SVG bolt position diagrams |
+| `washer-math.js` | Geometric calculations for diagram positioning |
 
-### **Utilities**
+### **Utilities & Support**
 
 | Module | Responsibility |
 |--------|---|
+| `error-handler.js` | Input validation, error recovery strategies |
+| `targets-manager.js` | Target values per wheel; acceptable error ranges |
 | `server.js` | Development web server (Node.js) |
-| `generate-dummy-data.mjs` | Generate sample alignment data for testing |
+| `dummy-data-generator.mjs` | Sample alignment data for testing |
 
 ---
 
@@ -405,20 +408,19 @@ The grid search (13×13 = 169 positions per wheel) explores all possible combina
 
 ---
 
-## Known Limitations & Future Expansion
+## Current Capabilities & Future Expansion
 
-### Phase 1 (Current: Front Wheels, 95% feature-complete)
-- Two wheels (FL, FR) analyzed
-- Camber + Caster (measurements at ±20°, 0° steering angles)
-- Front-only eccentric bolt adjustment
-- Toe measurements captured but not analyzed (Phase 2)
+### Phase 1 (Current: 95% feature-complete)
+- Four wheels (FL, FR, RL, RR) supported
+- Camber + Caster analysis
+- Front and rear bolt adjustment
+- Toe measurements captured but not analyzed
+- Configurable steering geometry (steering ratio or wheel degrees)
 
-### Phase 2 (Planned: Four Wheels)
-- Add RL, RR wheels
-- Modify data structure to support 4 wheels
-- Consider front-rear thrust angle alignment
-- Rear wheels may have different adjustment mechanisms
-- Scoring may need rear-specific targets
+### Phase 2 (Planned)
+- Toe analysis for all four wheels
+- Front-rear thrust angle alignment
+- Advanced symmetry analysis (axle pairs)
 
 ### Phase 3 (Future Ideas, Not Committed)
 - Compare multiple preset strategy sets
@@ -432,46 +434,41 @@ The grid search (13×13 = 169 positions per wheel) explores all possible combina
 
 This section provides visual diagrams of the system architecture, data flows, module relationships, and analysis pipelines using Mermaid.
 
-### System Layers (4-Tier Architecture)
+### System Layers (3-Tier Architecture)
 
 ```mermaid
 graph TB
     subgraph UI["📋 Presentation Layer (6 modules)"]
         IG["input-grid.js<br/>User measurement entry"]
-        RP["report-page.js<br/>Report coordinator"]
-        RUI["report-ui.js<br/>UI utilities"]
-        TB["table-builder.js<br/>Data tables"]
+        RP["report-page.js<br/>Orchestration"]
+        RUI["report-ui.js<br/>Shared UI"]
         CB["chart-builder.js<br/>Line charts"]
-        WD["washer-diagram.js<br/>Bolt position visuals"]
+        WD["washer-diagram.js<br/>Bolt diagrams"]
+        WM["washer-math.js<br/>Geometry"]
     end
     
-    subgraph ORCH["🎯 Orchestration Layer (4 modules)"]
-        RO["report-orchestrator.js<br/>Analysis workflow"]
-        SM["session-manager.js<br/>Session state"]
-        TM["targets-manager.js<br/>User alignment targets"]
-        PM["presets-manager.js<br/>Named presets"]
+    subgraph CALC["⚙️ Calculation Layer (4 modules)"]
+        RE["report-engine.js<br/>Golden Rule<br/>Three optima<br/>Symmetry"]
+        INTERP["interpolation.js<br/>Grid filling"]
+        MU["math-utils.js<br/>Camber/caster<br/>Steering geometry"]
+        MEAS["measurement-utils.js<br/>Validation<br/>Density analysis"]
     end
     
-    subgraph CALC["⚙️ Calculation Layer (3 modules)"]
-        RE["report-engine.js<br/>Golden Rule scoring<br/>Three optima calculation"]
-        INTERP["interpolation.js<br/>Grid interpolation"]
-        MU["math-utils.js<br/>Vector math"]
+    subgraph DATA["💾 Data Layer (4 modules)"]
+        CONST["constants.js<br/>Config & targets"]
+        LSI["localstorage-io.js<br/>Storage + caching"]
+        CSI["csv-io.js<br/>Import/export"]
+        TM["targets-manager.js<br/>Target ranges"]
     end
     
-    subgraph DATA["💾 Data Layer (3 modules)"]
-        LSI["localstorage-io.js<br/>Browser storage"]
-        CSI["csv-io.js<br/>CSV import/export"]
-        RDL["report-data-layer.js<br/>Data aggregation"]
-    end
-    
-    UI -->|reads| ORCH
-    ORCH -->|coordinates| CALC
-    CALC -->|requests| DATA
-    UI -->|displays| CALC
-    UI -->|persists via| DATA
+    UI -->|calls| CALC
+    UI -->|persists via| LSI
+    CALC -->|reads config| CONST
+    CALC -->|reads targets| TM
+    INTERP -->|fills grid| RE
+    MU -->|derives values| RE
     
     style UI fill:#e1f5ff
-    style ORCH fill:#fff3e0
     style CALC fill:#f3e5f5
     style DATA fill:#e8f5e9
 ```
