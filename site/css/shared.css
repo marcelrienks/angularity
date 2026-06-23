@@ -324,7 +324,7 @@ body {
 .grid-corner,
 .grid-col-header,
 .grid-row-header,
-.data-table .col-label-row th,
+.data-table th.col-label-row,
 .data-table .row-label,
 .data-table th {
   font-size: 0.85rem;
@@ -1651,7 +1651,7 @@ body {
   min-width: 3em;
 }
 
-.data-table .col-label-row th {
+.data-table th.col-label-row {
   background: var(--panel-alt);
   padding: 8px 4px;
   width: 56px;
