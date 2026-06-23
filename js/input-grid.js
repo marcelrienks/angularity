@@ -280,8 +280,8 @@ function _buildCell(camberBolt, casterBolt) {
     inp.type        = 'text';
     inp.inputMode   = 'decimal';
     inp.placeholder = '—';
-    inp.dataset.camber = camberBolt;
-    inp.dataset.caster  = casterBolt;
+    inp.dataset.front = camberBolt;
+    inp.dataset.rear  = casterBolt;
     inp.dataset.key   = key;
     inp.setAttribute('aria-label', `${label} steering wheel, camber ${_sign(camberBolt)}, caster ${_sign(casterBolt)}`);
 
