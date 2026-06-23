@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Vehicle Suspension Alignment</title>
+  <link rel="stylesheet" href="css/shared.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="title">Home Vehicle Suspension Alignment</span>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="input.html">Input Sheet</a></li>
+      <li><a href="report.html">Report</a></li>
+    </ul>
+  </nav>
+
+  <header class="page-header">
+    <h1>Home Vehicle Suspension Alignment</h1>
+    <p class="subtitle">Digital angle gauge method — eccentric bolt optimisation</p>
+  </header>
+
+  <div id="error-banner" class="error-banner" role="alert" style="display: none;">
+    <span id="error-message"></span>
+    <button id="error-close">&times;</button>
+  </div>
+
+  <main class="home-container">
+
+    <div class="home-intro">
+      <p class="desc">
+        Record camber readings across all eccentric bolt positions, then generate a
+        report showing the optimal bolt combination to hit your camber and caster
+        targets with L/R symmetry.
+      </p>
+    </div>
+
+    <div class="home-grid">
+      <a class="home-card input-card" href="input.html">
+        <span class="card-heading">Input Sheet</span>
+        <p class="card-desc" id="input-card-desc">
+          Enter camber readings at 360° anti-clockwise steering wheel, 0°, and
+          360° clockwise steering wheel for each bolt
+          combination. Covers the full 13×13 grid (169 combinations) with a
+          minimum of 25 required positions. Download or load CSV files per wheel.
+        </p>
+        <span class="card-arrow">→ Open Input Sheet</span>
+      </a>
+      <a class="home-card report-card" href="report.html">
+        <span class="card-heading">Report</span>
+        <p class="card-desc" id="report-card-desc">
+          Load CSV files for Front Left and Front Right. View the interpolated
+          13×13 summary table, multi-line chart, washer position diagrams,
+          and symmetry analysis — then read off the recommended bolt
+          settings.
+        </p>
+        <span class="card-arrow">→ Open Report</span>
+      </a>
+    </div>
+
+    <section class="targets-section" id="config-section">
+      <h2>Alignment Configuration</h2>
+
+      <div class="wheel-selector" id="config-tabs" role="tablist" aria-label="Configuration tabs" style="margin-bottom:16px;">
+        <button class="active" data-tab="targets" role="tab" aria-selected="true">Targets</button>
+        <button data-tab="configs" role="tab" aria-selected="false">Configs</button>
+      </div>
+
+      <div id="targets-panel" role="tabpanel" aria-label="Targets">
+        <form id="targets-form" class="targets-form">
+          <div class="targets-form-grid">
+            <fieldset class="form-fieldset">
+              <legend><strong>Front Axle Targets</strong></legend>
+              <div class="form-group">
+                <label for="camber-input">Camber (°)</label>
+                <input type="text" inputmode="decimal" id="camber-input" required>
+              </div>
+              <div class="form-group">
+                <label for="caster-input">Caster (°)</label>
+                <input type="text" inputmode="decimal" id="caster-input" required>
+              </div>
+              <div class="form-group">
+                <label for="toe-front-input">Toe (° per wheel)</label>
+                <input type="text" inputmode="decimal" id="toe-front-input" required>
+              </div>
+            </fieldset>
+            <fieldset class="form-fieldset">
+              <legend><strong>Rear Axle Targets</strong></legend>
+              <div class="form-group">
+                <label for="camber-rear-input">Camber (°)</label>
+                <input type="text" inputmode="decimal" id="camber-rear-input" required>
+              </div>
+              <div class="form-group">
+                <label for="toe-rear-input">Toe (° per wheel)</label>
+                <input type="text" inputmode="decimal" id="toe-rear-input" required>
+              </div>
+            </fieldset>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="button" id="btn-save-targets">Save Targets</button>
+            <button type="button" class="button danger" id="btn-reset-targets">Reset Targets</button>
+          </div>
+          <p style="margin-top:10px; font-size:0.65rem; color:var(--muted); letter-spacing:0.04em;">
+            Report calculations use stored values only. Edits apply after you click Save Targets.
+          </p>
+        </form>
+      </div>
+
+      <div id="configs-panel" role="tabpanel" aria-label="Configs" style="display:none;">
+        <form id="configs-form" class="targets-form">
+          <div class="targets-form-grid">
+            <fieldset class="form-fieldset">
+              <legend>Vehicle Configs</legend>
+              <div class="form-group">
+                <label>Caster Angle Input Mode</label>
+                <div style="display:flex; gap:16px; align-items:center; padding:6px 0;">
+                  <label style="display:flex; gap:6px; align-items:center; font-size:0.85rem; color:var(--text);">
+                    <input type="radio" name="caster-input-mode" id="caster-mode-ratio" value="steering-ratio" checked>
+                    Steering Ratio
+                  </label>
+                  <label style="display:flex; gap:6px; align-items:center; font-size:0.85rem; color:var(--text);">
+                    <input type="radio" name="caster-input-mode" id="caster-mode-wheel" value="wheel-degrees">
+                    Wheel Degrees
+                  </label>
+                </div>
+              </div>
+               <div id="steering-ratio-group" class="form-group">
+                 <label for="steering-ratio-input">Steering Ratio (x:1)</label>
+                 <input type="text" inputmode="decimal" id="steering-ratio-input" required>
+               </div>
+               <div id="wheel-degrees-group" class="form-group" style="display:none;">
+                 <label for="wheel-degrees-input">Measurement Wheel Degrees (°)</label>
+                   <input type="text" inputmode="decimal" id="wheel-degrees-input" required>
+              </div>
+              <div class="form-group">
+                <label for="wheel-diameter-input">Wheel Diameter (mm)</label>
+                <input type="text" inputmode="decimal" id="wheel-diameter-input" required>
+              </div>
+              <div class="form-group">
+                <label for="steering-sweep-input">Steering Wheel Sweep (°)</label>
+                <div id="steering-sweep-display" style="padding:10px 0; color:var(--text);">360 each direction</div>
+              </div>
+              <div class="form-group">
+                <label for="measurement-density-select">Measurement Points Per Bolt Axis</label>
+                <select id="measurement-density-select" style="padding:6px 10px; border:1px solid var(--border); border-radius:4px; background:var(--panel); color:var(--text); font-family:'Share Tech Mono', monospace; font-size:0.85rem;">
+                  <option value="3">3 points (−1 to +1)</option>
+                  <option value="5" selected>5 points (−2 to +2)</option>
+                  <option value="7">7 points (−3 to +3)</option>
+                  <option value="9">9 points (−4 to +4)</option>
+                  <option value="11">11 points (−5 to +5)</option>
+                  <option value="13">13 points (−6 to +6)</option>
+                </select>
+              </div>
+            </fieldset>
+            <fieldset class="form-fieldset">
+              <legend>Derived / Fixed Configs</legend>
+              <div class="form-group">
+                <label for="effective-wheel-angle-input">Effective Wheel Angle (°)</label>
+                <div id="effective-wheel-angle-display" style="padding:10px 0; color:var(--text);"></div>
+              </div>
+              <div class="form-group">
+                <label for="caster-multiplier-input">Caster Multiplier</label>
+                <div id="caster-multiplier-display" style="padding:10px 0; color:var(--text);"></div>
+              </div>
+              <div class="form-group">
+                <label for="bolt-range-input">Adjustment Bolt Positions</label>
+                <div id="bolt-range-display" style="padding:10px 0; color:var(--text);">−6 to +6 (13 positions)</div>
+              </div>
+              <div class="form-group">
+                <label for="required-points-input">Minimum Required Washer Points</label>
+                <div id="required-points-display" style="padding:10px 0; color:var(--text);">−6, −3, 0, +3, +6 (5 points)</div>
+              </div>
+            </fieldset>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="button" id="btn-save-configs">Save Configs</button>
+            <button type="button" class="button danger" id="btn-reset-configs">Reset Configs</button>
+          </div>
+          <p style="margin-top:10px; font-size:0.65rem; color:var(--muted); letter-spacing:0.04em;">
+            Report calculations use stored values only. Edits apply after you click Save Configs.
+          </p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module" src="../js/error-handler.js"></script>
+  <script type="module" src="../js/targets-manager.js"></script>
+
+  <script type="module">
+    // Set active nav link based on current page
+    const links = document.querySelectorAll('.nav-links a');
+    const current = location.pathname.split('/').pop() || 'index.html';
+    links.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === current);
+    });
+  </script>
+
+</body>
+</html>
+<!-- Deployment test: 2026-05-01T12:49:56Z -->

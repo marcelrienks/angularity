@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MX5 NC1 — Input Sheet</title>
+  <link rel="stylesheet" href="css/shared.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="title">Home Vehicle Suspension Alignment</span>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="input.html" class="active">Input Sheet</a></li>
+      <li><a href="report.html">Report</a></li>
+    </ul>
+  </nav>
+
+  <header class="page-header">
+    <h1>Input Sheet</h1>
+    <p class="subtitle" id="input-subtitle">Enter camber at 360° ACW, 0°, and 360° CW steering wheel positions</p>
+  </header>
+
+  <main class="grid-container">
+
+    <div id="error-banner" class="error-banner" role="alert" style="display: none;">
+      <span id="error-message"></span>
+      <button id="error-close">&times;</button>
+    </div>
+    <div id="warning-banner" class="warning-banner" role="status"></div>
+
+        <!-- INPUT MEASUREMENT GRID
+          PURPOSE: Capture camber readings at each bolt position combination (13×13 grid).
+          Each cell receives three steering wheel measurements: 360° ACW, 0°, 360° CW (used to calculate caster).
+         Auto-saves to browser localStorage on every cell change.
+         ──────────────────────────────────────────────────────────────────────────────────────── -->
+    <div class="grid-controls">
+      <div class="wheel-selector" id="wheel-selector" role="tablist" aria-label="Wheel selection">
+        <div class="selector-row">
+          <button class="active" data-wheel="FL" role="tab" aria-selected="true">FL — Front Left</button>
+          <button data-wheel="FR" role="tab" aria-selected="false">FR — Front Right</button>
+        </div>
+        <div class="selector-row">
+          <button data-wheel="RL" role="tab" aria-selected="false">RL — Rear Left</button>
+          <button data-wheel="RR" role="tab" aria-selected="false">RR — Rear Right</button>
+        </div>
+      </div>
+
+      <div class="control-buttons">
+        <div class="buttons-row">
+          <button class="button" id="btn-download">Save CSV</button>
+          <label class="button" id="btn-load-label" for="csv-upload">Load CSV</label>
+          <input type="file" id="csv-upload" accept=".csv" aria-label="Load CSV file" style="display:none">
+        </div>
+        <div class="buttons-row">
+          <button class="button" id="btn-sample">Sample Data</button>
+          <button class="button danger" id="btn-clear">Clear All</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 13×13 Grid injected here by input-grid.js -->
+    <div class="grid-wrapper" id="grid-wrapper">
+      <div class="input-grid" id="input-grid" role="grid" aria-label="Bolt position input matrix"></div>
+    </div>
+
+    <p style="margin-top:12px; font-size:0.65rem; color:var(--muted); letter-spacing:0.05em;">
+      Rows = Rear bolt (−6 to +6) &nbsp;·&nbsp;
+      Columns = Front bolt (−6 to +6) &nbsp;·&nbsp;
+      Required positions: −6, −3, 0, +3, +6 (highlighted border)
+    </p>
+
+  </main>
+
+  <script type="module" src="../js/error-handler.js"></script>
+  <script type="module" src="../js/input-grid.js"></script>
+  <script type="module">
+    import { updateMeasurementMethodText, getCurrentMeasurementMode, getCurrentDensity } from '../js/measurement-utils.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      updateMeasurementMethodText(getCurrentMeasurementMode(), getCurrentDensity());
+    });
+  </script>
+
+  <script type="module">
+    // Set active nav link
+    const links = document.querySelectorAll('.nav-links a');
+    const current = location.pathname.split('/').pop() || 'index.html';
+    links.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === current);
+    });
+  </script>
+
+</body>
+</html>
