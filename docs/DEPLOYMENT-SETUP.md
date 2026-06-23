@@ -115,10 +115,11 @@ aws cloudfront list-distributions \
   --output text
 ```
 
-Or via Terraform:
+Or via AWS CLI:
 ```bash
-cd infrastructure/
-terraform output cloudfront_distribution_id
+aws cloudfront list-distributions \
+  --query "DistributionList.Items[0].Id" \
+  --output text
 ```
 
 ## Security Best Practices

@@ -325,8 +325,8 @@ aws cloudfront get-distribution --id E1ABC2DEF34GHI | grep -i origin
 
 **Resolution**:
 - S3 bucket policy must allow CloudFront origin access control
-- See infrastructure/security.tf for correct policy
-- Re-apply: `cd infrastructure && terraform apply`
+- Check AWS Console → S3 → Permissions tab for bucket policy
+- Verify CloudFront OAC (Origin Access Control) is configured correctly
 
 ### Issue: Stale Content (Old Version Still Showing)
 
