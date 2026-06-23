@@ -1,4 +1,4 @@
-# MX-5 NC1 Wheel Alignment System — Technical Context
+# Eccentric Bolt Alignment System — Technical Context
 
 **Last read**: 2026-06-23  
 **Status**: MVP complete, 149 integration tests passing, AWS deployment ready
@@ -7,7 +7,7 @@
 
 ## Project Purpose
 
-Web-based digital analysis tool for home wheel alignment on a Mazda MX-5 NC1. Captures measurements at discrete bolt positions (13×13 grid per wheel), analyzes trade-offs using weighted scoring, recommends optimal configurations, provides visualization.
+Web-based digital analysis tool for home wheel alignment on vehicles with eccentric bolt adjustment (MX-5 NC1 & universal). Captures measurements at discrete bolt positions (13×13 grid per wheel), analyzes trade-offs using weighted scoring, recommends optimal configurations, provides visualization.
 
 **Key constraint**: All calculations client-side; data never leaves browser.
 
@@ -34,7 +34,7 @@ alignment/
 │   ├── input.html     # Input grid (measurements)
 │   ├── report.html    # Report (analysis & visualization)
 │   └── css/shared.css # Styling
-├── js/                # Business logic (21+ modules)
+├── js/                # Business logic (17 modules)
 │   ├── report-engine.js   # Core analysis & scoring
 │   ├── input-grid.js      # Input UI & localStorage binding
 │   ├── report-page.js     # Report orchestration
@@ -47,10 +47,10 @@ alignment/
 │   ├── constants.js       # Targets, thresholds, config
 │   ├── targets-manager.js # User alignment targets
 │   ├── math-utils.js      # Vector math utilities
-│   └── ... (10+ more)
+│   └── ... (7+ more)
 ├── tests/            # 149 Puppeteer integration tests
-├── docs/             # Archived documentation (deprecated)
-├── wiki/             # Primary documentation (ARCHITECTURE, INTERNALS, GUIDE)
+├── docs/             # Archived documentation (deprecated, move to wiki/)
+├── wiki/             # Primary documentation (ARCHITECTURE, INTERNALS, TODO)
 └── package.json
 ```
 
@@ -93,7 +93,7 @@ Physical constraint: Can't adjust one metric independently; always a trade-off.
 
 ### 2. Golden Rule Scoring
 
-**Hierarchy**:
+**Three-Tier Hierarchy**:
 - Tier 1: Camber lock — reject if |error| > 1.0°
 - Tier 2: Conditional caster — if |camber error| ≤ 0.5°, weight caster 3×
 - Tier 3: Default balance — score = (1.5 × |camber_error|) + (1.0 × |caster_error|)
@@ -113,37 +113,36 @@ Physical constraint: Can't adjust one metric independently; always a trade-off.
 | Path | Purpose |
 |------|---------|
 | `README.md` | Quick start, project overview, facts |
-| `wiki/ARCHITECTURE.md` | System design, module layers, data structures, algorithms |
-| `wiki/INTERNALS.md` | Algorithm deep-dives, interpolation math, error handling, debugging |
-| `wiki/GUIDE.md` | User workflow, dev tasks, troubleshooting, tips |
-| `wiki/todo.md` | Current blockers (360° steering angle handling, caster calculation for FL) |
+| `wiki/architecture.md` | System design, module layers, data structures, algorithms |
+| `wiki/internals.md` | Algorithm deep-dives, interpolation math, error handling, debugging |
+| `wiki/todo.md` | Current blockers (FL caster calculation, steering angle handling) |
 
 ---
 
 ## Open Issues
 
 From `wiki/todo.md`:
-1. **360° steering angle handling**: Current system assumes ±20° symmetric sweep. Need to clarify custom angle support.
-2. **Front-left caster calculation**: For FL wheel, steering direction is opposite (anti-clockwise vs clockwise for FR). Calculation may need flipping.
-3. **Documentation cleanup**: Deprecate `docs/` directory (moved to `wiki/`)
+1. **Front-left caster calculation**: FL wheel steering orientation opposite to FR (CCW vs CW). Sign flip needed?
+2. **Steering angle range**: System assumes ±20° symmetric. Custom angles (±10°, ±30°) supported?
+3. **Documentation cleanup**: Move docs/ → wiki/, verify all cross-references, archive safely
 
 ---
 
 ## Hashes (for change detection)
 
 ```
-README.md = d38fff34e5865fe07494f8199e1ba231
-wiki/ARCHITECTURE.md = f75b75e51e7745cd19e74198df940347
-wiki/GUIDE.md = 69a4fede4b87a7c60c9c8185d9a85fa5
-wiki/INTERNALS.md = 5949ae0b80c0fa6d8c60be0edcb0ad17
-wiki/todo.md = 8e568cd8b26df61cf381bc3255b4de2c
+README.md = 67297c99eb6df8036996485eb290d7ea
+wiki/architecture.md = c8357655c63fde8b85d75e3f6929f3c7
+wiki/internals.md = 4e2203045863d2a8253f85316f6db9a3
+wiki/todo.md = 72c1e639b34659b918274fef8da0b22f
 ```
 
 ---
 
 ## Next Steps for Development
 
-1. **Resolve steering angle ambiguity** → clarify 360° vs custom angles
-2. **Fix FL caster sign** → flip calculation for front-left wheel
-3. **Consolidate docs** → keep wiki/, archive docs/ safely
-4. **Run test suite** → `npm run test:all-sync` (verify 149 tests still pass)
+1. **Fix FL caster sign** → test against physical measurements
+2. **Clarify steering angle API** → test custom angles, update algorithm if needed
+3. **Archive docs/ safely** → keep wiki/ as source of truth
+4. **Verify wiki cross-references** → ensure all links work
+5. **Run test suite** → `npm run test:all-sync` (verify 149 tests still pass)

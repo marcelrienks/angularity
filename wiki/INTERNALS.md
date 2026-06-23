@@ -177,22 +177,22 @@ for each cell in grid:
   
   cell.score = score
   
-  // Track three best positions
-  if (score < best_compromise.score):
-    best_compromise = cell
-  if (error_camber < best_camber.error_camber):
-    best_camber = cell
-  if (error_caster < best_caster.error_caster):
-    best_caster = cell
+  // Track three best positions (using camelCase to match code)
+  if (score < bestCell.score):
+    bestCell = cell
+  if (error_camber < bestCamberCell.error_camber):
+    bestCamberCell = cell
+  if (error_caster < bestCasterCell.error_caster):
+    bestCasterCell = cell
 ```
 
 #### Step 5: Return Three Optima
 
 ```javascript
 return {
-  bestCell: best_compromise,
-  bestCamberCell: best_camber,
-  bestCasterCell: best_caster
+  bestCell,           // Best compromise (balanced)
+  bestCamberCell,     // Best camber (prioritizes camber accuracy)
+  bestCasterCell      // Best caster (prioritizes caster accuracy)
 }
 ```
 
@@ -457,8 +457,7 @@ console.log(`Camber diff: ${camberDiff}°, Caster diff: ${casterDiff}°`);
 
 ## Related Documentation
 
-- **System architecture & design**: [architecture.md](architecture.md) — module layers, data flow, algorithms
-- **How to use the tool**: [guide.md](guide.md) — user workflow, dev tasks, troubleshooting
+- **System architecture & design**: [architecture.md](architecture.md) — module layers, data flow, algorithms, data schema
 - **Current blockers**: [todo.md](todo.md) — known issues and open work
 
 **Note**: architecture.md § Module Responsibilities documents the primary module layers. Additional utility modules (error-handler, measurement-utils, dummy-data-generator) support these core layers but are not shown in the layered diagram.

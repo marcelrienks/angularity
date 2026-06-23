@@ -276,6 +276,19 @@ But the actual values shown remain identical; only visual emphasis changes
 | `localstorage-io.js` | Read/write localStorage; serialize/deserialize gridState |
 | `csv-io.js` | CSV import/export; file I/O operations |
 
+**gridState Schema** (per wheel):
+```javascript
+{
+  wheel: 'FL' | 'FR',
+  measurements: [
+    { frontBolt: -6..+6, rearBolt: -6..+6, neg20: number, zero: number, pos20: number },
+    // ... typically 30-100 measurements
+  ]
+}
+```
+Where `neg20`, `zero`, `pos20` are camber readings at −20°, 0°, and +20° steering angles respectively.
+Caster is derived as: `(neg20 − pos20) / 40` (change in camber per degree of steering).
+
 ### **Processing Layer** (Analysis & Calculations)
 
 | Module | Responsibility |
@@ -310,9 +323,11 @@ See **internals.md** for algorithm deep-dives and **guide.md** for development t
 
 ## Key Algorithms
 
-### ⚠️ Important: Algorithm Not Meant to Be Edited
+### ⚠️ Important: Algorithm Design & Stability Note
 
-The symmetry analysis algorithm is **designed to be stable and not modified**. It uses a simple, straightforward approach:
+The symmetry analysis algorithm is **intentionally simple** and uses a straightforward brute-force approach. However, note that the caster calculation (derived from steering sweep) is currently under review (see wiki/todo.md for FL caster sign verification). Treat the caster values as provisional until verification testing completes.
+
+**Algorithm approach**:
 
 1. **Search all possible pairs** (169 FL configurations × 169 FR configurations = 28,561 comparisons)
 2. **Find closest match** where camber and caster differ by ≤±0.3° on both wheels
@@ -324,12 +339,10 @@ The symmetry analysis algorithm is **designed to be stable and not modified**. I
 - Users understand exactly why a position was recommended
 - Simple logic = fewer bugs = more maintainable
 
-**Do NOT modify because**:
+**If you disagree with a recommendation**:
+- Adjust the ±0.3° tolerance parameter, not the algorithm itself
 - Weighting factors would add confusion (users wouldn't understand "why" recommendations changed)
-- The ±0.3° tolerance is the key parameter; change that, not algorithm weights
 - More complex algorithms are harder to debug when users report surprising results
-
-If you disagree with a recommendation, **adjust the ±0.3° tolerance**, not the algorithm itself.
 
 ---
 
@@ -359,7 +372,7 @@ If you disagree with a recommendation, **adjust the ±0.3° tolerance**, not the
 - Each position in the 13×13 grid represents a complete configuration: **Front bolt position + Rear bolt position**
 - We compare FL's complete configurations vs FR's complete configurations
 - We do NOT compare front bolts independently or rear bolts independently
-- See [DESIGN.md § Eccentric Bolt Coupling](DESIGN.md) for physical rationale
+- **Physical constraint**: Two bolts per wheel are coupled — moving one affects both camber and caster simultaneously. We optimize the complete configuration (front + rear) together, never independently.
 
 **Steps**:
 1. Search for **symmetric pairs** with ±0.3° tolerance:
@@ -394,10 +407,11 @@ The grid search (13×13 = 169 positions per wheel) explores all possible combina
 
 ## Known Limitations & Future Expansion
 
-### Phase 1 (Current: Front Wheels Only)
+### Phase 1 (Current: Front Wheels, 95% feature-complete)
 - Two wheels (FL, FR) analyzed
-- Camber + Caster only (Toe integration outstanding)
+- Camber + Caster (measurements at ±20°, 0° steering angles)
 - Front-only eccentric bolt adjustment
+- Toe measurements captured but not analyzed (Phase 2)
 
 ### Phase 2 (Planned: Four Wheels)
 - Add RL, RR wheels
