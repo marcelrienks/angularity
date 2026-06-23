@@ -539,7 +539,6 @@ console.log(`Camber diff: ${camberDiff}°, Caster diff: ${casterDiff}°`);
 
 ## Related Documentation
 
-- **Module APIs**: [API.md](API.md)
+- **System architecture & design**: [ARCHITECTURE.md](ARCHITECTURE.md)
 - **How to use the tool**: [GUIDE.md](GUIDE.md)
-- **System architecture**: [ARCHITECTURE.md](ARCHITECTURE.md)
-- **Development standards**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Current blockers**: [todo.md](todo.md)
