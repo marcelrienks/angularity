@@ -87,8 +87,8 @@ terraform apply -target=aws_acm_certificate.alignment
 
 # 3. Wait for certificate status to change to ISSUED (usually 2-5 minutes)
 
-# 4. Enable custom domain in terraform.tfvars:
-#    custom_domain = "alignment.marcelrienks.com"
+# 4. Enable custom domain in infrastructure configuration:
+#    (Update infrastructure code if needed)
 #    terraform apply
 
 # Verify certificate (when enabled):
