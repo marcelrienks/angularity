@@ -5,52 +5,24 @@
 }
 
 /* ============================================================================
-   TYPOGRAPHY SYSTEM (3 standard styles ONLY, applied globally and consistently)
+   TYPOGRAPHY SYSTEM (3 semantic classes ONLY)
    ============================================================================ */
 
-/* HEADER: Bold, largest size, blue color */
-h1, h2 {
+.header {
   font-size: var(--font-size-h);
   font-weight: var(--font-weight-h);
-  color: var(--blue);
+  color: #ff00ff;
   text-transform: uppercase;
 }
 
-/* SUB-HEADER: Bold, high size, black text — used for buttons, labels, grid text, value fields */
-h3, h4, h5, h6,
-button,
-.button,
-label,
-.label,
-legend,
-.card-heading,
-.grid-corner,
-.grid-col-header,
-.grid-row-header,
-.data-table th,
-.data-table th *,
-.cell-label,
-.cell-value,
-.group-heading,
-.target-value,
-.washer-bolt-name,
-.washer-section-title,
-.page-header .subtitle {
+.sub-header {
   font-size: var(--font-size-sh);
   font-weight: var(--font-weight-sh);
   color: var(--text);
   text-transform: none;
 }
 
-/* PARAGRAPH: Standard weight, standard size, gray text */
-p,
-body,
-span,
-.desc,
-.card-desc,
-.chart-note,
-.warning-banner,
-.symmetry-status {
+.paragraph {
   font-size: var(--font-size-p);
   font-weight: var(--font-weight-p);
   color: var(--muted);
@@ -1198,7 +1170,6 @@ body {
 
 .symmetry-analysis-section h2 {
   letter-spacing: 0.05em;
-  color: var(--blue);
   margin-bottom: 16px;
   margin-top: 0;
 }
@@ -1224,7 +1195,6 @@ body {
 
 .symmetry-section h2 {
   letter-spacing: 0.1em;
-  color: var(--blue);
   margin-bottom: 20px;
 }
 
@@ -2239,7 +2209,6 @@ body {
 
 .targets-section h2 {
   letter-spacing: 0.1em;
-  color: var(--blue);
   margin-bottom: 16px;
 }
 

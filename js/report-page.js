@@ -830,10 +830,12 @@ function _renderSymmetry() {
     recommendedSection.className = 'symmetry-analysis-section';
 
     const recommendedTitle = document.createElement('h2');
+    recommendedTitle.className = 'header';
     recommendedTitle.textContent = 'Recommended Summary';
     recommendedSection.appendChild(recommendedTitle);
 
     const recommendedDesc = document.createElement('p');
+    recommendedDesc.className = 'paragraph';
     recommendedDesc.textContent = 'Best overall compromise for left/right symmetry, prioritizing target alignment values.';
     recommendedSection.appendChild(recommendedDesc);
 
@@ -842,6 +844,7 @@ function _renderSymmetry() {
       frontSubsection.className = 'symmetry-subsection';
 
       const frontSubtitle = document.createElement('h3');
+      frontSubtitle.className = 'sub-header';
       frontSubtitle.textContent = 'Front Axle (FL ↔ FR)';
       frontSubsection.appendChild(frontSubtitle);
 
@@ -854,6 +857,7 @@ function _renderSymmetry() {
       rearSubsection.className = 'symmetry-subsection';
 
       const rearSubtitle = document.createElement('h3');
+      rearSubtitle.className = 'sub-header';
       rearSubtitle.textContent = 'Rear Axle (RL ↔ RR)';
       rearSubsection.appendChild(rearSubtitle);
 
@@ -869,10 +873,12 @@ function _renderSymmetry() {
     independentSection.className = 'symmetry-analysis-section';
 
     const independentTitle = document.createElement('h2');
+    independentTitle.className = 'header';
     independentTitle.textContent = 'Independent Optimizations';
     independentSection.appendChild(independentTitle);
 
     const independentDesc = document.createElement('p');
+    independentDesc.className = 'paragraph';
     independentDesc.textContent = 'Each wheel optimized separately, showing best camber and best caster scenarios with their resulting cross-metric values.';
     independentSection.appendChild(independentDesc);
 
@@ -881,6 +887,7 @@ function _renderSymmetry() {
       frontIndepSubsection.className = 'symmetry-subsection';
 
       const frontIndepSubtitle = document.createElement('h3');
+      frontIndepSubtitle.className = 'sub-header';
       frontIndepSubtitle.textContent = 'Front Wheels (FL & FR)';
       frontIndepSubsection.appendChild(frontIndepSubtitle);
 
@@ -901,6 +908,7 @@ function _renderSymmetry() {
       rearIndepSubsection.className = 'symmetry-subsection';
 
       const rearIndepSubtitle = document.createElement('h3');
+      rearIndepSubtitle.className = 'sub-header';
       rearIndepSubtitle.textContent = 'Rear Wheels (RL & RR)';
       rearIndepSubsection.appendChild(rearIndepSubtitle);
 
@@ -928,10 +936,12 @@ function _renderSymmetry() {
     optionsSection.className = 'symmetry-analysis-section';
 
     const optionsTitle = document.createElement('h2');
+    optionsTitle.className = 'header';
     optionsTitle.textContent = 'Symmetry Options';
     optionsSection.appendChild(optionsTitle);
 
     const optionsDesc = document.createElement('p');
+    optionsDesc.className = 'paragraph';
     optionsDesc.textContent = 'Alternative symmetric pairings where both wheels lock to matching alignment values (within tolerance).';
     optionsSection.appendChild(optionsDesc);
 
@@ -940,6 +950,7 @@ function _renderSymmetry() {
       frontOptSubsection.className = 'symmetry-subsection';
 
       const frontOptSubtitle = document.createElement('h3');
+      frontOptSubtitle.className = 'sub-header';
       frontOptSubtitle.textContent = 'Front Axle Pairs';
       frontOptSubsection.appendChild(frontOptSubtitle);
 
@@ -984,6 +995,7 @@ function _renderSymmetry() {
       rearOptSubsection.className = 'symmetry-subsection';
 
       const rearOptSubtitle = document.createElement('h3');
+      rearOptSubtitle.className = 'sub-header';
       rearOptSubtitle.textContent = 'Rear Axle Pairs';
       rearOptSubsection.appendChild(rearOptSubtitle);
 

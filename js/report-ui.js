@@ -190,6 +190,7 @@ function buildSymmetryPanel(sym) {
 
   // Add heading
   const heading = document.createElement('h2');
+  heading.className = 'header';
   heading.textContent = 'Symmetry Analysis';
   panel.appendChild(heading);
 
@@ -212,6 +213,7 @@ function buildRecommendationCard(rec) {
   card.className = 'recommendation-card';
 
   const title = document.createElement('h3');
+  title.className = 'sub-header';
   title.textContent = 'Recommended Bolt Positions';
   card.appendChild(title);
 

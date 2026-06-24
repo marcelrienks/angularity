@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MX5 NC1 — Report</title>
+  <title>Angularity</title>
   <script>
     const theme = localStorage.getItem('angularity-theme');
     if (theme === 'light' || theme === 'dark') {
@@ -17,19 +17,29 @@
 <body>
 
   <nav class="navbar">
-    <h1 class="title">Home Vehicle Suspension Alignment</h1>
+    <h1 class="title header">Angularity</h1>
     <ul class="nav-links">
-      <li><a href="index.html">Home</a></li>
+      <li><a href="index.html" class="active">Home</a></li>
       <li><a href="input.html">Input Sheet</a></li>
-      <li><a href="report.html" class="active">Report</a></li>
+      <li><a href="report.html">Report</a></li>
     </ul>
   </nav>
+
+  <header class="page-header">
+    <h1 class="header">Raw Data Summary</h2>
+      <p class="section-intro paragraph">
+        13×13 grid showing one selected metric value per bolt combination.
+        <em>Italic = interpolated.</em>
+        <span class="color-accent-green">Green border = best cell (closest to targets).</span>
+        Cells are colored by selected metric proximity to target: Green = good, Orange = acceptable, Red = off-target.
+      </p>
+  </header>
 
   <main id="report-main">
 
     <div id="error-banner" class="error-banner" role="alert" style="display: none;">
       <span id="error-message"></span>
-      <button id="error-close">&times;</button>
+      <button class="sub-header" id="error-close">&times;</button>
     </div>
     <div id="warning-banner" class="warning-banner" role="status"></div>
 
@@ -38,28 +48,28 @@
     <div class="csv-loader-grid">
       <div class="csv-loader-card" id="fl-loader-card">
         <div class="card-title">Front Left (FL)</div>
-        <label class="button" for="fl-upload">Load alignment-FL.csv</label>
+        <label class="button sub-header" for="fl-upload">Load alignment-FL.csv</label>
         <input type="file" id="fl-upload" accept=".csv" aria-label="Load Front Left CSV">
         <div class="file-status" id="fl-status">No file loaded</div>
         <div class="row-count" id="fl-row-count"></div>
       </div>
       <div class="csv-loader-card" id="fr-loader-card">
         <div class="card-title">Front Right (FR)</div>
-        <label class="button" for="fr-upload">Load alignment-FR.csv</label>
+        <label class="button sub-header" for="fr-upload">Load alignment-FR.csv</label>
         <input type="file" id="fr-upload" accept=".csv" aria-label="Load Front Right CSV">
         <div class="file-status" id="fr-status">No file loaded</div>
         <div class="row-count" id="fr-row-count"></div>
       </div>
       <div class="csv-loader-card" id="rl-loader-card">
         <div class="card-title">Rear Left (RL)</div>
-        <label class="button" for="rl-upload">Load alignment-RL.csv</label>
+        <label class="button sub-header" for="rl-upload">Load alignment-RL.csv</label>
         <input type="file" id="rl-upload" accept=".csv" aria-label="Load Rear Left CSV">
         <div class="file-status" id="rl-status">No file loaded</div>
         <div class="row-count" id="rl-row-count"></div>
       </div>
       <div class="csv-loader-card" id="rr-loader-card">
         <div class="card-title">Rear Right (RR)</div>
-        <label class="button" for="rr-upload">Load alignment-RR.csv</label>
+        <label class="button sub-header" for="rr-upload">Load alignment-RR.csv</label>
         <input type="file" id="rr-upload" accept=".csv" aria-label="Load Rear Right CSV">
         <div class="file-status" id="rr-status">No file loaded</div>
         <div class="row-count" id="rr-row-count"></div>
@@ -68,7 +78,7 @@
   </section>
     <!-- ── Placeholder shown before data is loaded ──────────────────────── -->
     <div id="no-data-msg">
-      LOAD ONE OR BOTH CSV FILES TO SEE THE REPORT
+      Load one or both CSV files to see the report. The report will show the best bolt positions for each wheel based on the loaded data.
     </div>
 
     <!-- ── Section 2.1: Raw Data Summary Table
@@ -76,29 +86,21 @@
          Shows which positions best match alignment targets.
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="summary-table" id="section-table" style="display:none">
-      <h2>Raw Data Summary</h2>
-      <p class="section-intro">
-        13×13 grid showing one selected metric value per bolt combination.
-        <em>Italic = interpolated.</em>
-        <span class="color-accent-green">Green border = best cell (closest to targets).</span>
-        Cells are colored by selected metric proximity to target: Green = good, Orange = acceptable, Red = off-target.
-      </p>
-
       <!-- Wheel tabs and color coding toggle -->
       <div style="display:flex; gap:24px; margin-bottom:12px; align-items:flex-start;">
         <!-- Wheel selector -->
         <div class="wheel-selector" id="table-wheel-tabs" style="display:none">
-          <button class="active" data-wheel="FL" id="tab-table-fl">FL</button>
-          <button data-wheel="FR" id="tab-table-fr">FR</button>
-          <button data-wheel="RL" id="tab-table-rl">RL</button>
-          <button data-wheel="RR" id="tab-table-rr">RR</button>
+          <button class="active sub-header" data-wheel="FL" id="tab-table-fl">FL</button>
+          <button class="sub-header" data-wheel="FR" id="tab-table-fr">FR</button>
+          <button class="sub-header" data-wheel="RL" id="tab-table-rl">RL</button>
+          <button class="sub-header" data-wheel="RR" id="tab-table-rr">RR</button>
         </div>
 
         <!-- Metric selector -->
         <div class="color-coding-selector" id="color-coding-group">
-          <button class="active" data-metric="camber" id="btn-metric-camber">Camber</button>
-          <button data-metric="caster" id="btn-metric-caster">Caster</button>
-          <button data-metric="toe" id="btn-metric-toe">Toe</button>
+          <button class="active sub-header" data-metric="camber" id="btn-metric-camber">Camber</button>
+          <button class="sub-header" data-metric="caster" id="btn-metric-caster">Caster</button>
+          <button class="sub-header" data-metric="toe" id="btn-metric-toe">Toe</button>
         </div>
       </div>
 
@@ -112,22 +114,22 @@
          Helps visualize trade-offs and identify positions where targets are achievable.
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="chart-section" id="section-chart" style="display:none">
-      <h2>Camber &amp; Caster vs Front Bolt Position</h2>
+      <h2 class="header">Camber &amp; Caster vs Front Bolt Position</h2>
       <div class="wheel-selector" id="chart-wheel-tabs" style="margin-bottom:16px; display:none">
-        <button class="active" data-wheel="FL" id="tab-chart-fl">FL</button>
-        <button data-wheel="FR" id="tab-chart-fr">FR</button>
-        <button data-wheel="RL" id="tab-chart-rl">RL</button>
-        <button data-wheel="RR" id="tab-chart-rr">RR</button>
+        <button class="active sub-header" data-wheel="FL" id="tab-chart-fl">FL</button>
+        <button class="sub-header" data-wheel="FR" id="tab-chart-fr">FR</button>
+        <button class="sub-header" data-wheel="RL" id="tab-chart-rl">RL</button>
+        <button class="sub-header" data-wheel="RR" id="tab-chart-rr">RR</button>
       </div>
       <div class="chart-wrapper">
         <canvas id="main-chart" aria-label="Camber and caster chart"></canvas>
       </div>
-      <p class="chart-note" id="chart-note">
+      <p class="chart-note paragraph" id="chart-note">
         X-axis: bolt combination index, grouped by front bolt position (13 groups × 13 rear positions = 169 points) ·
         Dashed lines: targets (<span id="chart-note-camber">Camber −1.1°</span> · <span id="chart-note-caster">Caster 5.0°</span>) ·
         Solid markers = measured · Hollow markers = interpolated
       </p>
-      <p class="chart-note" id="toe-summary"></p>
+      <p class="chart-note paragraph" id="toe-summary"></p>
     </section>
 
     <!-- ── Section OPT-4: Historical Sessions & Trend Analysis (Phase 4 feature)
@@ -135,16 +137,16 @@
          Shows session history and trend data for key metrics.
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="sessions-section" id="section-sessions" style="display:none">
-      <h2>Session History & Trends</h2>
-      <p class="section-desc">
+      <h2 class="header">Session History & Trends</h2>
+      <p class="section-desc paragraph">
         Track your alignment measurements over time. Each report is automatically saved as a session. View trends to detect gradual drift.
       </p>
 
       <!-- Session Controls -->
       <div style="margin-bottom:20px; display:flex; gap:12px; flex-wrap:wrap;">
-        <button type="button" id="btn-save-session" class="button secondary">💾 Save Current Session</button>
-        <button type="button" id="btn-export-sessions" class="button secondary">⬇ Export Sessions</button>
-        <button type="button" id="btn-import-sessions" class="button secondary">⬆ Import Sessions</button>
+        <button type="button" id="btn-save-session" class="button secondary sub-header">💾 Save Current Session</button>
+        <button type="button" id="btn-export-sessions" class="button secondary sub-header">⬇ Export Sessions</button>
+        <button type="button" id="btn-import-sessions" class="button secondary sub-header">⬆ Import Sessions</button>
         <button type="button" id="btn-clear-sessions" class="button secondary danger">🗑 Clear History</button>
       </div>
       <input type="file" id="sessions-import-file" accept=".json" style="display:none;">
@@ -169,8 +171,8 @@
          Compares both wheels and finds the best compromise if perfect symmetry not achievable within ±0.3°.
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="symmetry-section" id="section-symmetry" style="display:none">
-      <h2>Axle Symmetry Analysis</h2>
-      <p class="section-desc">
+      <h2 class="header">Axle Symmetry Analysis</h2>
+      <p class="section-desc paragraph">
         Front and rear axles are analyzed independently. Each panel searches for bolt positions where the left and right wheels on that axle achieve matching alignment values within tolerance.
       </p>
       <div id="symmetry-container"></div>
@@ -183,8 +185,8 @@
          These are the positions the user should physically implement on the vehicle to achieve the symmetric alignment goal.
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="washer-section" id="section-washers" style="display:none">
-      <h2>Recommended Bolt Positions</h2>
-      <p class="section-desc">
+      <h2 class="header">Recommended Bolt Positions</h2>
+      <p class="section-desc paragraph">
         Front and rear recommendations are shown for each loaded wheel. Front wheels prioritize symmetric camber and caster across the axle; rear wheels are camber-focused and shown as a separate axle pair.
       </p>
       <div id="washer-container"></div>
