@@ -67,7 +67,7 @@
     </div>
   </section>
     <!-- ── Placeholder shown before data is loaded ──────────────────────── -->
-    <div id="no-data-msg" style="text-align:center; padding:60px 20px; letter-spacing:0.08em;">
+    <div id="no-data-msg">
       LOAD ONE OR BOTH CSV FILES TO SEE THE REPORT
     </div>
 
@@ -77,10 +77,10 @@
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="summary-table" id="section-table" style="display:none">
       <h2>Raw Data Summary</h2>
-      <p style="margin-bottom:12px; letter-spacing:0.04em;">
+      <p class="section-intro">
         13×13 grid showing one selected metric value per bolt combination.
         <em>Italic = interpolated.</em>
-        <span style="color:var(--green)">Green border = best cell (closest to targets).</span>
+        <span class="color-accent-green">Green border = best cell (closest to targets).</span>
         Cells are colored by selected metric proximity to target: Green = good, Orange = acceptable, Red = off-target.
       </p>
 
@@ -136,7 +136,7 @@
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="sessions-section" id="section-sessions" style="display:none">
       <h2>Session History & Trends</h2>
-      <p style="margin-bottom:16px; letter-spacing:0.04em;">
+      <p class="section-desc">
         Track your alignment measurements over time. Each report is automatically saved as a session. View trends to detect gradual drift.
       </p>
 
@@ -152,7 +152,7 @@
 
       <!-- Sessions List -->
       <div style="background: var(--panel-alt); border: 1px solid var(--border); border-radius:4px; padding:12px; margin-bottom:20px; max-height:300px; overflow-y:auto;">
-        <div style="text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Recent Sessions</div>
+        <div class="label-uppercase">Recent Sessions</div>
         <div id="sessions-list">
           <div style="padding:8px;">No sessions saved yet</div>
         </div>
@@ -170,7 +170,7 @@
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="symmetry-section" id="section-symmetry" style="display:none">
       <h2>Axle Symmetry Analysis</h2>
-      <p style="margin-bottom:16px; letter-spacing:0.04em;">
+      <p class="section-desc">
         Front and rear axles are analyzed independently. Each panel searches for bolt positions where the left and right wheels on that axle achieve matching alignment values within tolerance.
       </p>
       <div id="symmetry-container"></div>
@@ -184,7 +184,7 @@
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="washer-section" id="section-washers" style="display:none">
       <h2>Recommended Bolt Positions</h2>
-      <p style="margin-bottom:16px; letter-spacing:0.04em;">
+      <p class="section-desc">
         Front and rear recommendations are shown for each loaded wheel. Front wheels prioritize symmetric camber and caster across the axle; rear wheels are camber-focused and shown as a separate axle pair.
       </p>
       <div id="washer-container"></div>

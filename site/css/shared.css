@@ -13,6 +13,7 @@ h1, h2 {
   font-size: var(--font-size-h);
   font-weight: var(--font-weight-h);
   color: var(--blue);
+  text-transform: uppercase;
 }
 
 /* SUB-HEADER: Bold, high size, black text — used for buttons, labels, grid text, value fields */
@@ -34,12 +35,11 @@ legend,
 .target-value,
 .washer-bolt-name,
 .washer-section-title,
-.symmetry-analysis-section h2,
-.washer-section h2,
 .page-header .subtitle {
   font-size: var(--font-size-sh);
   font-weight: var(--font-weight-sh);
   color: var(--text);
+  text-transform: none;
 }
 
 /* PARAGRAPH: Standard weight, standard size, gray text */
@@ -99,6 +99,10 @@ textarea {
   --font-weight-sh: 600;
   --font-size-p:   0.75rem;
   --font-weight-p: 400;
+
+  --border-subtle: var(--border);
+  --info:          var(--blue);
+  --success:       var(--green);
 }
 
 /* ── Light Theme (VS Code Light+) ── */
@@ -143,6 +147,22 @@ body {
 }
 
 /* ============================================================================
+   TYPOGRAPHY UTILITIES (semantic spacing variants — no font/color overrides)
+   ============================================================================ */
+
+.section-intro { margin-bottom: 12px; letter-spacing: 0.04em; }
+.section-desc  { margin-bottom: 16px; letter-spacing: 0.04em; }
+.form-note     { margin-top: 10px;    letter-spacing: 0.04em; }
+.label-uppercase { text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.color-accent-green { color: var(--green); }
+
+#no-data-msg {
+  text-align: center;
+  padding: 60px 20px;
+  letter-spacing: 0.08em;
+}
+
+/* ============================================================================
    NAVIGATION & HEADER
    ============================================================================ */
 
@@ -162,7 +182,6 @@ body {
 
 .navbar .title {
   letter-spacing: 0.08em;
-  text-transform: uppercase;
   margin: 0;
 }
 
@@ -303,7 +322,6 @@ body {
   justify-content: center;
   text-decoration: none;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
   border-bottom: 2px solid transparent;
   padding-bottom: 2px;
   transition: all 0.2s;
@@ -426,7 +444,6 @@ body {
   background: var(--panel);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
@@ -455,7 +472,6 @@ body {
   background: var(--panel);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
@@ -487,7 +503,6 @@ body {
   background: var(--panel);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
@@ -506,7 +521,6 @@ body {
   background: var(--panel);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
@@ -705,7 +719,6 @@ body {
 
 .summary-table h2 {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   margin-bottom: 12px;
 }
 
@@ -781,7 +794,6 @@ body {
 
 .chart-section h2 {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   margin-bottom: 16px;
 }
 
@@ -818,7 +830,6 @@ body {
 
 .heatmap-section h2 {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   margin-bottom: 8px;
 }
 
@@ -890,7 +901,6 @@ body {
 
 .sessions-section h2 {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   margin-bottom: 8px;
 }
 
@@ -949,7 +959,6 @@ body {
 
 .washer-section h2 {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   margin-bottom: 20px;
 }
 
@@ -957,7 +966,7 @@ body {
 .washer-grid-section {
   margin-bottom: 32px;
   padding: 16px;
-  background: var(--bg-secondary);
+  background: var(--panel-alt);
   border: 1px solid var(--border);
   border-radius: 4px;
 }
@@ -972,7 +981,6 @@ body {
 
 .washer-section-title {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 16px;
   padding-bottom: 8px;
@@ -1018,7 +1026,7 @@ body {
 .washer-bolt-row-placeholder {
   opacity: 0.6;
   border-style: dashed;
-  background: var(--bg-secondary);
+  background: var(--panel-alt);
 }
 
 /* Bolt header (label + effect) */
@@ -1120,29 +1128,18 @@ body {
     margin-bottom: 24px;
   }
 
-  .symmetry-analysis-section h2 {
-    font-size: var(--font-size-sh);
-  }
-
-  .symmetry-subsection h3 {
-    font-size: var(--font-size-p);
-  }
-  
   /* Consolidation table mobile fix */
   .symmetry-consolidation-table {
     max-width: 100%;
-    font-size: var(--font-size-p);
   }
 
   .symmetry-consolidation-table th,
   .symmetry-consolidation-table td {
     padding: 6px 4px;
-    font-size: var(--font-size-p);
   }
-  
+
   /* Status block mobile fix */
   .symmetry-status {
-    font-size: var(--font-size-p);
     padding: 10px;
     line-height: 1.4;
   }
@@ -1156,7 +1153,6 @@ body {
   }
 
   .symmetry-analysis-section h2 {
-    font-size: var(--font-size-p);
     margin-bottom: 8px;
   }
 
@@ -1165,28 +1161,23 @@ body {
   }
 
   .symmetry-subsection h3 {
-    font-size: var(--font-size-p);
     margin-bottom: 8px;
   }
 
   .symmetry-card {
     padding: 12px 12px;
-    font-size: var(--font-size-p);
   }
 
   .symmetry-consolidation-table {
     max-width: 100%;
-    font-size: var(--font-size-p);
   }
 
   .symmetry-consolidation-table th,
   .symmetry-consolidation-table td {
     padding: 4px 2px;
-    font-size: var(--font-size-p);
   }
 
   .symmetry-status {
-    font-size: var(--font-size-p);
     padding: 8px;
     margin: 8px 0;
     line-height: 1.3;
@@ -1218,9 +1209,8 @@ body {
 
 .symmetry-analysis-section h2 {
   letter-spacing: 0.05em;
-  text-transform: none;
   color: var(--blue);
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   margin-top: 0;
 }
 
@@ -1241,12 +1231,10 @@ body {
 .symmetry-subsection h3 {
   letter-spacing: 0.05em;
   margin: 0 0 12px 0;
-  text-transform: none;
 }
 
 .symmetry-section h2 {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--blue);
   margin-bottom: 20px;
 }
@@ -1275,6 +1263,12 @@ body {
   padding-left: 4px;
 }
 
+.scenario-col--right {
+  padding-left: 24px;
+  padding-right: 0;
+  border-right: none;
+}
+
 .scenario-header {
   font-size: var(--font-size-p);
   font-weight: var(--font-weight-h);
@@ -1287,9 +1281,10 @@ body {
 }
 
 .symmetry-card .title {
+  font-size: var(--font-size-sh);
+  font-weight: var(--font-weight-sh);
+  color: var(--text);
   letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--subtle);
   margin-bottom: 12px;
 }
 
@@ -1313,6 +1308,204 @@ body {
 
 .symmetry-metric:last-child {
   margin-bottom: 0;
+}
+
+/* ── Style-Agnostic Component Classes ─────────────────────────────────── */
+
+/* Empty/no-data fallback state */
+.empty-state {
+  padding: 12px;
+  background: var(--panel-alt);
+  border-radius: 4px;
+}
+
+/* Legend component */
+.legend-container {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: var(--panel-alt);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.legend-items {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Single-column symmetry grid override */
+.symmetry-grid--single {
+  grid-template-columns: 1fr;
+}
+
+/* Grid full-width span */
+.grid-full-span {
+  grid-column: 1 / -1;
+}
+
+/* Section divider header (inside grid, spans full width with top border) */
+.section-divider-header {
+  grid-column: 1 / -1;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* Scenario layout grid (inside symmetry cards) */
+.scenario-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+/* Compact symmetry metric (no bottom margin, reduced emphasis) */
+.symmetry-metric--compact {
+  margin-bottom: 0;
+  opacity: 0.6;
+}
+
+/* Success-colored card title */
+.title--success {
+  color: var(--success);
+}
+
+/* Axle heading description text */
+.axle-heading-desc {
+  line-height: 1.6;
+}
+
+/* Status block title line */
+.status-title {
+  font-size: var(--font-size-sh);
+  font-weight: var(--font-weight-sh);
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+/* Status block note line */
+.status-note {
+  line-height: 1.5;
+}
+
+/* Inline note with breathing room */
+.section-note {
+  line-height: 1.6;
+}
+
+/* Consolidation section title */
+.consolidation-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Consolidation table sizing */
+.compact-table {
+  line-height: 1;
+  width: 100%;
+  min-width: 200px;
+}
+
+/* Status block outer container */
+.status-summary {
+  margin-bottom: 32px;
+}
+
+/* Axle heading with margin rhythm */
+.axle-heading {
+  margin: 24px 0 16px;
+}
+
+/* Recommended card: full-width centered */
+.symmetry-card--full-width {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 820px;
+  justify-self: center;
+}
+
+/* Note cell in data tables */
+.note-cell {
+  text-align: center;
+}
+
+/* Bold table cell (sub-header weight) */
+.bold-cell {
+  font-weight: var(--font-weight-sh);
+}
+
+/* Corner table component */
+.corner-table-name {
+  text-align: center;
+  padding: 8px 6px;
+  font-weight: var(--font-weight-h);
+  color: var(--blue);
+  border-bottom: 1px solid var(--border);
+  line-height: 1;
+}
+
+.corner-table-name--muted {
+  color: var(--muted);
+}
+
+.corner-table-cell {
+  padding: 6px;
+  white-space: nowrap;
+  line-height: 1;
+  border-bottom: 1px solid var(--border);
+}
+
+.corner-table-cell--last {
+  padding: 6px;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.corner-value-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.corner-bolt-label { text-align: right; }
+.corner-separator  { color: var(--muted); padding: 0 2px; }
+.corner-value-camber { color: var(--blue);   font-weight: var(--font-weight-sh); text-align: left; }
+.corner-value-caster  { color: var(--orange); font-weight: var(--font-weight-sh); text-align: left; }
+
+/* Legend functional color labels */
+.legend-swatch {
+  width: 20px;
+  height: 12px;
+  border-radius: 2px;
+  display: inline-block;
+}
+.legend-swatch--camber { background-color: var(--blue); }
+.legend-swatch--caster  { background-color: var(--orange); }
+.legend-label--camber { color: var(--blue);   font-weight: var(--font-weight-sh); }
+.legend-label--caster  { color: var(--orange); font-weight: var(--font-weight-sh); }
+.legend-label--muted   { color: var(--muted); }
+
+/* Corner layout: 2×2 grid for FL/FR/RL/RR wheel positions */
+.corner-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 32px;
+  row-gap: 64px;
+  margin-top: 48px;
+  margin-bottom: 16px;
+}
+
+/* Each corner wrapper centers its content */
+.corner-wrapper {
+  display: flex;
+  justify-content: center;
 }
 
 .bolt-pair {
@@ -1346,7 +1539,6 @@ body {
 
 .symmetry-metric .label {
   letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .symmetry-delta {
@@ -1650,7 +1842,6 @@ body {
 
 .heatmap-section h2 {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--blue);
   margin-bottom: 4px;
 }
@@ -1846,7 +2037,6 @@ body {
 
 .home-card .card-heading {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 .home-card .card-desc {
@@ -1885,7 +2075,6 @@ body {
   border-bottom: 1px solid var(--border);
   padding: 6px 8px;
   text-align: center;
-  text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text);
 }
@@ -1924,7 +2113,6 @@ body {
   border-bottom: 1px solid var(--border);
   padding: 8px;
   text-align: center;
-  text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
@@ -1986,6 +2174,7 @@ body {
 /* Symmetry Status Indicator */
 .symmetry-status {
   margin: 12px 0;
+  margin-bottom: 16px;
   padding: 12px;
   border-radius: 4px;
   line-height: 1.6;
@@ -2073,7 +2262,6 @@ body {
 
 .targets-section h2 {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--blue);
   margin-bottom: 16px;
 }
@@ -2097,7 +2285,6 @@ body {
 
 .group-heading {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   margin-bottom: 4px;
 }
 
@@ -2109,7 +2296,6 @@ body {
 
 .target-item label {
   letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .target-value {
@@ -2143,7 +2329,6 @@ body {
 
 .form-fieldset legend {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
   margin-bottom: 4px;
   padding: 0;
 }
@@ -2156,7 +2341,6 @@ body {
 
 .form-group label {
   letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .form-group input {
@@ -2409,15 +2593,6 @@ body {
     }
   }
 
-  /* Header sizing */
-  h1, h2 {
-    font-size: var(--font-size-sh) !important;
-  }
-
-  h3 {
-    font-size: var(--font-size-p) !important;
-  }
-
   /* Spec table */
   .spec-table {
     font-size: var(--font-size-p);
@@ -2492,14 +2667,6 @@ body {
   #proximity-heatmap {
     width: 90vw !important;
     height: 90vw !important;
-  }
-
-  h1, h2 {
-    font-size: var(--font-size-p) !important;
-  }
-
-  h3 {
-    font-size: var(--font-size-p) !important;
   }
 
   .summary-table table {

@@ -97,9 +97,7 @@ function buildTable(result, wheel) {
     const noteCell = noteRow.insertCell();
     noteCell.colSpan = 14;
     noteCell.textContent = `Expected toe: ${rearToe.toFixed(2)} mm`;
-    noteCell.style.textAlign = 'center';
-    noteCell.style.fontSize = '0.85rem';
-    noteCell.style.color = 'var(--muted)';
+    noteCell.className = 'note-cell';
   }
 
   return table;
