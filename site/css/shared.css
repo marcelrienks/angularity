@@ -154,7 +154,6 @@ body {
 .section-desc  { margin-bottom: 16px; letter-spacing: 0.04em; }
 .form-note     { margin-top: 10px;    letter-spacing: 0.04em; }
 .label-uppercase { text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-.color-accent-green { color: var(--green); }
 
 #no-data-msg {
   text-align: center;
@@ -274,7 +273,7 @@ body {
   padding: 12px 16px;
   background: var(--panel-alt);
   border-left: 4px solid var(--orange);
-  color: var(--orange);
+  color: var(--muted);
   font-size: var(--font-size-p);
   border-radius: 2px;
   display: none;
@@ -749,7 +748,7 @@ body {
 }
 
 .data-table tr.header-row th {
-  color: var(--blue);
+  color: var(--text);
 }
 
 .cell-value {
@@ -809,13 +808,6 @@ body {
   line-height: 1.6;
 }
 
-#chart-note-camber {
-  color: var(--blue);
-}
-
-#chart-note-caster {
-  color: var(--orange);
-}
 
 /* ── Heatmap Visualizations (OPT-1) ────────────────────────────────────── */
 
@@ -943,7 +935,7 @@ body {
 
 #trend-container .trend-stat strong {
   display: block;
-  color: var(--blue);
+  color: var(--text);
   margin-bottom: 2px;
 }
 
@@ -1004,7 +996,7 @@ body {
 .washer-wheel-label {
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--blue);
+  color: var(--text);
   margin-bottom: 8px;
   padding-bottom: 6px;
   border-bottom: 2px solid var(--blue);
@@ -1037,7 +1029,6 @@ body {
 }
 
 .washer-bolt-name {
-  color: var(--blue);
   letter-spacing: 0.05em;
 }
 
@@ -1059,9 +1050,7 @@ body {
 }
 
 /* Position label */
-.washer-position {
-  color: var(--green);
-}
+.washer-position {}
 
 .washer-position-placeholder {
   color: var(--muted);
@@ -1445,7 +1434,7 @@ body {
   text-align: center;
   padding: 8px 6px;
   font-weight: var(--font-weight-h);
-  color: var(--blue);
+  color: var(--text);
   border-bottom: 1px solid var(--border);
   line-height: 1;
 }
@@ -1475,8 +1464,8 @@ body {
 
 .corner-bolt-label { text-align: right; }
 .corner-separator  { color: var(--muted); padding: 0 2px; }
-.corner-value-camber { color: var(--blue);   font-weight: var(--font-weight-sh); text-align: left; }
-.corner-value-caster  { color: var(--orange); font-weight: var(--font-weight-sh); text-align: left; }
+.corner-value-camber { font-weight: var(--font-weight-sh); text-align: left; }
+.corner-value-caster  { font-weight: var(--font-weight-sh); text-align: left; }
 
 /* Legend functional color labels */
 .legend-swatch {
@@ -1487,8 +1476,8 @@ body {
 }
 .legend-swatch--camber { background-color: var(--blue); }
 .legend-swatch--caster  { background-color: var(--orange); }
-.legend-label--camber { color: var(--blue);   font-weight: var(--font-weight-sh); }
-.legend-label--caster  { color: var(--orange); font-weight: var(--font-weight-sh); }
+.legend-label--camber { font-weight: var(--font-weight-sh); }
+.legend-label--caster  { font-weight: var(--font-weight-sh); }
 .legend-label--muted   { color: var(--muted); }
 
 /* Corner layout: 2×2 grid for FL/FR/RL/RR wheel positions */
@@ -1606,14 +1595,14 @@ body {
 
 .grid-col-header.required {
   background: var(--bg);
-  color: var(--red);
+  color: var(--text);
   font-weight: var(--font-weight-h);
   border-bottom-color: transparent;
 }
 
 .grid-row-header.required {
   background: var(--bg);
-  color: var(--red);
+  color: var(--text);
   font-weight: var(--font-weight-h);
   border-right-color: transparent;
 }
@@ -1674,14 +1663,6 @@ body {
   color: var(--text);
 }
 
-.progress-stat .count.complete {
-  color: var(--green);
-}
-
-.progress-stat .count.partial {
-  color: var(--orange);
-}
-
 .progress-track {
   height: 4px;
   border-radius: 2px;
@@ -1727,7 +1708,7 @@ body {
 /* Required bolt position headers in the 13×13 table */
 .data-table th.required-header,
 .data-table td.required-header {
-  color: var(--red);
+  color: var(--text);
   background: var(--panel-alt);
   font-weight: var(--font-weight-h);
 }
@@ -1761,7 +1742,7 @@ body {
   border-radius: 4px;
   padding: 10px 14px;
   font-size: var(--font-size-p);
-  color: var(--red);
+  color: var(--muted);
   letter-spacing: 0.04em;
   display: none;
 }
@@ -1778,7 +1759,7 @@ body {
   border-radius: 4px;
   padding: 10px 14px;
   font-size: var(--font-size-p);
-  color: var(--orange);
+  color: var(--muted);
   letter-spacing: 0.04em;
   display: none;
 }
@@ -1817,10 +1798,6 @@ body {
 
 .csv-loader-card .file-status {
   color: var(--muted);
-}
-
-.csv-loader-card .file-status.loaded {
-  color: var(--green);
 }
 
 .csv-loader-card .row-count {
@@ -2372,7 +2349,7 @@ body {
 .button.secondary {
   background: var(--panel-alt);
   border-color: var(--blue);
-  color: var(--blue);
+  color: var(--text);
 }
 
 .button.secondary:hover {
