@@ -11,7 +11,7 @@
 .header {
   font-size: var(--font-size-h);
   font-weight: var(--font-weight-h);
-  color: #ff00ff;
+  color: var(--blue);
   text-transform: uppercase;
 }
 
