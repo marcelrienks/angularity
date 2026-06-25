@@ -18,6 +18,9 @@
 
 import { REQUIRED_POSITIONS, WHEELS, FRONT_WHEELS, REAR_WHEELS, TARGET_TOE_FRONT, TARGET_TOE_REAR, getRequiredPositions, getCurrentMeasurementDensity, getBoltPositions } from './constants.js';
 import { buildCSVString, downloadCSVBlob, parseCSV } from './csv-io.js';
+import { _sign } from './format-utils.js';
+import { _showError, _hideError, _showWarning, _hideWarning } from './error-utils.js';
+import { _getStorageKey, _getToeStorageKey } from './localstorage-io.js';
 import { generateGrid, generateThreeColorGrid } from './dummy-data-generator.js';
 
 // Helper to get input field labels based on measurement mode
@@ -61,14 +64,6 @@ let _dirHandle = null;
  * Get the localStorage key for a specific wheel.
  * Uses per-wheel keys so clearing one wheel doesn't affect the other.
  */
-function _getStorageKey(wheel) {
-  return `mx5-nc1-alignment-${wheel}`;
-}
-
-function _getToeStorageKey(wheel) {
-  return `mx5-nc1-alignment-toe-${wheel}`;
-}
-
 /**
  * Per-wheel in-memory grid state.
  * gridState[wheel][frontBolt][rearBolt] = { neg20: string, zero: string, pos20: string }
@@ -229,13 +224,13 @@ function _buildGrid() {
   grid.style.gridTemplateColumns = `44px repeat(${boltPositions.length}, 140px)`;
 
   // ── Row 0: corner + column headers (front bolt positions) ──────────────
-  const corner = _el('div', 'grid-corner');
+  const corner = _el('div', 'grid-corner sub-header');
   corner.setAttribute('aria-hidden', 'true');
   corner.textContent = 'Front →\nRear ↓';
   grid.appendChild(corner);
 
   for (const f of boltPositions) {
-    const th = _el('div', `grid-col-header${_isRequired(f) ? ' required' : ''}`);
+    const th = _el('div', `grid-col-header sub-header${_isRequired(f) ? ' required' : ''}`);
     th.dataset.col = f;
     th.textContent = _sign(f);
     th.setAttribute('aria-label', `Front bolt ${_sign(f)}`);
@@ -245,7 +240,7 @@ function _buildGrid() {
   // ── Rows 1–N: row header + N cells ───────────────────────────────────
   for (const r of boltPositions) {
     // Row header (rear bolt)
-    const rh = _el('div', `grid-row-header${_isRequired(r) ? ' required' : ''}`);
+    const rh = _el('div', `grid-row-header sub-header${_isRequired(r) ? ' required' : ''}`);
     rh.dataset.row = r;
     rh.textContent = _sign(r);
     rh.setAttribute('aria-label', `Rear bolt ${_sign(r)}`);
@@ -280,8 +275,8 @@ function _buildCell(camberBolt, casterBolt) {
     inp.type        = 'text';
     inp.inputMode   = 'decimal';
     inp.placeholder = '—';
-    inp.dataset.camber = camberBolt;
-    inp.dataset.caster  = casterBolt;
+    inp.dataset.front = camberBolt;
+    inp.dataset.rear  = casterBolt;
     inp.dataset.key   = key;
     inp.setAttribute('aria-label', `${label} steering wheel, camber ${_sign(camberBolt)}, caster ${_sign(casterBolt)}`);
 
@@ -367,8 +362,8 @@ function _onInputFocus(f, r) {
   if (colHeader) colHeader.classList.add('col-highlight');
 
   // Highlight cells in same row/col
-  document.querySelectorAll(`.grid-cell[data-rear="${r}"]`).forEach(el => el.classList.add('row-highlight'));
-  document.querySelectorAll(`.grid-cell[data-front="${f}"]`).forEach(el => el.classList.add('col-highlight'));
+  document.querySelectorAll(`.grid-cell[data-caster="${r}"]`).forEach(el => el.classList.add('row-highlight'));
+  document.querySelectorAll(`.grid-cell[data-camber="${f}"]`).forEach(el => el.classList.add('col-highlight'));
 }
 
 function _onInputBlur() {
@@ -404,7 +399,7 @@ function _onKeyDown(e) {
 // ── Cell class management ─────────────────────────────────────────────────
 
 function _updateCellClass(f, r) {
-  const cell = document.querySelector(`.grid-cell[data-front="${f}"][data-rear="${r}"]`);
+  const cell = document.querySelector(`.grid-cell[data-camber="${f}"][data-caster="${r}"]`);
   if (!cell) return;
 
   const { neg20, zero, pos20 } = gridState[activeWheel][f][r];
@@ -745,10 +740,6 @@ function _isRequired(pos) {
   return getRequiredPositions().includes(pos);
 }
 
-function _sign(n) {
-  return n > 0 ? `+${n}` : String(n);
-}
-
 function _el(tag, className = '') {
   const el = document.createElement(tag);
   if (className) el.className = className;
@@ -789,26 +780,4 @@ function _applyWheelInputMode(wheel) {
   });
 }
 
-function _showError(msg) {
-  const el = document.getElementById('error-banner');
-  if (!el) return;
-  el.textContent = msg;
-  el.classList.add('visible');
-}
 
-function _hideError() {
-  const el = document.getElementById('error-banner');
-  if (el) el.classList.remove('visible');
-}
-
-function _showWarning(msg) {
-  const el = document.getElementById('warning-banner');
-  if (!el) return;
-  el.textContent = msg;
-  el.classList.add('visible');
-}
-
-function _hideWarning() {
-  const el = document.getElementById('warning-banner');
-  if (el) el.classList.remove('visible');
-}

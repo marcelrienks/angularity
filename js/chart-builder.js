@@ -7,6 +7,7 @@
  */
 
 import { BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER } from './constants.js';
+import { _sign } from './format-utils.js';
 
 // Number of rear bolt positions in one "front bolt group"
 const GROUP_SIZE = BOLT_POSITIONS.length; // 13
@@ -394,9 +395,6 @@ function _comboLabel(f, r) {
   return `${_sign(f)}/${_sign(r)}`;
 }
 
-function _sign(n) {
-  return n >= 0 ? `+${n}` : String(n);
-}
 
 function _delta(d) {
   return (d >= 0 ? '+' : '') + d.toFixed(2);

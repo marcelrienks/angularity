@@ -24,11 +24,11 @@ import { processWheel, symmetryAnalysis } from './report-engine.js';
  * @param {string} wheel - 'FL' or 'FR'
  * @returns {string}
  */
-function _getStorageKey(wheel) {
+export function _getStorageKey(wheel) {
   return `mx5-nc1-alignment-${wheel}`;
 }
 
-function _getToeStorageKey(wheel) {
+export function _getToeStorageKey(wheel) {
   return `mx5-nc1-alignment-toe-${wheel}`;
 }
 

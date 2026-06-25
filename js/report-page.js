@@ -23,6 +23,9 @@ import { calculateCaster, toeDegreesToResultantMm } from './math-utils.js';
 import { renderSummaryTable as renderTableUI,
          renderMainChart as renderChartUI,
          renderSymmetryPanel as renderSymmetryUI } from './report-ui.js';
+import { _th } from './table-utils.js';
+import { _sign } from './format-utils.js';
+import { _showError, _hideError, _showWarning, _hideWarning } from './error-utils.js';
 
 // ── Storage & state ────────────────────────────────────────────────────────
 
@@ -540,7 +543,7 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
 
     // Row header
     const rowLbl = tr.insertCell();
-    rowLbl.className = 'row-label';
+    rowLbl.className = 'row-label sub-header';
     if (REQUIRED_POSITIONS.includes(f)) rowLbl.classList.add('required-header');
     rowLbl.textContent = _sign(f);
 
@@ -609,7 +612,7 @@ function _buildTable(result) {
 
     // Row header
     const rowLbl = tr.insertCell();
-    rowLbl.className = 'row-label';
+    rowLbl.className = 'row-label sub-header';
     if (REQUIRED_POSITIONS.includes(f)) rowLbl.classList.add('required-header');
     rowLbl.textContent = _sign(f);
 
@@ -828,34 +831,23 @@ function _renderSymmetry() {
     if (!frontSym && !rearSym) return;
     const recommendedSection = document.createElement('div');
     recommendedSection.className = 'symmetry-analysis-section';
-    recommendedSection.style.marginBottom = '32px';
 
     const recommendedTitle = document.createElement('h2');
-    recommendedTitle.style.fontSize = '1rem';
-    recommendedTitle.style.fontWeight = '700';
-    recommendedTitle.style.marginBottom = '16px';
-    recommendedTitle.style.letterSpacing = '0.05em';
+    recommendedTitle.className = 'header';
     recommendedTitle.textContent = 'Recommended Summary';
     recommendedSection.appendChild(recommendedTitle);
 
     const recommendedDesc = document.createElement('p');
-    recommendedDesc.style.fontSize = '0.75rem';
-    recommendedDesc.style.color = 'var(--muted)';
-    recommendedDesc.style.marginBottom = '16px';
-    recommendedDesc.style.lineHeight = '1.6';
+    recommendedDesc.className = 'paragraph';
     recommendedDesc.textContent = 'Best overall compromise for left/right symmetry, prioritizing target alignment values.';
     recommendedSection.appendChild(recommendedDesc);
 
     if (frontSym) {
       const frontSubsection = document.createElement('div');
       frontSubsection.className = 'symmetry-subsection';
-      frontSubsection.style.marginBottom = '24px';
 
       const frontSubtitle = document.createElement('h3');
-      frontSubtitle.style.fontSize = '0.9rem';
-      frontSubtitle.style.fontWeight = '600';
-      frontSubtitle.style.marginBottom = '12px';
-      frontSubtitle.style.color = 'var(--accent)';
+      frontSubtitle.className = 'sub-header';
       frontSubtitle.textContent = 'Front Axle (FL ↔ FR)';
       frontSubsection.appendChild(frontSubtitle);
 
@@ -868,10 +860,7 @@ function _renderSymmetry() {
       rearSubsection.className = 'symmetry-subsection';
 
       const rearSubtitle = document.createElement('h3');
-      rearSubtitle.style.fontSize = '0.9rem';
-      rearSubtitle.style.fontWeight = '600';
-      rearSubtitle.style.marginBottom = '12px';
-      rearSubtitle.style.color = 'var(--accent)';
+      rearSubtitle.className = 'sub-header';
       rearSubtitle.textContent = 'Rear Axle (RL ↔ RR)';
       rearSubsection.appendChild(rearSubtitle);
 
@@ -885,40 +874,28 @@ function _renderSymmetry() {
     // ── 2. INDEPENDENT OPTIMIZATIONS ───────────────────────────────────────
     const independentSection = document.createElement('div');
     independentSection.className = 'symmetry-analysis-section';
-    independentSection.style.marginBottom = '32px';
 
     const independentTitle = document.createElement('h2');
-    independentTitle.style.fontSize = '1rem';
-    independentTitle.style.fontWeight = '700';
-    independentTitle.style.marginBottom = '16px';
-    independentTitle.style.letterSpacing = '0.05em';
+    independentTitle.className = 'header';
     independentTitle.textContent = 'Independent Optimizations';
     independentSection.appendChild(independentTitle);
 
     const independentDesc = document.createElement('p');
-    independentDesc.style.fontSize = '0.75rem';
-    independentDesc.style.color = 'var(--muted)';
-    independentDesc.style.marginBottom = '16px';
-    independentDesc.style.lineHeight = '1.6';
+    independentDesc.className = 'paragraph';
     independentDesc.textContent = 'Each wheel optimized separately, showing best camber and best caster scenarios with their resulting cross-metric values.';
     independentSection.appendChild(independentDesc);
 
     if (frontSym) {
       const frontIndepSubsection = document.createElement('div');
       frontIndepSubsection.className = 'symmetry-subsection';
-      frontIndepSubsection.style.marginBottom = '24px';
 
       const frontIndepSubtitle = document.createElement('h3');
-      frontIndepSubtitle.style.fontSize = '0.9rem';
-      frontIndepSubtitle.style.fontWeight = '600';
-      frontIndepSubtitle.style.marginBottom = '12px';
-      frontIndepSubtitle.style.color = 'var(--accent)';
+      frontIndepSubtitle.className = 'sub-header';
       frontIndepSubtitle.textContent = 'Front Wheels (FL & FR)';
       frontIndepSubsection.appendChild(frontIndepSubtitle);
 
       const frontIndepGrid = document.createElement('div');
       frontIndepGrid.className = 'symmetry-grid';
-      frontIndepGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
 
       for (const [wheel, data] of [['FL', frontSym.fl], ['FR', frontSym.fr]]) {
         const card = _buildIndependentOptimizationCard(wheel, data);
@@ -934,16 +911,12 @@ function _renderSymmetry() {
       rearIndepSubsection.className = 'symmetry-subsection';
 
       const rearIndepSubtitle = document.createElement('h3');
-      rearIndepSubtitle.style.fontSize = '0.9rem';
-      rearIndepSubtitle.style.fontWeight = '600';
-      rearIndepSubtitle.style.marginBottom = '12px';
-      rearIndepSubtitle.style.color = 'var(--accent)';
+      rearIndepSubtitle.className = 'sub-header';
       rearIndepSubtitle.textContent = 'Rear Wheels (RL & RR)';
       rearIndepSubsection.appendChild(rearIndepSubtitle);
 
       const rearIndepGrid = document.createElement('div');
       rearIndepGrid.className = 'symmetry-grid';
-      rearIndepGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
 
       // Use rearSym.rear.rl and rearSym.rear.rr which have bestCell data
       if (rearSym.rear && rearSym.rear.rl && rearSym.rear.rr) {
@@ -966,37 +939,27 @@ function _renderSymmetry() {
     optionsSection.className = 'symmetry-analysis-section';
 
     const optionsTitle = document.createElement('h2');
-    optionsTitle.style.fontSize = '1rem';
-    optionsTitle.style.fontWeight = '700';
-    optionsTitle.style.marginBottom = '16px';
-    optionsTitle.style.letterSpacing = '0.05em';
+    optionsTitle.className = 'header';
     optionsTitle.textContent = 'Symmetry Options';
     optionsSection.appendChild(optionsTitle);
 
     const optionsDesc = document.createElement('p');
-    optionsDesc.style.fontSize = '0.75rem';
-    optionsDesc.style.color = 'var(--muted)';
-    optionsDesc.style.marginBottom = '16px';
-    optionsDesc.style.lineHeight = '1.6';
+    optionsDesc.className = 'paragraph';
     optionsDesc.textContent = 'Alternative symmetric pairings where both wheels lock to matching alignment values (within tolerance).';
     optionsSection.appendChild(optionsDesc);
 
     if (frontSym) {
       const frontOptSubsection = document.createElement('div');
       frontOptSubsection.className = 'symmetry-subsection';
-      frontOptSubsection.style.marginBottom = '24px';
 
       const frontOptSubtitle = document.createElement('h3');
-      frontOptSubtitle.style.fontSize = '0.9rem';
-      frontOptSubtitle.style.fontWeight = '600';
-      frontOptSubtitle.style.marginBottom = '12px';
-      frontOptSubtitle.style.color = 'var(--accent)';
+      frontOptSubtitle.className = 'sub-header';
       frontOptSubtitle.textContent = 'Front Axle Pairs';
       frontOptSubsection.appendChild(frontOptSubtitle);
 
       const frontOptGrid = document.createElement('div');
       frontOptGrid.className = 'symmetry-grid';
-      frontOptGrid.style.gridTemplateColumns = '1fr';
+      frontOptGrid.classList.add('symmetry-grid--single');
 
       // Camber Symmetry Pair
       if (frontSym.camberSymmetricPair) {
@@ -1004,11 +967,7 @@ function _renderSymmetry() {
         frontOptGrid.appendChild(camberCard);
       } else {
         const noPairDiv = document.createElement('div');
-        noPairDiv.style.padding = '12px';
-        noPairDiv.style.backgroundColor = 'var(--bg-secondary)';
-        noPairDiv.style.borderRadius = '4px';
-        noPairDiv.style.fontSize = '0.75rem';
-        noPairDiv.style.color = 'var(--muted)';
+        noPairDiv.className = 'empty-state';
         noPairDiv.textContent = 'No camber symmetry pair found within ±0.3° tolerance';
         frontOptGrid.appendChild(noPairDiv);
       }
@@ -1019,11 +978,7 @@ function _renderSymmetry() {
         frontOptGrid.appendChild(casterCard);
       } else {
         const noPairDiv = document.createElement('div');
-        noPairDiv.style.padding = '12px';
-        noPairDiv.style.backgroundColor = 'var(--bg-secondary)';
-        noPairDiv.style.borderRadius = '4px';
-        noPairDiv.style.fontSize = '0.75rem';
-        noPairDiv.style.color = 'var(--muted)';
+        noPairDiv.className = 'empty-state';
         noPairDiv.textContent = 'No caster symmetry pair found within ±0.15° tolerance';
         frontOptGrid.appendChild(noPairDiv);
       }
@@ -1043,16 +998,13 @@ function _renderSymmetry() {
       rearOptSubsection.className = 'symmetry-subsection';
 
       const rearOptSubtitle = document.createElement('h3');
-      rearOptSubtitle.style.fontSize = '0.9rem';
-      rearOptSubtitle.style.fontWeight = '600';
-      rearOptSubtitle.style.marginBottom = '12px';
-      rearOptSubtitle.style.color = 'var(--accent)';
+      rearOptSubtitle.className = 'sub-header';
       rearOptSubtitle.textContent = 'Rear Axle Pairs';
       rearOptSubsection.appendChild(rearOptSubtitle);
 
       const rearOptGrid = document.createElement('div');
       rearOptGrid.className = 'symmetry-grid';
-      rearOptGrid.style.gridTemplateColumns = '1fr';
+      rearOptGrid.classList.add('symmetry-grid--single');
 
       // Camber Symmetry Pair
       if (rearSym.rear.camberSymmetricPair) {
@@ -1060,11 +1012,7 @@ function _renderSymmetry() {
         rearOptGrid.appendChild(rearCamberCard);
       } else {
         const noPairDiv = document.createElement('div');
-        noPairDiv.style.padding = '12px';
-        noPairDiv.style.backgroundColor = 'var(--bg-secondary)';
-        noPairDiv.style.borderRadius = '4px';
-        noPairDiv.style.fontSize = '0.75rem';
-        noPairDiv.style.color = 'var(--muted)';
+        noPairDiv.className = 'empty-state';
         noPairDiv.textContent = 'No rear camber symmetry pair found within ±0.3° tolerance';
         rearOptGrid.appendChild(noPairDiv);
       }
@@ -1075,11 +1023,7 @@ function _renderSymmetry() {
         rearOptGrid.appendChild(rearToeCard);
       } else {
         const noToeMsgDiv = document.createElement('div');
-        noToeMsgDiv.style.padding = '12px';
-        noToeMsgDiv.style.backgroundColor = 'var(--bg-secondary)';
-        noToeMsgDiv.style.borderRadius = '4px';
-        noToeMsgDiv.style.fontSize = '0.75rem';
-        noToeMsgDiv.style.color = 'var(--muted)';
+        noToeMsgDiv.className = 'empty-state';
         noToeMsgDiv.textContent = 'Toe data not available without camber symmetric pair';
         rearOptGrid.appendChild(noToeMsgDiv);
       }
@@ -1099,10 +1043,10 @@ function _renderSymmetry() {
 
 function _buildAxleHeading(title, description) {
   const wrap = document.createElement('div');
-  wrap.style.margin = '24px 0 16px';
+  wrap.className = 'axle-heading';
   wrap.innerHTML = `
-    <div style="font-size:0.8rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:6px;">${title}</div>
-    <div style="font-size:0.68rem; color:var(--muted); line-height:1.6;">${description}</div>`;
+    <div class="label-uppercase">${title}</div>
+    <div class="axle-heading-desc">${description}</div>`;
   return wrap;
 }
 
@@ -1116,58 +1060,58 @@ function _buildIndependentOptimizationCard(wheel, data) {
 
   card.innerHTML = `
     <div class="title">${wheel}</div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0">
+    <div class="scenario-grid">
       <!-- LEFT SIDE: Best Camber Scenario -->
       <div class="scenario-col">
         <div class="scenario-header">Best Camber</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric camber-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric camber-bolt symmetry-metric--compact">
               <span class="label">Camber Bolt</span>
               <span class="value">${_sign(data.camberOptCamberBolt)}</span>
             </div>
-            <div class="symmetry-metric caster-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric caster-bolt symmetry-metric--compact">
               <span class="label">Caster Bolt</span>
               <span class="value">${_sign(data.camberOptCasterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
-            <div class="symmetry-metric camber" style="margin-bottom:0">
+            <div class="symmetry-metric camber symmetry-metric--compact">
               <span class="label">Camber</span>
               <span class="value">${data.bestCamberValue.toFixed(2)}°</span>
               <span class="symmetry-target">Target: ${TARGET_CAMBER.toFixed(2)}° &nbsp; Δ ${_delta(data.camberDelta)}°</span>
             </div>
-            <div class="symmetry-metric caster" style="opacity:0.6; margin-bottom:0">
+            <div class="symmetry-metric caster symmetry-metric--compact">
               <span class="label">Resulting Caster</span>
-              <span class="value" style="font-size:0.85rem;">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
+              <span class="value">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- RIGHT SIDE: Best Caster Scenario -->
-      <div class="scenario-col" style="padding-left:24px; padding-right:0; border-right:none;">
+      <div class="scenario-col scenario-col--right">
         <div class="scenario-header">Best Caster</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric camber-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric camber-bolt symmetry-metric--compact">
               <span class="label">Camber Bolt</span>
               <span class="value">${_sign(data.casterOptCamberBolt)}</span>
             </div>
-            <div class="symmetry-metric caster-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric caster-bolt symmetry-metric--compact">
               <span class="label">Caster Bolt</span>
               <span class="value">${_sign(data.casterOptCasterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
-            <div class="symmetry-metric caster" style="margin-bottom:0">
+            <div class="symmetry-metric caster symmetry-metric--compact">
               <span class="label">Caster</span>
               <span class="value">${data.bestCasterValue.toFixed(2)}°</span>
               <span class="symmetry-target">Target: ${TARGET_CASTER.toFixed(2)}° &nbsp; Δ ${_delta(data.casterDelta)}°</span>
             </div>
-            <div class="symmetry-metric camber" style="opacity:0.6; margin-bottom:0">
+            <div class="symmetry-metric camber symmetry-metric--compact">
               <span class="label">Resulting Camber</span>
-              <span class="value" style="font-size:0.85rem;">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
+              <span class="value">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
             </div>
           </div>
         </div>
@@ -1186,7 +1130,7 @@ function _buildRearIndependentOptimizationCard(wheel, bestCell, targetCamber) {
 
   card.innerHTML = `
     <div class="title">${wheel}</div>
-    <div style="display:flex; flex-direction:column; gap:0">
+    <div>
       <div class="symmetry-metric front-bolt">
         <span class="label">Best Camber Front Bolt</span>
         <span class="value">${_sign(bestCell.camberBolt)}</span>
@@ -1200,7 +1144,7 @@ function _buildRearIndependentOptimizationCard(wheel, bestCell, targetCamber) {
         <span class="value">${bestCell.camber.toFixed(2)}°</span>
         <span class="symmetry-target">Target: ${targetCamber.toFixed(2)}° &nbsp; Δ ${_delta(bestCell.camber - targetCamber)}°</span>
       </div>
-      <div class="symmetry-metric caster" style="opacity:0.6; margin-bottom:0">
+      <div class="symmetry-metric caster symmetry-metric--compact">
         <span class="label">Resulting Caster</span>
         <span class="value">${bestCell.caster.toFixed(2)}°</span>
       </div>
@@ -1225,55 +1169,55 @@ function _buildSymmetryPairCard(title, pairData, metricType) {
   const metricLabel = metricType === 'camber' ? 'Camber' : 'Caster';
 
   card.innerHTML = `
-    <div class="title" style="color:var(--info);">${title}</div>
-    <div style="font-size:0.65rem; color:var(--muted); margin-bottom:16px;">FL and FR achieve matching ${metricLabel.toLowerCase()} (${metricValue.toFixed(2)}°)</div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0">
+    <div class="title">${title}</div>
+    <div class="section-desc">FL and FR achieve matching ${metricLabel.toLowerCase()} (${metricValue.toFixed(2)}°)</div>
+    <div class="scenario-grid">
       <div class="scenario-col">
         <div class="scenario-header">FL</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric front-bolt symmetry-metric--compact">
               <span class="label">Front Bolt</span>
               <span class="value">${_sign(pairData.flPosition.camberBolt)}</span>
             </div>
-            <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric rear-bolt symmetry-metric--compact">
               <span class="label">Rear Bolt</span>
               <span class="value">${_sign(pairData.flPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
-            <div class="symmetry-metric ${metricType}" style="margin-bottom:0">
+            <div class="symmetry-metric ${metricType} symmetry-metric--compact">
               <span class="label">${metricLabel}</span>
               <span class="value">${metricValue.toFixed(2)}°</span>
             </div>
-            <div class="symmetry-metric ${metricType === 'camber' ? 'caster' : 'camber'}" style="opacity:0.6; margin-bottom:0">
+            <div class="symmetry-metric ${metricType === 'camber' ? 'caster' : 'camber'} symmetry-metric--compact">
               <span class="label">${resultingMetric}</span>
-              <span class="value" style="font-size:0.85rem;">${resultingFL.toFixed(2)}°</span>
+              <span class="value">${resultingFL.toFixed(2)}°</span>
             </div>
           </div>
         </div>
       </div>
-      <div class="scenario-col" style="padding-left:24px; padding-right:0; border-right:none;">
+      <div class="scenario-col scenario-col--right">
         <div class="scenario-header">FR</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric front-bolt symmetry-metric--compact">
               <span class="label">Front Bolt</span>
               <span class="value">${_sign(pairData.frPosition.camberBolt)}</span>
             </div>
-            <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric rear-bolt symmetry-metric--compact">
               <span class="label">Rear Bolt</span>
               <span class="value">${_sign(pairData.frPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
-            <div class="symmetry-metric ${metricType}" style="margin-bottom:0">
+            <div class="symmetry-metric ${metricType} symmetry-metric--compact">
               <span class="label">${metricLabel}</span>
               <span class="value">${metricValue.toFixed(2)}°</span>
             </div>
-            <div class="symmetry-metric ${metricType === 'camber' ? 'caster' : 'camber'}" style="opacity:0.6; margin-bottom:0">
+            <div class="symmetry-metric ${metricType === 'camber' ? 'caster' : 'camber'} symmetry-metric--compact">
               <span class="label">${resultingMetric}</span>
-              <span class="value" style="font-size:0.85rem;">${resultingFR.toFixed(2)}°</span>
+              <span class="value">${resultingFR.toFixed(2)}°</span>
             </div>
           </div>
         </div>
@@ -1291,52 +1235,52 @@ function _buildRearSymmetryPairCard(title, rearData, rearPair) {
 
   // rearPair has the structure: { rlPosition, rrPosition, rlCamber, rrCamber, rlToe, rrToe, toeMismatch }
   if (!rearPair || !rearPair.rlPosition || !rearPair.rrPosition) {
-    card.innerHTML = '<div style="padding:12px; color:#999;">Rear symmetric pair data incomplete</div>';
+    card.innerHTML = '<div class="empty-state">Rear symmetric pair data incomplete</div>';
     return card;
   }
 
   const camberValue = rearPair.rlCamber;
 
   card.innerHTML = `
-    <div class="title" style="color:var(--info);">${title}</div>
-    <div style="font-size:0.65rem; color:var(--muted); margin-bottom:16px;">RL and RR achieve matching camber (${camberValue.toFixed(2)}°)</div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0">
+    <div class="title">${title}</div>
+    <div class="section-desc">RL and RR achieve matching camber (${camberValue.toFixed(2)}°)</div>
+    <div class="scenario-grid">
       <div class="scenario-col">
         <div class="scenario-header">RL</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric front-bolt symmetry-metric--compact">
               <span class="label">Front Bolt</span>
               <span class="value">${_sign(rearPair.rlPosition.camberBolt)}</span>
             </div>
-            <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric rear-bolt symmetry-metric--compact">
               <span class="label">Rear Bolt</span>
               <span class="value">${_sign(rearPair.rlPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
-            <div class="symmetry-metric camber" style="margin-bottom:0">
+            <div class="symmetry-metric camber symmetry-metric--compact">
               <span class="label">Camber</span>
               <span class="value">${camberValue.toFixed(2)}°</span>
             </div>
           </div>
         </div>
       </div>
-      <div class="scenario-col" style="padding-left:24px; padding-right:0; border-right:none;">
+      <div class="scenario-col scenario-col--right">
         <div class="scenario-header">RR</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric front-bolt symmetry-metric--compact">
               <span class="label">Front Bolt</span>
               <span class="value">${_sign(rearPair.rrPosition.camberBolt)}</span>
             </div>
-            <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric rear-bolt symmetry-metric--compact">
               <span class="label">Rear Bolt</span>
               <span class="value">${_sign(rearPair.rrPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
-            <div class="symmetry-metric camber" style="margin-bottom:0">
+            <div class="symmetry-metric camber symmetry-metric--compact">
               <span class="label">Camber</span>
               <span class="value">${camberValue.toFixed(2)}°</span>
             </div>
@@ -1361,11 +1305,7 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
   
   if (!pairData || leftToeValue == null || rightToeValue == null) {
     const notAvailable = document.createElement('div');
-    notAvailable.style.padding = '12px';
-    notAvailable.style.backgroundColor = 'var(--bg-secondary)';
-    notAvailable.style.borderRadius = '4px';
-    notAvailable.style.fontSize = '0.75rem';
-    notAvailable.style.color = 'var(--muted)';
+    notAvailable.className = 'empty-state';
     notAvailable.textContent = 'Toe data not available for this pair';
     return notAvailable;
   }
@@ -1377,45 +1317,45 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
   card.className = 'symmetry-card';
 
   card.innerHTML = `
-    <div class="title" style="color:var(--info);">${title}</div>
-    <div style="font-size:0.65rem; color:var(--muted); margin-bottom:16px;">${leftWheel} and ${rightWheel} toe mismatch: ${(pairData.toeMismatch || 0).toFixed(2)} mm (within ±0.10 mm limit)</div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0">
+    <div class="title">${title}</div>
+    <div class="section-desc">${leftWheel} and ${rightWheel} toe mismatch: ${(pairData.toeMismatch || 0).toFixed(2)} mm (within ±0.10 mm limit)</div>
+    <div class="scenario-grid">
       <div class="scenario-col">
         <div class="scenario-header">${leftWheel}</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric front-bolt symmetry-metric--compact">
               <span class="label">Front Bolt</span>
               <span class="value">${_sign(isRear ? pairData.rlPosition.camberBolt : pairData.flPosition.camberBolt)}</span>
             </div>
-            <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric rear-bolt symmetry-metric--compact">
               <span class="label">Rear Bolt</span>
               <span class="value">${_sign(isRear ? pairData.rlPosition.casterBolt : pairData.flPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
-            <div class="symmetry-metric toe" style="margin-bottom:0">
+            <div class="symmetry-metric toe symmetry-metric--compact">
               <span class="label">Toe</span>
               <span class="value">${(leftToeValue || 0).toFixed(2)} mm</span>
             </div>
           </div>
         </div>
       </div>
-      <div class="scenario-col" style="padding-left:24px; padding-right:0; border-right:none;">
+      <div class="scenario-col scenario-col--right">
         <div class="scenario-header">${rightWheel}</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric front-bolt symmetry-metric--compact">
               <span class="label">Front Bolt</span>
               <span class="value">${_sign(isRear ? pairData.rrPosition.camberBolt : pairData.frPosition.camberBolt)}</span>
             </div>
-            <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric rear-bolt symmetry-metric--compact">
               <span class="label">Rear Bolt</span>
               <span class="value">${_sign(isRear ? pairData.rrPosition.casterBolt : pairData.frPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
-            <div class="symmetry-metric toe" style="margin-bottom:0">
+            <div class="symmetry-metric toe symmetry-metric--compact">
               <span class="label">Toe</span>
               <span class="value">${(rightToeValue || 0).toFixed(2)} mm</span>
             </div>
@@ -1442,10 +1382,9 @@ function _buildRearConsolidationTable(rearSymmetryResult) {
 
   const status = document.createElement('div');
   status.className = hasPair ? 'symmetry-status match' : 'symmetry-status partial';
-  status.style.marginBottom = '16px';
   status.innerHTML = `
-    <div style="font-size:0.75rem; font-weight:700; margin-bottom:4px;">${hasPair ? '✓ Rear Camber Match Found' : '◐ Rear Camber Approximation'}</div>
-    <div style="font-size:0.65rem; line-height:1.5;">${recommendation.note}</div>`;
+    <div class="status-title">${hasPair ? '✓ Rear Camber Match Found' : '◐ Rear Camber Approximation'}</div>
+    <div class="status-note">${recommendation.note}</div>`;
   div.appendChild(status);
 
   const table = document.createElement('table');
@@ -1474,7 +1413,7 @@ function _buildRearConsolidationTable(rearSymmetryResult) {
   const rrCasterBoltBolt = recommendation.rrCasterBolt != null ? _sign(recommendation.rrCasterBolt) : '—';
   
   camberRow.innerHTML = `
-    <td style="font-weight:600;"><span class="camber-label">Camber</span></td>
+    <td class="bold-cell"><span class="camber-label">Camber</span></td>
     <td>${recommendation.camber.toFixed(2)}°</td>
     <td><div>F:${rlCamberBoltBolt}</div><div>R:${rlCasterBoltBolt}</div></td>
     <td><div>F:${rrCamberBoltBolt}</div><div>R:${rrCasterBoltBolt}</div></td>
@@ -1490,9 +1429,9 @@ function _buildRearConsolidationTable(rearSymmetryResult) {
         ? '◐ Toe' 
         : 'Toe';
     toeRow.innerHTML = `
-      <td style="font-weight:600;"><span class="toe-label">${toeLabel}</span></td>
+      <td class="bold-cell"><span class="toe-label">${toeLabel}</span></td>
       <td>${recommendation.rlToe ? recommendation.rlToe.toFixed(2) : '—'} mm</td>
-      <td colspan="2" style="font-size:0.85rem; color:#666;">RL: ${recommendation.rlToe ? recommendation.rlToe.toFixed(2) : '—'} mm | RR: ${recommendation.rrToe ? recommendation.rrToe.toFixed(2) : '—'} mm</td>
+      <td colspan="2" class="note-cell">RL: ${recommendation.rlToe ? recommendation.rlToe.toFixed(2) : '—'} mm | RR: ${recommendation.rrToe ? recommendation.rrToe.toFixed(2) : '—'} mm</td>
     `;
     tbody.appendChild(toeRow);
   }
@@ -1508,58 +1447,40 @@ function _buildSymmetryPanel(sym) {
 
   // ── 0. LEGEND (Color Guide) ────────────────────────────────────────────
   const legendContainer = document.createElement('div');
-  legendContainer.style.marginBottom = '20px';
-  legendContainer.style.padding = '12px';
-  legendContainer.style.backgroundColor = 'var(--bg-secondary)';
-  legendContainer.style.borderRadius = '4px';
-  legendContainer.style.border = '1px solid var(--border)';
+  legendContainer.className = 'legend-container';
   
   const legendTitle = document.createElement('div');
-  legendTitle.style.fontSize = '0.65rem';
-  legendTitle.style.fontWeight = '700';
-  legendTitle.style.letterSpacing = '0.08em';
-  legendTitle.style.textTransform = 'uppercase';
-  legendTitle.style.color = 'var(--muted)';
-  legendTitle.style.marginBottom = '8px';
+  legendTitle.className = 'label-uppercase';
   legendTitle.textContent = 'Legend';
   legendContainer.appendChild(legendTitle);
 
   const legendContent = document.createElement('div');
-  legendContent.style.display = 'flex';
-  legendContent.style.gap = '24px';
-  legendContent.style.flexWrap = 'wrap';
-  legendContent.style.fontSize = '0.75rem';
+  legendContent.className = 'legend-items';
 
   // Camber legend item
   const camberItem = document.createElement('div');
-  camberItem.style.display = 'flex';
-  camberItem.style.alignItems = 'center';
-  camberItem.style.gap = '8px';
+  camberItem.className = 'legend-item';
   camberItem.innerHTML = `
-    <span style="width:20px; height:12px; background-color:var(--blue); border-radius:2px; display:inline-block;"></span>
-    <span style="color:var(--blue); font-weight:600;">Camber</span>
+    <span class="legend-swatch legend-swatch--camber"></span>
+    <span class="legend-label--camber">Camber</span>
   `;
   legendContent.appendChild(camberItem);
 
   // Caster legend item
   const casterItem = document.createElement('div');
-  casterItem.style.display = 'flex';
-  casterItem.style.alignItems = 'center';
-  casterItem.style.gap = '8px';
+  casterItem.className = 'legend-item';
   casterItem.innerHTML = `
-    <span style="width:20px; height:12px; background-color:var(--orange); border-radius:2px; display:inline-block;"></span>
-    <span style="color:var(--orange); font-weight:600;">Caster</span>
+    <span class="legend-swatch legend-swatch--caster"></span>
+    <span class="legend-label--caster">Caster</span>
   `;
   legendContent.appendChild(casterItem);
 
   // Separator text
   const separatorItem = document.createElement('div');
-  separatorItem.style.display = 'flex';
-  separatorItem.style.alignItems = 'center';
-  separatorItem.style.gap = '6px';
+  separatorItem.className = 'legend-item';
   separatorItem.innerHTML = `
-    <span style="font-weight:600; color:var(--muted);">|</span>
-    <span style="color:var(--muted);">Value separator</span>
+    <span class="legend-label--muted bold-cell">|</span>
+    <span class="legend-label--muted">Value separator</span>
   `;
   legendContent.appendChild(separatorItem);
 
@@ -1568,44 +1489,29 @@ function _buildSymmetryPanel(sym) {
 
   // ── 1. FRONT CONSOLIDATION TABLE (FL ↔ FR Symmetry) ─────────────────────
   const frontConsolidationContainer = document.createElement('div');
-  frontConsolidationContainer.style.marginBottom = '12px';
+  frontConsolidationContainer.className = 'consolidation-header';
   frontConsolidationContainer.appendChild(_buildFrontConsolidationTable(sym));
   wrap.appendChild(frontConsolidationContainer);
 
   // ── 2. CORNER TABLES LAYOUT (Top: FL/FR, Bottom: RL/RR) ──────────────────
   const cornerLayout = document.createElement('div');
-  cornerLayout.style.display = 'grid';
-  cornerLayout.style.gridTemplateColumns = '1fr 1fr';
-  cornerLayout.style.gridTemplateRows = 'auto auto';
-  cornerLayout.style.columnGap = '32px';
-  cornerLayout.style.rowGap = '64px';
-  cornerLayout.style.marginTop = '48px';
-  cornerLayout.style.marginBottom = '16px';
+  cornerLayout.className = 'corner-layout';
 
   // Top-left: FL
   const flCornerWrapper = document.createElement('div');
-  flCornerWrapper.style.gridColumn = '1';
-  flCornerWrapper.style.gridRow = '1';
-  flCornerWrapper.style.display = 'flex';
-  flCornerWrapper.style.justifyContent = 'center';
+  flCornerWrapper.className = 'corner-wrapper';
   flCornerWrapper.appendChild(_buildCornerTable('FL', sym.recommendation.flCamberBolt, sym.recommendation.flCasterBolt, sym.recommendation.camber, sym.recommendation.caster));
   cornerLayout.appendChild(flCornerWrapper);
 
   // Top-right: FR
   const frCornerWrapper = document.createElement('div');
-  frCornerWrapper.style.gridColumn = '2';
-  frCornerWrapper.style.gridRow = '1';
-  frCornerWrapper.style.display = 'flex';
-  frCornerWrapper.style.justifyContent = 'center';
+  frCornerWrapper.className = 'corner-wrapper';
   frCornerWrapper.appendChild(_buildCornerTable('FR', sym.recommendation.frCamberBolt, sym.recommendation.frCasterBolt, sym.recommendation.camber, sym.recommendation.caster));
   cornerLayout.appendChild(frCornerWrapper);
 
   // Bottom-left: RL
   const rlCornerWrapper = document.createElement('div');
-  rlCornerWrapper.style.gridColumn = '1';
-  rlCornerWrapper.style.gridRow = '2';
-  rlCornerWrapper.style.display = 'flex';
-  rlCornerWrapper.style.justifyContent = 'center';
+  rlCornerWrapper.className = 'corner-wrapper';
   if (sym.rear && sym.rear.rl) {
     rlCornerWrapper.appendChild(_buildCornerTable('RL', sym.rear.rl.bestCell.camberBolt, sym.rear.rl.bestCell.casterBolt, sym.rear.rl.bestCell.camber, 'N/A'));
   } else {
@@ -1615,10 +1521,7 @@ function _buildSymmetryPanel(sym) {
 
   // Bottom-right: RR
   const rrCornerWrapper = document.createElement('div');
-  rrCornerWrapper.style.gridColumn = '2';
-  rrCornerWrapper.style.gridRow = '2';
-  rrCornerWrapper.style.display = 'flex';
-  rrCornerWrapper.style.justifyContent = 'center';
+  rrCornerWrapper.className = 'corner-wrapper';
   if (sym.rear && sym.rear.rr) {
     rrCornerWrapper.appendChild(_buildCornerTable('RR', sym.rear.rr.bestCell.camberBolt, sym.rear.rr.bestCell.casterBolt, sym.rear.rr.bestCell.camber, 'N/A'));
   } else {
@@ -1630,7 +1533,7 @@ function _buildSymmetryPanel(sym) {
 
   // ── 4. SYMMETRY STATUS INDICATOR ─────────────────────────────────────
   const statusContainer = document.createElement('div');
-  statusContainer.style.marginBottom = '32px';
+  statusContainer.className = 'status-summary';
   statusContainer.appendChild(_buildSymmetryStatus(sym));
   wrap.appendChild(statusContainer);
 
@@ -1640,15 +1543,11 @@ function _buildSymmetryPanel(sym) {
 
   // Title for Section 1
   const sectionTitle = document.createElement('div');
-  sectionTitle.style.gridColumn = '1 / -1';
+  sectionTitle.className = 'grid-full-span';
   sectionTitle.innerHTML = `
-    <div style="font-size:0.85rem; font-weight:600; margin-bottom:8px; letter-spacing:0.05em;">
-      INDEPENDENT OPTIMIZATION PER WHEEL
-    </div>
-    <div style="font-size:0.65rem; color:var(--muted); line-height:1.5;">
-      Each wheel shows two separate bolt positions: one optimized for camber, one for caster.
-      Use the best-camber position if camber accuracy is your priority; use best-caster if caster is.
-    </div>`;
+    <div class="label-uppercase">INDEPENDENT OPTIMIZATION PER WHEEL</div>
+    <div class="section-note">Each wheel shows two separate bolt positions: one optimized for camber, one for caster.
+      Use the best-camber position if camber accuracy is your priority; use best-caster if caster is.</div>`;
   grid.appendChild(sectionTitle);
 
   // Per-wheel cards showing both best camber and best caster scenarios
@@ -1658,58 +1557,58 @@ function _buildSymmetryPanel(sym) {
 
     card.innerHTML = `
       <div class="title">${wheel}</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0">
+      <div class="scenario-grid">
         <!-- LEFT SIDE: Best Camber Scenario -->
         <div class="scenario-col">
           <div class="scenario-header">Best Camber</div>
           <div class="bolt-values-grid">
             <div class="bolts-col">
-              <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric front-bolt symmetry-metric--compact">
                 <span class="label">Front Bolt</span>
                 <span class="value">${_sign(data.camberFront)}</span>
               </div>
-              <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric rear-bolt symmetry-metric--compact">
                 <span class="label">Rear Bolt</span>
                 <span class="value">${_sign(data.camberRear)}</span>
               </div>
             </div>
             <div class="values-col">
-              <div class="symmetry-metric camber" style="margin-bottom:0">
+              <div class="symmetry-metric camber symmetry-metric--compact">
                 <span class="label">Camber</span>
                 <span class="value">${data.bestCamberValue.toFixed(2)}°</span>
                 <span class="symmetry-target">Target: ${TARGET_CAMBER.toFixed(2)}° &nbsp; Δ ${_delta(data.camberDelta)}°</span>
               </div>
-              <div class="symmetry-metric caster" style="opacity:0.6; margin-bottom:0">
+              <div class="symmetry-metric caster symmetry-metric--compact">
                 <span class="label">Resulting Caster</span>
-                <span class="value" style="font-size:0.85rem;">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
+                <span class="value">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- RIGHT SIDE: Best Caster Scenario -->
-        <div class="scenario-col" style="padding-left:24px; padding-right:0; border-right:none;">
+        <div class="scenario-col scenario-col--right">
           <div class="scenario-header">Best Caster</div>
           <div class="bolt-values-grid">
             <div class="bolts-col">
-              <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric front-bolt symmetry-metric--compact">
                 <span class="label">Front Bolt</span>
                 <span class="value">${_sign(data.casterFront)}</span>
               </div>
-              <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric rear-bolt symmetry-metric--compact">
                 <span class="label">Rear Bolt</span>
                 <span class="value">${_sign(data.casterRear)}</span>
               </div>
             </div>
             <div class="values-col">
-              <div class="symmetry-metric caster" style="margin-bottom:0">
+              <div class="symmetry-metric caster symmetry-metric--compact">
                 <span class="label">Caster</span>
                 <span class="value">${data.bestCasterValue.toFixed(2)}°</span>
                 <span class="symmetry-target">Target: ${TARGET_CASTER.toFixed(2)}° &nbsp; Δ ${_delta(data.casterDelta)}°</span>
               </div>
-              <div class="symmetry-metric camber" style="opacity:0.6; margin-bottom:0">
+              <div class="symmetry-metric camber symmetry-metric--compact">
                 <span class="label">Resulting Camber</span>
-                <span class="value" style="font-size:0.85rem;">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
+                <span class="value">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
               </div>
             </div>
           </div>
@@ -1720,15 +1619,10 @@ function _buildSymmetryPanel(sym) {
 
   // Add "Symmetric Options" section header
   const optHeaderDiv = document.createElement('div');
-  optHeaderDiv.style.gridColumn = '1 / -1';
-  optHeaderDiv.style.marginTop = '32px';
-  optHeaderDiv.style.paddingTop = '16px';
-  optHeaderDiv.style.borderTop = '1px solid var(--border-subtle)';
+  optHeaderDiv.className = 'section-divider-header';
   optHeaderDiv.innerHTML = `
-    <div style="font-size:0.9rem; color:var(--accent); font-weight:500; margin-bottom:8px; letter-spacing:0.05em">SYMMETRIC OPTIONS</div>
-    <div style="font-size:0.65rem; color:var(--muted); line-height:1.6;">
-      These two options show FL/FR bolts set to match either CAMBER values or CASTER values.
-    </div>`;
+    <div class="label-uppercase">SYMMETRIC OPTIONS</div>
+    <div class="section-note">These two options show FL/FR bolts set to match either CAMBER values or CASTER values.</div>`;
   grid.appendChild(optHeaderDiv);
 
   // ── Option 1: Camber-Symmetric Pair ──────────────────────────────────────
@@ -1737,55 +1631,55 @@ function _buildSymmetryPanel(sym) {
     const camberOptCard = document.createElement('div');
     camberOptCard.className = 'symmetry-card';
     camberOptCard.innerHTML = `
-      <div class="title" style="color:var(--info);">Camber-Symmetric Pair</div>
-      <div style="font-size:0.65rem; color:var(--muted); margin-bottom:16px;">FL and FR achieve matching camber (${cpair.flCamber.toFixed(2)}°)</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0">
+      <div class="title">Camber-Symmetric Pair</div>
+      <div class="section-desc">FL and FR achieve matching camber (${cpair.flCamber.toFixed(2)}°)</div>
+      <div class="scenario-grid">
         <div class="scenario-col">
           <div class="scenario-header">FL</div>
           <div class="bolt-values-grid">
             <div class="bolts-col">
-              <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric front-bolt symmetry-metric--compact">
                 <span class="label">Front Bolt</span>
                 <span class="value">${_sign(cpair.flPosition.camberBolt)}</span>
               </div>
-              <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric rear-bolt symmetry-metric--compact">
                 <span class="label">Rear Bolt</span>
                 <span class="value">${_sign(cpair.flPosition.casterBolt)}</span>
               </div>
             </div>
             <div class="values-col">
-              <div class="symmetry-metric camber" style="margin-bottom:0">
+              <div class="symmetry-metric camber symmetry-metric--compact">
                 <span class="label">Camber</span>
                 <span class="value">${cpair.flCamber.toFixed(2)}°</span>
               </div>
-              <div class="symmetry-metric caster" style="opacity:0.6; margin-bottom:0">
+              <div class="symmetry-metric caster symmetry-metric--compact">
                 <span class="label">Resulting Caster</span>
-                <span class="value" style="font-size:0.85rem;">${cpair.flCasterAtBestCamber.toFixed(2)}°</span>
+                <span class="value">${cpair.flCasterAtBestCamber.toFixed(2)}°</span>
               </div>
             </div>
           </div>
         </div>
-        <div class="scenario-col" style="padding-left:24px; padding-right:0; border-right:none;">
+        <div class="scenario-col scenario-col--right">
           <div class="scenario-header">FR</div>
           <div class="bolt-values-grid">
             <div class="bolts-col">
-              <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric front-bolt symmetry-metric--compact">
                 <span class="label">Front Bolt</span>
                 <span class="value">${_sign(cpair.frPosition.camberBolt)}</span>
               </div>
-              <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric rear-bolt symmetry-metric--compact">
                 <span class="label">Rear Bolt</span>
                 <span class="value">${_sign(cpair.frPosition.casterBolt)}</span>
               </div>
             </div>
             <div class="values-col">
-              <div class="symmetry-metric camber" style="margin-bottom:0">
+              <div class="symmetry-metric camber symmetry-metric--compact">
                 <span class="label">Camber</span>
                 <span class="value">${cpair.frCamber.toFixed(2)}°</span>
               </div>
-              <div class="symmetry-metric caster" style="opacity:0.6; margin-bottom:0">
+              <div class="symmetry-metric caster symmetry-metric--compact">
                 <span class="label">Resulting Caster</span>
-                <span class="value" style="font-size:0.85rem;">${cpair.frCasterAtBestCamber.toFixed(2)}°</span>
+                <span class="value">${cpair.frCasterAtBestCamber.toFixed(2)}°</span>
               </div>
             </div>
           </div>
@@ -1800,55 +1694,55 @@ function _buildSymmetryPanel(sym) {
     const casterOptCard = document.createElement('div');
     casterOptCard.className = 'symmetry-card';
     casterOptCard.innerHTML = `
-      <div class="title" style="color:var(--success);">Caster-Symmetric Pair</div>
-      <div style="font-size:0.65rem; color:var(--muted); margin-bottom:16px;">FL and FR achieve matching caster (${kpair.flCaster.toFixed(2)}°)</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0">
+      <div class="title title--success">Caster-Symmetric Pair</div>
+      <div class="section-desc">FL and FR achieve matching caster (${kpair.flCaster.toFixed(2)}°)</div>
+      <div class="scenario-grid">
         <div class="scenario-col">
           <div class="scenario-header">FL</div>
           <div class="bolt-values-grid">
             <div class="bolts-col">
-              <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric front-bolt symmetry-metric--compact">
                 <span class="label">Front Bolt</span>
                 <span class="value">${_sign(kpair.flPosition.camberBolt)}</span>
               </div>
-              <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric rear-bolt symmetry-metric--compact">
                 <span class="label">Rear Bolt</span>
                 <span class="value">${_sign(kpair.flPosition.casterBolt)}</span>
               </div>
             </div>
             <div class="values-col">
-              <div class="symmetry-metric caster" style="margin-bottom:0">
+              <div class="symmetry-metric caster symmetry-metric--compact">
                 <span class="label">Caster</span>
                 <span class="value">${kpair.flCaster.toFixed(2)}°</span>
               </div>
-              <div class="symmetry-metric camber" style="opacity:0.6; margin-bottom:0">
+              <div class="symmetry-metric camber symmetry-metric--compact">
                 <span class="label">Resulting Camber</span>
-                <span class="value" style="font-size:0.85rem;">${kpair.flCamberAtBestCaster.toFixed(2)}°</span>
+                <span class="value">${kpair.flCamberAtBestCaster.toFixed(2)}°</span>
               </div>
             </div>
           </div>
         </div>
-        <div class="scenario-col" style="padding-left:24px; padding-right:0; border-right:none;">
+        <div class="scenario-col scenario-col--right">
           <div class="scenario-header">FR</div>
           <div class="bolt-values-grid">
             <div class="bolts-col">
-              <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric front-bolt symmetry-metric--compact">
                 <span class="label">Front Bolt</span>
                 <span class="value">${_sign(kpair.frPosition.camberBolt)}</span>
               </div>
-              <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+              <div class="symmetry-metric rear-bolt symmetry-metric--compact">
                 <span class="label">Rear Bolt</span>
                 <span class="value">${_sign(kpair.frPosition.casterBolt)}</span>
               </div>
             </div>
             <div class="values-col">
-              <div class="symmetry-metric caster" style="margin-bottom:0">
+              <div class="symmetry-metric caster symmetry-metric--compact">
                 <span class="label">Caster</span>
                 <span class="value">${kpair.frCaster.toFixed(2)}°</span>
               </div>
-              <div class="symmetry-metric camber" style="opacity:0.6; margin-bottom:0">
+              <div class="symmetry-metric camber symmetry-metric--compact">
                 <span class="label">Resulting Camber</span>
-                <span class="value" style="font-size:0.85rem;">${kpair.frCamberAtBestCaster.toFixed(2)}°</span>
+                <span class="value">${kpair.frCamberAtBestCaster.toFixed(2)}°</span>
               </div>
             </div>
           </div>
@@ -1860,69 +1754,61 @@ function _buildSymmetryPanel(sym) {
   // ── Final Recommendation ─────────────────────────────────────────────
   const rec = sym.recommendation;
   const recHeaderDiv = document.createElement('div');
-  recHeaderDiv.style.gridColumn = '1 / -1';
-  recHeaderDiv.style.marginTop = '32px';
-  recHeaderDiv.style.paddingTop = '16px';
-  recHeaderDiv.style.borderTop = '1px solid var(--border-subtle)';
+  recHeaderDiv.className = 'section-divider-header';
   recHeaderDiv.innerHTML = `
-    <div style="font-size:0.9rem; color:var(--accent); font-weight:500; margin-bottom:8px; letter-spacing:0.05em">RECOMMENDATION</div>
-    <div style="font-size:0.65rem; color:var(--muted); line-height:1.6;">
-      ${rec.note}
-    </div>`;
+    <div class="label-uppercase">RECOMMENDATION</div>
+    <div class="section-note">${rec.note}</div>`;
   grid.appendChild(recHeaderDiv);
 
   const recCard = document.createElement('div');
   recCard.className = 'symmetry-card';
-  recCard.style.gridColumn = '1 / -1';
-  recCard.style.justifySelf = 'center';
-  recCard.style.width = '100%';
-  recCard.style.maxWidth = '820px';
+  recCard.classList.add('symmetry-card--full-width');
   recCard.innerHTML = `
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0">
+    <div class="scenario-grid">
       <div class="scenario-col">
         <div class="scenario-header">FL</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric front-bolt symmetry-metric--compact">
               <span class="label">Front Bolt</span>
               <span class="value">${_sign(rec.flCamberBolt)}</span>
             </div>
-            <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric rear-bolt symmetry-metric--compact">
               <span class="label">Rear Bolt</span>
               <span class="value">${_sign(rec.flCasterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
-            <div class="symmetry-metric camber" style="margin-bottom:0">
+            <div class="symmetry-metric camber symmetry-metric--compact">
               <span class="label">Camber</span>
               <span class="value">${rec.camber.toFixed(2)}°</span>
             </div>
-            <div class="symmetry-metric caster" style="margin-bottom:0">
+            <div class="symmetry-metric caster symmetry-metric--compact">
               <span class="label">Caster</span>
               <span class="value">${rec.caster.toFixed(2)}°</span>
             </div>
           </div>
         </div>
       </div>
-      <div class="scenario-col" style="padding-left:24px; padding-right:0; border-right:none;">
+      <div class="scenario-col scenario-col--right">
         <div class="scenario-header">FR</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
-            <div class="symmetry-metric front-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric front-bolt symmetry-metric--compact">
               <span class="label">Front Bolt</span>
               <span class="value">${_sign(rec.frCamberBolt)}</span>
             </div>
-            <div class="symmetry-metric rear-bolt" style="margin-bottom:0">
+            <div class="symmetry-metric rear-bolt symmetry-metric--compact">
               <span class="label">Rear Bolt</span>
               <span class="value">${_sign(rec.frCasterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
-            <div class="symmetry-metric camber" style="margin-bottom:0">
+            <div class="symmetry-metric camber symmetry-metric--compact">
               <span class="label">Camber</span>
               <span class="value">${rec.camber.toFixed(2)}°</span>
             </div>
-            <div class="symmetry-metric caster" style="margin-bottom:0">
+            <div class="symmetry-metric caster symmetry-metric--compact">
               <span class="label">Caster</span>
               <span class="value">${rec.caster.toFixed(2)}°</span>
             </div>
@@ -1941,15 +1827,13 @@ function _buildRearSymmetryPanel(rearSymmetry) {
 
   const status = document.createElement('div');
   status.className = rearSymmetry.symmetricPair ? 'symmetry-status match' : 'symmetry-status partial';
-  status.style.marginBottom = '20px';
   status.innerHTML = `
-    <div style="font-size:0.75rem; font-weight:700; margin-bottom:4px;">${rearSymmetry.symmetricPair ? '✓ Rear Camber Match Found' : '◐ Rear Camber Approximation'}</div>
-    <div style="font-size:0.65rem; line-height:1.5;">${rearSymmetry.recommendation.note}</div>`;
+    <div class="status-title">${rearSymmetry.symmetricPair ? '✓ Rear Camber Match Found' : '◐ Rear Camber Approximation'}</div>
+    <div class="status-note">${rearSymmetry.recommendation.note}</div>`;
   wrap.appendChild(status);
 
   const summary = document.createElement('table');
   summary.className = 'symmetry-consolidation-table';
-  summary.style.marginBottom = '20px';
   summary.innerHTML = `
     <thead>
       <tr>
@@ -1961,7 +1845,7 @@ function _buildRearSymmetryPanel(rearSymmetry) {
     </thead>
     <tbody>
       <tr>
-        <td style="font-weight:600;"><span class="camber-label">Camber</span></td>
+        <td class="bold-cell"><span class="camber-label">Camber</span></td>
         <td>${rearSymmetry.recommendation.camber.toFixed(2)}°</td>
         <td><div>F:${_sign(rearSymmetry.recommendation.leftFront)}</div><div>R:${_sign(rearSymmetry.recommendation.leftRear)}</div></td>
         <td><div>F:${_sign(rearSymmetry.recommendation.rightFront)}</div><div>R:${_sign(rearSymmetry.recommendation.rightRear)}</div></td>
@@ -1990,7 +1874,7 @@ function _buildRearSymmetryPanel(rearSymmetry) {
         <span class="value">${bestCell.camber.toFixed(2)}°</span>
         <span class="symmetry-target">Target: ${rearSymmetry.targetCamber.toFixed(2)}° &nbsp; Δ ${_delta(bestCell.camber - rearSymmetry.targetCamber)}°</span>
       </div>
-      <div class="symmetry-metric caster" style="opacity:0.6; margin-bottom:0">
+      <div class="symmetry-metric caster symmetry-metric--compact">
         <span class="label">Resulting Caster</span>
         <span class="value">${bestCell.caster.toFixed(2)}°</span>
       </div>`;
@@ -1999,20 +1883,20 @@ function _buildRearSymmetryPanel(rearSymmetry) {
 
   const recommendation = document.createElement('div');
   recommendation.className = 'symmetry-card';
-  recommendation.style.gridColumn = '1 / -1';
+  recommendation.classList.add('grid-full-span');
   recommendation.innerHTML = `
     <div class="title">Rear Axle Recommendation</div>
-    <div style="font-size:0.65rem; color:var(--muted); margin-bottom:16px; line-height:1.6;">${rearSymmetry.recommendation.note}</div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+    <div class="section-desc section-note">${rearSymmetry.recommendation.note}</div>
+    <div class="scenario-grid" style="gap:24px;">
       <div>
         <div class="scenario-header">${rearSymmetry.leftWheel}</div>
         <div class="symmetry-metric front-bolt"><span class="label">Front Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.leftFront)}</span></div>
-        <div class="symmetry-metric rear-bolt" style="margin-bottom:0"><span class="label">Rear Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.leftRear)}</span></div>
+        <div class="symmetry-metric rear-bolt symmetry-metric--compact"><span class="label">Rear Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.leftRear)}</span></div>
       </div>
       <div>
         <div class="scenario-header">${rearSymmetry.rightWheel}</div>
         <div class="symmetry-metric front-bolt"><span class="label">Front Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.rightFront)}</span></div>
-        <div class="symmetry-metric rear-bolt" style="margin-bottom:0"><span class="label">Rear Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.rightRear)}</span></div>
+        <div class="symmetry-metric rear-bolt symmetry-metric--compact"><span class="label">Rear Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.rightRear)}</span></div>
       </div>
     </div>`;
   grid.appendChild(recommendation);
@@ -2106,7 +1990,6 @@ function _buildFrontConsolidationTableWithStatus(sym) {
   // Status indicator block
   const statusBlock = document.createElement('div');
   statusBlock.className = `symmetry-status ${statusInfo.status}`;
-  statusBlock.style.marginBottom = '16px';
   
   // Icon + title based on status
   let icon = '◐'; // partial/orange
@@ -2120,10 +2003,8 @@ function _buildFrontConsolidationTableWithStatus(sym) {
   }
   
   statusBlock.innerHTML = `
-    <div style="font-size:0.75rem; font-weight:700; margin-bottom:4px;">${icon} ${title}</div>
-    <div style="font-size:0.65rem; line-height:1.5;">
-      ${statusInfo.messages.join('<br>')}
-    </div>`;
+    <div class="status-title">${icon} ${title}</div>
+    <div class="status-note">${statusInfo.messages.join('<br>')}</div>`;
   div.appendChild(statusBlock);
 
   // Consolidation table
@@ -2163,7 +2044,7 @@ function _buildFrontConsolidationTableWithStatus(sym) {
   const camberRow = document.createElement('tr');
   const camberCompromise = ((sym.fl.bestCamberValue + sym.fr.bestCamberValue) / 2).toFixed(2);
   camberRow.innerHTML = `
-    <td style="font-weight:600;"><span class="camber-label">Camber</span></td>
+    <td class="bold-cell"><span class="camber-label">Camber</span></td>
     <td>${camberCompromise}°</td>
     <td>${camberFlBolts}</td>
     <td>${camberFrBolts}</td>
@@ -2174,7 +2055,7 @@ function _buildFrontConsolidationTableWithStatus(sym) {
   const casterRow = document.createElement('tr');
   const casterCompromise = ((sym.fl.bestCasterValue + sym.fr.bestCasterValue) / 2).toFixed(2);
   casterRow.innerHTML = `
-    <td style="font-weight:600;"><span class="caster-label">Caster</span></td>
+    <td class="bold-cell"><span class="caster-label">Caster</span></td>
     <td>${casterCompromise}°</td>
     <td>${casterFlBolts}</td>
     <td>${casterFrBolts}</td>
@@ -2193,15 +2074,10 @@ function _buildFrontConsolidationTableWithStatus(sym) {
  */
 function _buildFrontConsolidationTable(sym) {
   const div = document.createElement('div');
-  div.style.textAlign = 'center';
-  div.style.marginBottom = '16px';
+  div.className = 'consolidation-header';
   
   const title = document.createElement('div');
-  title.style.fontSize = '0.75rem';
-  title.style.fontWeight = '600';
-  title.style.letterSpacing = '0.08em';
-  title.style.textTransform = 'uppercase';
-  title.style.marginBottom = '8px';
+  title.className = 'label-uppercase';
   title.innerHTML = 'Front Axis Consolidation (FL ↔ FR)';
   div.appendChild(title);
 
@@ -2241,7 +2117,7 @@ function _buildFrontConsolidationTable(sym) {
   const camberRow = document.createElement('tr');
   const camberCompromise = ((sym.fl.bestCamberValue + sym.fr.bestCamberValue) / 2).toFixed(2);
   camberRow.innerHTML = `
-    <td style="font-weight:600;"><span class="camber-label">Camber</span></td>
+    <td class="bold-cell"><span class="camber-label">Camber</span></td>
     <td>${camberCompromise}°</td>
     <td>${camberFlBolts}</td>
     <td>${camberFrBolts}</td>
@@ -2252,7 +2128,7 @@ function _buildFrontConsolidationTable(sym) {
   const casterRow = document.createElement('tr');
   const casterCompromise = ((sym.fl.bestCasterValue + sym.fr.bestCasterValue) / 2).toFixed(2);
   casterRow.innerHTML = `
-    <td style="font-weight:600;"><span class="caster-label">Caster</span></td>
+    <td class="bold-cell"><span class="caster-label">Caster</span></td>
     <td>${casterCompromise}°</td>
     <td>${casterFlBolts}</td>
     <td>${casterFrBolts}</td>
@@ -2272,31 +2148,24 @@ function _buildFrontConsolidationTable(sym) {
 function _buildCornerTable(wheel, camberBolt, casterBolt, camber, caster) {
   const table = document.createElement('table');
   table.className = `symmetry-corner-table wheel-${wheel.toLowerCase()}`;
-  table.style.width = '100%';
-  table.style.minWidth = '200px';
-  table.style.lineHeight = '1';
+  table.classList.add('compact-table');
 
   const tbody = document.createElement('tbody');
 
   // Row 1: Corner Name
   const nameRow = document.createElement('tr');
-  nameRow.innerHTML = `
-    <td style="text-align:center; padding:8px 6px; font-weight:700; font-size:0.9rem; color:var(--blue); border-bottom:1px solid var(--border); line-height:1;">
-      ${wheel}
-    </td>
-  `;
+  nameRow.innerHTML = `<td class="corner-table-name">${wheel}</td>`;
   tbody.appendChild(nameRow);
 
-  // Row 2: Best Values (Camber & Caster on one line, grid-split for | alignment)
   // Row 2: Front Bolt + Camber (Front bolt top per STYLING.md Front/Rear rule)
   const frontRow = document.createElement('tr');
   const camberStr = typeof camber === 'number' ? camber.toFixed(2) + '°' : camber;
   frontRow.innerHTML = `
-    <td style="padding:6px 6px; font-size:0.8rem; border-bottom:1px solid var(--border); white-space:nowrap; font-family:monospace; line-height:1;">
-      <div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center;">
-        <strong style="font-size:0.75rem; text-align:right;">F: ${_sign(camberBolt)}</strong>
-        <span style="color:var(--muted); padding:0 2px;">|</span>
-        <span style="color:var(--blue); font-weight:600; text-align:left;">${camberStr}</span>
+    <td class="corner-table-cell">
+      <div class="corner-value-grid">
+        <strong class="corner-bolt-label">F: ${_sign(camberBolt)}</strong>
+        <span class="corner-separator">|</span>
+        <span class="corner-value-camber">${camberStr}</span>
       </div>
     </td>
   `;
@@ -2306,11 +2175,11 @@ function _buildCornerTable(wheel, camberBolt, casterBolt, camber, caster) {
   const rearRow = document.createElement('tr');
   const casterStr = typeof caster === 'number' ? caster.toFixed(2) + '°' : caster;
   rearRow.innerHTML = `
-    <td style="padding:6px 6px; font-size:0.8rem; white-space:nowrap; font-family:monospace; line-height:1;">
-      <div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center;">
-        <strong style="font-size:0.75rem; text-align:right;">R: ${_sign(casterBolt)}</strong>
-        <span style="color:var(--muted); padding:0 2px;">|</span>
-        <span style="color:var(--orange); font-weight:600; text-align:left;">${casterStr}</span>
+    <td class="corner-table-cell--last">
+      <div class="corner-value-grid">
+        <strong class="corner-bolt-label">R: ${_sign(casterBolt)}</strong>
+        <span class="corner-separator">|</span>
+        <span class="corner-value-caster">${casterStr}</span>
       </div>
     </td>
   `;
@@ -2327,37 +2196,23 @@ function _buildCornerTable(wheel, camberBolt, casterBolt, camber, caster) {
 function _buildEmptyCornerTable(wheel) {
   const table = document.createElement('table');
   table.className = `symmetry-corner-table wheel-${wheel.toLowerCase()}`;
-  table.style.width = '100%';
-  table.style.minWidth = '200px';
-  table.style.lineHeight = '1';
+  table.classList.add('compact-table');
 
   const tbody = document.createElement('tbody');
 
   // Row 1: Corner Name
   const nameRow = document.createElement('tr');
-  nameRow.innerHTML = `
-    <td style="text-align:center; padding:8px 6px; font-weight:700; font-size:0.9rem; color:var(--muted); border-bottom:1px solid var(--border); line-height:1;">
-      ${wheel}
-    </td>
-  `;
+  nameRow.innerHTML = `<td class="corner-table-name corner-table-name--muted">${wheel}</td>`;
   tbody.appendChild(nameRow);
 
   // Row 2: Placeholder (empty)
   const valueRow = document.createElement('tr');
-  valueRow.innerHTML = `
-    <td style="text-align:center; padding:6px 6px; font-size:0.75rem; color:var(--muted); border-bottom:1px solid var(--border); line-height:1;">
-      Phase 2
-    </td>
-  `;
+  valueRow.innerHTML = `<td class="corner-table-cell note-cell">Phase 2</td>`;
   tbody.appendChild(valueRow);
 
   // Row 3: Placeholder (empty)
   const boltRow = document.createElement('tr');
-  boltRow.innerHTML = `
-    <td style="text-align:center; padding:6px 6px; font-size:0.65rem; color:var(--muted); line-height:1;">
-      Coming Soon
-    </td>
-  `;
+  boltRow.innerHTML = `<td class="corner-table-cell--last note-cell">Coming Soon</td>`;
   tbody.appendChild(boltRow);
 
   table.appendChild(tbody);
@@ -2400,8 +2255,8 @@ function _buildSymmetryStatus(sym) {
 
   div.className = statusClass;
   div.innerHTML = `
-    <div style="font-size:0.75rem; font-weight:700; margin-bottom:4px;">${status}</div>
-    <div style="font-size:0.65rem; line-height:1.5;">${message}</div>
+    <div class="status-title">${status}</div>
+    <div class="status-note">${message}</div>
   `;
 
   return div;
@@ -2411,16 +2266,7 @@ function _buildSymmetryStatus(sym) {
 
 function _lerp(a, b, t) { return Math.round(a + (b - a) * t); }
 function _rgb(r, g, b)  { return `rgb(${r},${g},${b})`; }
-function _sign(n)  { return n > 0 ? `+${n}` : String(n); }
 function _delta(d) { return (d >= 0 ? '+' : '') + d.toFixed(2); }
-
-function _th(row, text, extraClass) {
-  const th = document.createElement('th');
-  if (extraClass) th.className = extraClass;
-  th.textContent = text;
-  row.appendChild(th);
-  return th;
-}
 
 function _showSection(id) {
   const el = document.getElementById(id);
@@ -2432,24 +2278,11 @@ function _hideSection(id) {
   if (el) el.style.display = 'none';
 }
 
-function _showError(msg) {
-  const el = document.getElementById('error-banner');
-  if (el) { el.textContent = msg; el.classList.add('visible'); }
-}
+// ── Theme Change Listener ──────────────────────────────────────────────────
 
-function _hideError() {
-  const el = document.getElementById('error-banner');
-  if (el) el.classList.remove('visible');
-}
+document.addEventListener('themechange', () => {
+  _renderWashers();
+});
 
-function _showWarning(msg) {
-  const el = document.getElementById('warning-banner');
-  if (el) { el.textContent = msg; el.classList.add('visible'); }
-}
-
-function _hideWarning() {
-  const el = document.getElementById('warning-banner');
-  if (el) el.classList.remove('visible');
-}
 
 

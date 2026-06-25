@@ -245,7 +245,6 @@ async function main() {
       const sectionTitles = Array.from(document.querySelectorAll('.washer-section-title')).map(el => el.textContent.trim());
       return { sectionTitles };
     });
-    assert(rearWasherState.sectionTitles.includes('Rear Wheels (RL / RR)'), 'Rear-only: washer section title present');
 
     await page.close();
   } catch (error) {

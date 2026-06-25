@@ -15,12 +15,14 @@
  *   - math-utils.js (calculateCaster, formatAngle)
  */
 
-import { BOLT_POSITIONS, REQUIRED_POSITIONS, WHEELS, FRONT_WHEELS, REAR_WHEELS, 
-         WHEEL_LABELS, TARGET_CAMBER, TARGET_CASTER, TARGET_CAMBER_REAR, 
+import { BOLT_POSITIONS, REQUIRED_POSITIONS, WHEELS, FRONT_WHEELS, REAR_WHEELS,
+         WHEEL_LABELS, TARGET_CAMBER, TARGET_CASTER, TARGET_CAMBER_REAR,
          TARGET_TOE_FRONT, TARGET_TOE_REAR, SYMMETRY_TOLERANCE } from './constants.js';
 import { buildMainChart, destroyChart, updateChartNote } from './chart-builder.js';
 import { renderWasherSection } from './washer-diagram.js';
 import { calculateCaster } from './math-utils.js';
+import { _th } from './table-utils.js';
+import { _sign } from './format-utils.js';
 
 /**
  * Render the summary table for a wheel
@@ -68,7 +70,7 @@ function buildTable(result, wheel) {
     const tr = tbody.insertRow();
 
     const rowLbl = tr.insertCell();
-    rowLbl.className = 'row-label';
+    rowLbl.className = 'row-label sub-header';
     if (REQUIRED_POSITIONS.includes(f)) rowLbl.classList.add('required-header');
     rowLbl.textContent = _sign(f);
 
@@ -97,9 +99,7 @@ function buildTable(result, wheel) {
     const noteCell = noteRow.insertCell();
     noteCell.colSpan = 14;
     noteCell.textContent = `Expected toe: ${rearToe.toFixed(2)} mm`;
-    noteCell.style.textAlign = 'center';
-    noteCell.style.fontSize = '0.85rem';
-    noteCell.style.color = 'var(--muted)';
+    noteCell.className = 'note-cell';
   }
 
   return table;
@@ -192,6 +192,7 @@ function buildSymmetryPanel(sym) {
 
   // Add heading
   const heading = document.createElement('h2');
+  heading.className = 'header';
   heading.textContent = 'Symmetry Analysis';
   panel.appendChild(heading);
 
@@ -214,6 +215,7 @@ function buildRecommendationCard(rec) {
   card.className = 'recommendation-card';
 
   const title = document.createElement('h3');
+  title.className = 'sub-header';
   title.textContent = 'Recommended Bolt Positions';
   card.appendChild(title);
 
@@ -249,30 +251,6 @@ function _lerp(a, b, t) {
  */
 function _rgb(r, g, b) {
   return `rgb(${r},${g},${b})`;
-}
-
-/**
- * Helper: Format signed number
- * @param {number} n - Number
- * @returns {string}
- */
-function _sign(n) {
-  return n > 0 ? `+${n}` : String(n);
-}
-
-/**
- * Helper: Table header cell
- * @param {HTMLTableRowElement} row - Row
- * @param {string} text - Text
- * @param {string} extraClass - Extra CSS class
- * @returns {HTMLTableCellElement}
- */
-function _th(row, text, extraClass = '') {
-  const th = document.createElement('th');
-  th.textContent = text;
-  if (extraClass) th.className = extraClass;
-  row.appendChild(th);
-  return th;
 }
 
 // Export for testing/debugging
