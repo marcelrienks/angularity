@@ -65,7 +65,7 @@
     <section class="targets-section" id="config-section">
       <h2 class="sub-header">Alignment Configuration</h2>
 
-      <div class="wheel-selector" id="config-tabs" role="tablist" aria-label="Configuration tabs" style="margin-bottom:16px;">
+      <div class="wheel-selector tabs-spacer" id="config-tabs" role="tablist" aria-label="Configuration tabs">
         <button class="active sub-header" data-tab="targets" role="tab" aria-selected="true">Targets</button>
         <button class="sub-header" data-tab="configs" role="tab" aria-selected="false">Configs</button>
       </div>
@@ -101,7 +101,7 @@
             </fieldset>
           </div>
           <div class="form-actions">
-            <button type="submit" class="button sub-header" id="btn-save-targets">Save Targets</button>
+            <button type="submit" class="button primary sub-header" id="btn-save-targets">Save Targets</button>
             <button type="button" class="button danger sub-header" id="btn-reset-targets">Reset Targets</button>
           </div>
           <p class="form-note paragraph">
@@ -117,12 +117,12 @@
               <legend class="sub-header">Vehicle Configs</legend>
               <div class="form-group">
                 <label>Caster Angle Input Mode</label>
-                <div style="display:flex; gap:16px; align-items:center; padding:6px 0;">
-                  <label style="display:flex; gap:6px; align-items:center;">
+                <div class="radio-group">
+                  <label class="radio-label">
                     <input type="radio" name="caster-input-mode" id="caster-mode-ratio" value="steering-ratio" checked>
                     Steering Ratio
                   </label>
-                  <label style="display:flex; gap:6px; align-items:center;">
+                  <label class="radio-label">
                     <input type="radio" name="caster-input-mode" id="caster-mode-wheel" value="wheel-degrees">
                     Wheel Degrees
                   </label>
@@ -142,11 +142,11 @@
               </div>
               <div class="form-group">
                 <label class="sub-header" for="steering-sweep-input">Steering Wheel Sweep (°)</label>
-                <div id="steering-sweep-display" style="padding:10px 0;">360 each direction</div>
+                <div id="steering-sweep-display" class="display-value">360 each direction</div>
               </div>
               <div class="form-group">
                 <label class="sub-header" for="measurement-density-select">Measurement Points Per Bolt Axis</label>
-                <select id="measurement-density-select" style="padding:6px 10px; border:1px solid var(--border); border-radius:4px; background:var(--panel);">
+                <select id="measurement-density-select">
                   <option value="3">3 points (−1 to +1)</option>
                   <option value="5" selected>5 points (−2 to +2)</option>
                   <option value="7">7 points (−3 to +3)</option>
@@ -160,24 +160,24 @@
               <legend class="sub-header">Derived / Fixed Configs</legend>
               <div class="form-group">
                 <label class="sub-header" for="effective-wheel-angle-input">Effective Wheel Angle (°)</label>
-                <div id="effective-wheel-angle-display" style="padding:10px 0;"></div>
+                <div id="effective-wheel-angle-display" class="display-value"></div>
               </div>
               <div class="form-group">
                 <label class="sub-header" for="caster-multiplier-input">Caster Multiplier</label>
-                <div id="caster-multiplier-display" style="padding:10px 0;"></div>
+                <div id="caster-multiplier-display" class="display-value"></div>
               </div>
               <div class="form-group">
                 <label class="sub-header" for="bolt-range-input">Adjustment Bolt Positions</label>
-                <div id="bolt-range-display" style="padding:10px 0;">−6 to +6 (13 positions)</div>
+                <div id="bolt-range-display" class="display-value">−6 to +6 (13 positions)</div>
               </div>
               <div class="form-group">
                 <label class="sub-header" for="required-points-input">Minimum Required Washer Points</label>
-                <div id="required-points-display" style="padding:10px 0;">−6, −3, 0, +3, +6 (5 points)</div>
+                <div id="required-points-display" class="display-value">−6, −3, 0, +3, +6 (5 points)</div>
               </div>
             </fieldset>
           </div>
           <div class="form-actions">
-            <button type="submit" class="button sub-header" id="btn-save-configs">Save Configs</button>
+            <button type="submit" class="button primary sub-header" id="btn-save-configs">Save Configs</button>
             <button type="button" class="button danger sub-header" id="btn-reset-configs">Reset Configs</button>
           </div>
           <p class="form-note paragraph">
