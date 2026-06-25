@@ -18,7 +18,7 @@
 .sub-header {
   font-size: var(--font-size-sh);
   font-weight: var(--font-weight-sh);
-  color: var(--text);
+  color: #000000;
   text-transform: none;
 }
 
@@ -446,13 +446,18 @@ body {
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
-  color: var(--muted);
+  white-space: nowrap;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
 }
 
 .color-coding-selector button:hover,
 .color-coding-selector button.active {
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--blue);
+  border-color: var(--blue);
 }
 
 .color-coding-selector button:disabled {
@@ -558,6 +563,18 @@ body {
   align-items: center;
   justify-content: center;
   white-space: pre-line;
+}
+
+.grid-corner.sub-header {
+  color: #ff00ff;
+}
+
+.grid-col-header.sub-header {
+  color: #ff00ff;
+}
+
+.grid-row-header.sub-header {
+  color: #ff00ff;
 }
 
 .grid-col-header {
@@ -720,7 +737,7 @@ body {
 }
 
 .data-table tr.header-row th {
-  color: var(--text);
+  color: #ff00ff;
 }
 
 .cell-value {
@@ -967,8 +984,6 @@ body {
 
 .washer-wheel-label {
   letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text);
   margin-bottom: 8px;
   padding-bottom: 6px;
   border-bottom: 2px solid var(--blue);
@@ -1565,14 +1580,14 @@ body {
 
 .grid-col-header.required {
   background: var(--bg);
-  color: var(--text);
+  color: #ff00ff;
   font-weight: var(--font-weight-h);
   border-bottom-color: transparent;
 }
 
 .grid-row-header.required {
   background: var(--bg);
-  color: var(--text);
+  color: #ff00ff;
   font-weight: var(--font-weight-h);
   border-right-color: transparent;
 }
@@ -1678,7 +1693,7 @@ body {
 /* Required bolt position headers in the 13×13 table */
 .data-table th.required-header,
 .data-table td.required-header {
-  color: var(--text);
+  color: #ff00ff;
   background: var(--panel-alt);
   font-weight: var(--font-weight-h);
 }
@@ -2023,7 +2038,7 @@ body {
   padding: 6px 8px;
   text-align: center;
   letter-spacing: 0.05em;
-  color: var(--text);
+  color: #ff00ff;
 }
 
 .symmetry-corner-table td {
@@ -2056,7 +2071,7 @@ body {
 
 .symmetry-consolidation-table th {
   background-color: var(--panel-alt);
-  color: var(--text);
+  color: #ff00ff;
   border-bottom: 1px solid var(--border);
   padding: 8px;
   text-align: center;

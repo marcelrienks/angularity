@@ -27,6 +27,7 @@
  */
 
 import { BOLT_POSITIONS, COLOURS, getRequiredPositions, getCurrentMeasurementDensity } from './constants.js';
+import { _sign } from './format-utils.js';
 
 const BOLT_MIN = -6;
 const BOLT_MAX =  6;
@@ -38,7 +39,7 @@ const BOLT_MAX =  6;
  * ┌─────────────────────────────────────────────────────┐
  * │            FRONT WHEELS (active)                    │
  * ├──────────────────┬──────────────────┤
- * │   LEFT (FL)      │    RIGHT (FR)    │
+ * │ Front Left (FL)  │  Front Right (FR) │
  * ├─ Front Bolt     ├─ Front Bolt     │
  * │ (Camber)        │ (Camber)        │
  * ├─ Rear Bolt      ├─ Rear Bolt      │
@@ -46,7 +47,7 @@ const BOLT_MAX =  6;
  * ├─────────────────────────────────────────────────────┤
  * │              REAR WHEELS (active)                   │
  * ├──────────────────┬──────────────────┤
- * │   LEFT (RL)      │    RIGHT (RR)    │
+ * │  Rear Left (RL)  │   Rear Right (RR) │
  * ├─ Front Bolt     ├─ Front Bolt     │
  * ├─ Rear Bolt      ├─ Rear Bolt      │
  * └─────────────────────────────────────────────────────┘
@@ -64,8 +65,6 @@ export function renderWasherSection(containerId, recommendations) {
   frontSection.className = 'washer-grid-section';
   
   const frontTitle = document.createElement('div');
-  frontTitle.className = 'washer-section-title';
-  frontTitle.textContent = 'Front Wheels (FL / FR)';
   frontSection.appendChild(frontTitle);
 
   const frontGrid = document.createElement('div');
@@ -75,8 +74,8 @@ export function renderWasherSection(containerId, recommendations) {
   const flGroup = document.createElement('div');
   flGroup.className = 'washer-wheel-column';
   const flWheelTitle = document.createElement('div');
-  flWheelTitle.className = 'washer-wheel-label';
-  flWheelTitle.textContent = 'LEFT (FL)';
+  flWheelTitle.className = 'washer-wheel-label sub-header';
+  flWheelTitle.textContent = 'Front Left (FL)';
   flGroup.appendChild(flWheelTitle);
   
   if (recommendations.FL) {
@@ -89,8 +88,8 @@ export function renderWasherSection(containerId, recommendations) {
   const frGroup = document.createElement('div');
   frGroup.className = 'washer-wheel-column';
   const frWheelTitle = document.createElement('div');
-  frWheelTitle.className = 'washer-wheel-label';
-  frWheelTitle.textContent = 'RIGHT (FR)';
+  frWheelTitle.className = 'washer-wheel-label sub-header';
+  frWheelTitle.textContent = 'Front Right (FR)';
   frGroup.appendChild(frWheelTitle);
   
   if (recommendations.FR) {
@@ -110,8 +109,6 @@ export function renderWasherSection(containerId, recommendations) {
     : 'washer-grid-section washer-grid-section-placeholder';
   
   const rearTitle = document.createElement('div');
-  rearTitle.className = 'washer-section-title';
-  rearTitle.textContent = hasRearRecommendations ? 'Rear Wheels (RL / RR)' : 'Rear Wheels (RL / RR)';
   rearSection.appendChild(rearTitle);
 
   const rearGrid = document.createElement('div');
@@ -121,8 +118,8 @@ export function renderWasherSection(containerId, recommendations) {
   const rlGroup = document.createElement('div');
   rlGroup.className = 'washer-wheel-column';
   const rlWheelTitle = document.createElement('div');
-  rlWheelTitle.className = 'washer-wheel-label';
-  rlWheelTitle.textContent = 'LEFT (RL)';
+  rlWheelTitle.className = 'washer-wheel-label sub-header';
+  rlWheelTitle.textContent = 'Rear Left (RL)';
   rlGroup.appendChild(rlWheelTitle);
   if (recommendations.RL) {
     rlGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RL.camberBolt, COLOURS.purple));
@@ -137,8 +134,8 @@ export function renderWasherSection(containerId, recommendations) {
   const rrGroup = document.createElement('div');
   rrGroup.className = 'washer-wheel-column';
   const rrWheelTitle = document.createElement('div');
-  rrWheelTitle.className = 'washer-wheel-label';
-  rrWheelTitle.textContent = 'RIGHT (RR)';
+  rrWheelTitle.className = 'washer-wheel-label sub-header';
+  rrWheelTitle.textContent = 'Rear Right (RR)';
   rrGroup.appendChild(rrWheelTitle);
   if (recommendations.RR) {
     rrGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RR.camberBolt, COLOURS.purple));
@@ -481,6 +478,3 @@ function _circle(cx, cy, r, fill, stroke, strokeW) {
   return el;
 }
 
-function _sign(n) {
-  return n >= 0 ? `+${n}` : String(n);
-}

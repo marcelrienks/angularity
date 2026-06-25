@@ -23,6 +23,9 @@ import { calculateCaster, toeDegreesToResultantMm } from './math-utils.js';
 import { renderSummaryTable as renderTableUI,
          renderMainChart as renderChartUI,
          renderSymmetryPanel as renderSymmetryUI } from './report-ui.js';
+import { _th } from './table-utils.js';
+import { _sign } from './format-utils.js';
+import { _showError, _hideError, _showWarning, _hideWarning } from './error-utils.js';
 
 // ── Storage & state ────────────────────────────────────────────────────────
 
@@ -540,7 +543,7 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
 
     // Row header
     const rowLbl = tr.insertCell();
-    rowLbl.className = 'row-label';
+    rowLbl.className = 'row-label sub-header';
     if (REQUIRED_POSITIONS.includes(f)) rowLbl.classList.add('required-header');
     rowLbl.textContent = _sign(f);
 
@@ -609,7 +612,7 @@ function _buildTable(result) {
 
     // Row header
     const rowLbl = tr.insertCell();
-    rowLbl.className = 'row-label';
+    rowLbl.className = 'row-label sub-header';
     if (REQUIRED_POSITIONS.includes(f)) rowLbl.classList.add('required-header');
     rowLbl.textContent = _sign(f);
 
@@ -2263,16 +2266,7 @@ function _buildSymmetryStatus(sym) {
 
 function _lerp(a, b, t) { return Math.round(a + (b - a) * t); }
 function _rgb(r, g, b)  { return `rgb(${r},${g},${b})`; }
-function _sign(n)  { return n > 0 ? `+${n}` : String(n); }
 function _delta(d) { return (d >= 0 ? '+' : '') + d.toFixed(2); }
-
-function _th(row, text, extraClass) {
-  const th = document.createElement('th');
-  if (extraClass) th.className = extraClass;
-  th.textContent = text;
-  row.appendChild(th);
-  return th;
-}
 
 function _showSection(id) {
   const el = document.getElementById(id);
@@ -2284,24 +2278,5 @@ function _hideSection(id) {
   if (el) el.style.display = 'none';
 }
 
-function _showError(msg) {
-  const el = document.getElementById('error-banner');
-  if (el) { el.textContent = msg; el.classList.add('visible'); }
-}
-
-function _hideError() {
-  const el = document.getElementById('error-banner');
-  if (el) el.classList.remove('visible');
-}
-
-function _showWarning(msg) {
-  const el = document.getElementById('warning-banner');
-  if (el) { el.textContent = msg; el.classList.add('visible'); }
-}
-
-function _hideWarning() {
-  const el = document.getElementById('warning-banner');
-  if (el) el.classList.remove('visible');
-}
 
 
