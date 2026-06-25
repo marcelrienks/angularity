@@ -2278,5 +2278,11 @@ function _hideSection(id) {
   if (el) el.style.display = 'none';
 }
 
+// ── Theme Change Listener ──────────────────────────────────────────────────
+
+document.addEventListener('themechange', () => {
+  _renderWashers();
+});
+
 
 

@@ -18,7 +18,7 @@
 .sub-header {
   font-size: var(--font-size-sh);
   font-weight: var(--font-weight-sh);
-  color: #000000;
+  color: var(--text);
   text-transform: none;
 }
 
@@ -113,6 +113,7 @@ textarea {
 
 body {
   background: var(--bg);
+  color: var(--text);
   font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   min-height: 100vh;
   padding: 20px;
@@ -303,6 +304,7 @@ body {
   width: auto;
   height: auto;
   padding: 0;
+  color: var(--text);
 }
 
 .theme-toggle:hover {
@@ -338,6 +340,7 @@ body {
   font-family: inherit;
   text-align: left;
   transition: background 0.2s;
+  color: var(--text);
 }
 
 .theme-option:hover {
@@ -423,7 +426,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 140px;
+  width: 180px;
 }
 
 .wheel-selector button:hover,
@@ -451,7 +454,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 140px;
+  width: auto;
+  min-width: 140px;
 }
 
 .color-coding-selector button:hover,
@@ -505,7 +509,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 140px;
+  width: auto;
+  min-width: 140px;
 }
 
 .button:hover {
@@ -565,17 +570,6 @@ body {
   white-space: pre-line;
 }
 
-.grid-corner.sub-header {
-  color: #ff00ff;
-}
-
-.grid-col-header.sub-header {
-  color: #ff00ff;
-}
-
-.grid-row-header.sub-header {
-  color: #ff00ff;
-}
 
 .grid-col-header {
   background: var(--bg);
@@ -652,6 +646,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--text);
 }
 
 .cell-input {
@@ -737,7 +732,7 @@ body {
 }
 
 .data-table tr.header-row th {
-  color: #ff00ff;
+  color: var(--text);
 }
 
 .cell-value {
@@ -1513,6 +1508,7 @@ body {
 
 .symmetry-metric .label {
   letter-spacing: 0.08em;
+  color: var(--text);
 }
 
 .symmetry-delta {
@@ -1580,14 +1576,14 @@ body {
 
 .grid-col-header.required {
   background: var(--bg);
-  color: #ff00ff;
+  color: var(--text);
   font-weight: var(--font-weight-h);
   border-bottom-color: transparent;
 }
 
 .grid-row-header.required {
   background: var(--bg);
-  color: #ff00ff;
+  color: var(--text);
   font-weight: var(--font-weight-h);
   border-right-color: transparent;
 }
@@ -1693,7 +1689,7 @@ body {
 /* Required bolt position headers in the 13×13 table */
 .data-table th.required-header,
 .data-table td.required-header {
-  color: #ff00ff;
+  color: var(--text);
   background: var(--panel-alt);
   font-weight: var(--font-weight-h);
 }
@@ -2038,7 +2034,7 @@ body {
   padding: 6px 8px;
   text-align: center;
   letter-spacing: 0.05em;
-  color: #ff00ff;
+  color: var(--text);
 }
 
 .symmetry-corner-table td {
@@ -2071,7 +2067,7 @@ body {
 
 .symmetry-consolidation-table th {
   background-color: var(--panel-alt);
-  color: #ff00ff;
+  color: var(--text);
   border-bottom: 1px solid var(--border);
   padding: 8px;
   text-align: center;

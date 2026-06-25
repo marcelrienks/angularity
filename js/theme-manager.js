@@ -13,6 +13,7 @@ export function setTheme(value) {
   if (!VALID_THEMES.includes(value)) return;
   localStorage.setItem(THEME_STORAGE_KEY, value);
   document.documentElement.setAttribute('data-theme', value);
+  document.dispatchEvent(new CustomEvent('themechange', { detail: { theme: value } }));
 }
 
 export function buildConfigMenu() {
