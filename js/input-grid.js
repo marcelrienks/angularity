@@ -223,17 +223,19 @@ function _buildGrid() {
   // Bolt labels vary by suspension type
   const frontBoltLabel = isRearWheel ? 'Toe Bolt' : 'Camber Bolt';
   const rearBoltLabel = isRearWheel ? 'Camber Bolt' : 'Caster Bolt';
+  const frontMetricLabel = isRearWheel ? 'Toe' : 'Camber';
+  const rearMetricLabel = isRearWheel ? 'Camber' : 'Caster';
 
   // CSS grid: 1 row-header column + N data columns
   const colCount = 1 + boltPositions.length;
-  grid.style.gridTemplateColumns = `44px repeat(${boltPositions.length}, 140px)`;
+  grid.style.gridTemplateColumns = `85px repeat(${boltPositions.length}, 140px)`;
 
   // ── Row 0: corner + column headers (front bolt positions) ──────────────
   const corner = _el('div', 'grid-corner sub-header');
   corner.setAttribute('aria-hidden', 'true');
   const frontBoltClass = isRearWheel ? 'metric-toe' : 'metric-camber';
   const rearBoltClass = isRearWheel ? 'metric-camber' : 'metric-caster';
-  corner.innerHTML = `<span class="${frontBoltClass}">${frontBoltLabel}</span> →<br><span class="${rearBoltClass}">${rearBoltLabel}</span> ↓`;
+  corner.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; white-space: nowrap;"><span class="${frontBoltClass}">${frontMetricLabel}</span>→</div><div style="display: flex; align-items: center; justify-content: center; white-space: nowrap;"><span class="${rearBoltClass}">${rearMetricLabel}</span>↓</div>`;
   grid.appendChild(corner);
 
   for (const f of boltPositions) {
