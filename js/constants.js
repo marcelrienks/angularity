@@ -189,6 +189,9 @@ export const COLOURS = {
   green:        '#3fb950',
   orange:       '#d29922',
   purple:       '#bc8cff',
+  gold:         '#f59e0b',
+  camber:       '#bc8cff',  // Purple for Camber
+  caster:       '#f59e0b',  // Gold for Caster
   red:          '#f85149',
   muted:        '#8b949e',
   mutedStrong:  '#6e7681',

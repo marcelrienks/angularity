@@ -65,6 +65,10 @@ textarea {
   --purple:       #c89eff;
   --red:          #fc6e68;
 
+  /* ── Camber vs Caster Colors ── */
+  --camber:       #bc8cff;   /* Purple for Camber */
+  --caster:       #f59e0b;   /* Gold for Caster */
+
   /* ── Required-Position Band (preserved across themes) ── */
   --req-band:     #254470;
   --req-band-hdr: #3a6b9f;
@@ -1553,38 +1557,54 @@ body {
   border: 2px solid var(--green);
 }
 
-/* Best cell highlights: separate boxes for camber (blue) and caster (green) targets */
+/* Best cell highlights: separate boxes for camber (purple) and caster (gold) targets */
 
 /* Camber target met */
 .data-table td.best-camber {
-  background: rgba(88, 166, 255, 0.12);  /* light blue */
+  background: rgba(188, 140, 255, 0.12);  /* light purple */
 }
 
 /* Caster target met */
 .data-table td.best-caster {
-  background: rgba(63, 185, 80, 0.12);   /* light green */
+  background: rgba(245, 158, 11, 0.12);   /* light gold */
 }
 
-/* Both targets met: split visualization (left = blue, right = green) */
+/* Both targets met: split visualization (left = purple, right = gold) */
 .data-table td.best-both {
-  background: linear-gradient(to right, 
-    rgba(88, 166, 255, 0.15) 50%, 
-    rgba(63, 185, 80, 0.15) 50%);
+  background: linear-gradient(to right,
+    rgba(188, 140, 255, 0.15) 50%,
+    rgba(245, 158, 11, 0.15) 50%);
 }
 
 /* Add colored outline to indicate active target indicator */
 .data-table td.best-camber {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--camber);
   outline-offset: -2px;
 }
 
 .data-table td.best-caster {
-  outline: 2px solid var(--green);
+  outline: 2px solid var(--caster);
   outline-offset: -2px;
 }
 
 .data-table td.best-both {
-  box-shadow: inset 2px 0 0 0 var(--blue), inset -2px 0 0 0 var(--green);
+  box-shadow: inset 2px 0 0 0 var(--camber), inset -2px 0 0 0 var(--caster);
+}
+
+/* Metric text coloring for symmetry analysis and reports */
+.metric-camber {
+  color: var(--camber);
+  font-weight: 600;
+}
+
+.metric-caster {
+  color: var(--caster);
+  font-weight: 600;
+}
+
+.metric-toe {
+  color: var(--caster);  /* Toe uses same color as Caster */
+  font-weight: 600;
 }
 
 /* ============================================================================

@@ -1077,12 +1077,12 @@ function _buildIndependentOptimizationCard(wheel, data) {
           </div>
           <div class="values-col">
             <div class="symmetry-metric camber symmetry-metric--compact">
-              <span class="label">Camber</span>
+              <span class="label"><span class="metric-camber">Camber</span></span>
               <span class="value">${data.bestCamberValue.toFixed(2)}°</span>
               <span class="symmetry-target">Target: ${TARGET_CAMBER.toFixed(2)}° &nbsp; Δ ${_delta(data.camberDelta)}°</span>
             </div>
             <div class="symmetry-metric caster symmetry-metric--compact">
-              <span class="label">Resulting Caster</span>
+              <span class="label"><span class="metric-caster">Resulting Caster</span></span>
               <span class="value">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
             </div>
           </div>
@@ -1105,12 +1105,12 @@ function _buildIndependentOptimizationCard(wheel, data) {
           </div>
           <div class="values-col">
             <div class="symmetry-metric caster symmetry-metric--compact">
-              <span class="label">Caster</span>
+              <span class="label"><span class="metric-caster">Caster</span></span>
               <span class="value">${data.bestCasterValue.toFixed(2)}°</span>
               <span class="symmetry-target">Target: ${TARGET_CASTER.toFixed(2)}° &nbsp; Δ ${_delta(data.casterDelta)}°</span>
             </div>
             <div class="symmetry-metric camber symmetry-metric--compact">
-              <span class="label">Resulting Camber</span>
+              <span class="label"><span class="metric-camber">Resulting Camber</span></span>
               <span class="value">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
             </div>
           </div>
@@ -1132,20 +1132,20 @@ function _buildRearIndependentOptimizationCard(wheel, bestCell, targetCamber) {
     <div class="title">${wheel}</div>
     <div>
       <div class="symmetry-metric front-bolt">
-        <span class="label">Best Camber Front Bolt</span>
+        <span class="label">Best <span class="metric-camber">Camber</span> Toe Bolt</span>
         <span class="value">${_sign(bestCell.camberBolt)}</span>
       </div>
       <div class="symmetry-metric rear-bolt">
-        <span class="label">Best Camber Rear Bolt</span>
+        <span class="label">Best <span class="metric-camber">Camber</span> Camber Bolt</span>
         <span class="value">${_sign(bestCell.casterBolt)}</span>
       </div>
       <div class="symmetry-metric camber">
-        <span class="label">Camber</span>
+        <span class="label"><span class="metric-camber">Camber</span></span>
         <span class="value">${bestCell.camber.toFixed(2)}°</span>
         <span class="symmetry-target">Target: ${targetCamber.toFixed(2)}° &nbsp; Δ ${_delta(bestCell.camber - targetCamber)}°</span>
       </div>
       <div class="symmetry-metric caster symmetry-metric--compact">
-        <span class="label">Resulting Caster</span>
+        <span class="label"><span class="metric-caster">Resulting Caster</span></span>
         <span class="value">${bestCell.caster.toFixed(2)}°</span>
       </div>
     </div>`;
@@ -1167,31 +1167,34 @@ function _buildSymmetryPairCard(title, pairData, metricType) {
   const resultingFL = metricType === 'camber' ? pairData.flCasterAtBestCamber : pairData.flCamberAtBestCaster;
   const resultingFR = metricType === 'camber' ? pairData.frCasterAtBestCamber : pairData.frCamberAtBestCaster;
   const metricLabel = metricType === 'camber' ? 'Camber' : 'Caster';
+  const metricClass = metricType === 'camber' ? 'metric-camber' : 'metric-caster';
+  const metricLabelLower = metricLabel.toLowerCase();
+  const resultingClass = metricType === 'camber' ? 'metric-caster' : 'metric-camber';
 
   card.innerHTML = `
     <div class="title">${title}</div>
-    <div class="section-desc">FL and FR achieve matching ${metricLabel.toLowerCase()} (${metricValue.toFixed(2)}°)</div>
+    <div class="section-desc">FL and FR achieve matching <span class="${metricClass}">${metricLabelLower}</span> (${metricValue.toFixed(2)}°)</div>
     <div class="scenario-grid">
       <div class="scenario-col">
         <div class="scenario-header">FL</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt symmetry-metric--compact">
-              <span class="label">Front Bolt</span>
+              <span class="label">Camber Bolt</span>
               <span class="value">${_sign(pairData.flPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-              <span class="label">Rear Bolt</span>
+              <span class="label">Caster Bolt</span>
               <span class="value">${_sign(pairData.flPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
             <div class="symmetry-metric ${metricType} symmetry-metric--compact">
-              <span class="label">${metricLabel}</span>
+              <span class="label"><span class="${metricClass}">${metricLabel}</span></span>
               <span class="value">${metricValue.toFixed(2)}°</span>
             </div>
             <div class="symmetry-metric ${metricType === 'camber' ? 'caster' : 'camber'} symmetry-metric--compact">
-              <span class="label">${resultingMetric}</span>
+              <span class="label"><span class="${resultingClass}">${resultingMetric}</span></span>
               <span class="value">${resultingFL.toFixed(2)}°</span>
             </div>
           </div>
@@ -1202,21 +1205,21 @@ function _buildSymmetryPairCard(title, pairData, metricType) {
         <div class="bolt-values-grid">
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt symmetry-metric--compact">
-              <span class="label">Front Bolt</span>
+              <span class="label">Camber Bolt</span>
               <span class="value">${_sign(pairData.frPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-              <span class="label">Rear Bolt</span>
+              <span class="label">Caster Bolt</span>
               <span class="value">${_sign(pairData.frPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
             <div class="symmetry-metric ${metricType} symmetry-metric--compact">
-              <span class="label">${metricLabel}</span>
+              <span class="label"><span class="${metricClass}">${metricLabel}</span></span>
               <span class="value">${metricValue.toFixed(2)}°</span>
             </div>
             <div class="symmetry-metric ${metricType === 'camber' ? 'caster' : 'camber'} symmetry-metric--compact">
-              <span class="label">${resultingMetric}</span>
+              <span class="label"><span class="${resultingClass}">${resultingMetric}</span></span>
               <span class="value">${resultingFR.toFixed(2)}°</span>
             </div>
           </div>
@@ -1243,24 +1246,24 @@ function _buildRearSymmetryPairCard(title, rearData, rearPair) {
 
   card.innerHTML = `
     <div class="title">${title}</div>
-    <div class="section-desc">RL and RR achieve matching camber (${camberValue.toFixed(2)}°)</div>
+    <div class="section-desc">RL and RR achieve matching <span class="metric-camber">camber</span> (${camberValue.toFixed(2)}°)</div>
     <div class="scenario-grid">
       <div class="scenario-col">
         <div class="scenario-header">RL</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt symmetry-metric--compact">
-              <span class="label">Front Bolt</span>
+              <span class="label">Toe Bolt</span>
               <span class="value">${_sign(rearPair.rlPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-              <span class="label">Rear Bolt</span>
+              <span class="label">Camber Bolt</span>
               <span class="value">${_sign(rearPair.rlPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
             <div class="symmetry-metric camber symmetry-metric--compact">
-              <span class="label">Camber</span>
+              <span class="label"><span class="metric-camber">Camber</span></span>
               <span class="value">${camberValue.toFixed(2)}°</span>
             </div>
           </div>
@@ -1271,17 +1274,17 @@ function _buildRearSymmetryPairCard(title, rearData, rearPair) {
         <div class="bolt-values-grid">
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt symmetry-metric--compact">
-              <span class="label">Front Bolt</span>
+              <span class="label">Toe Bolt</span>
               <span class="value">${_sign(rearPair.rrPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-              <span class="label">Rear Bolt</span>
+              <span class="label">Camber Bolt</span>
               <span class="value">${_sign(rearPair.rrPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
             <div class="symmetry-metric camber symmetry-metric--compact">
-              <span class="label">Camber</span>
+              <span class="label"><span class="metric-camber">Camber</span></span>
               <span class="value">${camberValue.toFixed(2)}°</span>
             </div>
           </div>
@@ -1298,11 +1301,11 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
   const leftWheel = wheelPrefix.split('/')[0];
   const rightWheel = wheelPrefix.split('/')[1];
   const isRear = leftWheel === 'RL';
-  
+
   // Get toe properties based on wheel prefix
   const leftToeValue = isRear ? pairData.rlToe : pairData.flToe;
   const rightToeValue = isRear ? pairData.rrToe : pairData.frToe;
-  
+
   if (!pairData || leftToeValue == null || rightToeValue == null) {
     const notAvailable = document.createElement('div');
     notAvailable.className = 'empty-state';
@@ -1313,29 +1316,33 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
   const toeMismatchStable = pairData.toeMismatch != null && pairData.toeMismatch <= 0.10;
   const toeMismatchClass = toeMismatchStable ? 'match' : 'partial';
 
+  // Bolt labels differ between front and rear suspension
+  const frontBoltLabel = isRear ? 'Toe Bolt' : 'Camber Bolt';
+  const rearBoltLabel = isRear ? 'Camber Bolt' : 'Caster Bolt';
+
   const card = document.createElement('div');
   card.className = 'symmetry-card';
 
   card.innerHTML = `
     <div class="title">${title}</div>
-    <div class="section-desc">${leftWheel} and ${rightWheel} toe mismatch: ${(pairData.toeMismatch || 0).toFixed(2)} mm (within ±0.10 mm limit)</div>
+    <div class="section-desc">${leftWheel} and ${rightWheel} <span class="metric-toe">toe</span> mismatch: ${(pairData.toeMismatch || 0).toFixed(2)} mm (within ±0.10 mm limit)</div>
     <div class="scenario-grid">
       <div class="scenario-col">
         <div class="scenario-header">${leftWheel}</div>
         <div class="bolt-values-grid">
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt symmetry-metric--compact">
-              <span class="label">Front Bolt</span>
+              <span class="label">${frontBoltLabel}</span>
               <span class="value">${_sign(isRear ? pairData.rlPosition.camberBolt : pairData.flPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-              <span class="label">Rear Bolt</span>
+              <span class="label">${rearBoltLabel}</span>
               <span class="value">${_sign(isRear ? pairData.rlPosition.casterBolt : pairData.flPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
             <div class="symmetry-metric toe symmetry-metric--compact">
-              <span class="label">Toe</span>
+              <span class="label"><span class="metric-toe">Toe</span></span>
               <span class="value">${(leftToeValue || 0).toFixed(2)} mm</span>
             </div>
           </div>
@@ -1346,17 +1353,17 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
         <div class="bolt-values-grid">
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt symmetry-metric--compact">
-              <span class="label">Front Bolt</span>
+              <span class="label">${frontBoltLabel}</span>
               <span class="value">${_sign(isRear ? pairData.rrPosition.camberBolt : pairData.frPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-              <span class="label">Rear Bolt</span>
+              <span class="label">${rearBoltLabel}</span>
               <span class="value">${_sign(isRear ? pairData.rrPosition.casterBolt : pairData.frPosition.casterBolt)}</span>
             </div>
           </div>
           <div class="values-col">
             <div class="symmetry-metric toe symmetry-metric--compact">
-              <span class="label">Toe</span>
+              <span class="label"><span class="metric-toe">Toe</span></span>
               <span class="value">${(rightToeValue || 0).toFixed(2)} mm</span>
             </div>
           </div>
@@ -1383,7 +1390,7 @@ function _buildRearConsolidationTable(rearSymmetryResult) {
   const status = document.createElement('div');
   status.className = hasPair ? 'symmetry-status match' : 'symmetry-status partial';
   status.innerHTML = `
-    <div class="status-title">${hasPair ? '✓ Rear Camber Match Found' : '◐ Rear Camber Approximation'}</div>
+    <div class="status-title">${hasPair ? '✓ Rear <span class="metric-camber">Camber</span> Match Found' : '◐ Rear <span class="metric-camber">Camber</span> Approximation'}</div>
     <div class="status-note">${recommendation.note}</div>`;
   div.appendChild(status);
 
@@ -1413,7 +1420,7 @@ function _buildRearConsolidationTable(rearSymmetryResult) {
   const rrCasterBoltBolt = recommendation.rrCasterBolt != null ? _sign(recommendation.rrCasterBolt) : '—';
   
   camberRow.innerHTML = `
-    <td class="bold-cell"><span class="camber-label">Camber</span></td>
+    <td class="bold-cell"><span class="metric-camber">Camber</span></td>
     <td>${recommendation.camber.toFixed(2)}°</td>
     <td><div>F:${rlCamberBoltBolt}</div><div>R:${rlCasterBoltBolt}</div></td>
     <td><div>F:${rrCamberBoltBolt}</div><div>R:${rrCasterBoltBolt}</div></td>
@@ -1429,7 +1436,7 @@ function _buildRearConsolidationTable(rearSymmetryResult) {
         ? '◐ Toe' 
         : 'Toe';
     toeRow.innerHTML = `
-      <td class="bold-cell"><span class="toe-label">${toeLabel}</span></td>
+      <td class="bold-cell"><span class="metric-toe">${toeLabel}</span></td>
       <td>${recommendation.rlToe ? recommendation.rlToe.toFixed(2) : '—'} mm</td>
       <td colspan="2" class="note-cell">RL: ${recommendation.rlToe ? recommendation.rlToe.toFixed(2) : '—'} mm | RR: ${recommendation.rrToe ? recommendation.rrToe.toFixed(2) : '—'} mm</td>
     `;
@@ -1564,11 +1571,11 @@ function _buildSymmetryPanel(sym) {
           <div class="bolt-values-grid">
             <div class="bolts-col">
               <div class="symmetry-metric front-bolt symmetry-metric--compact">
-                <span class="label">Front Bolt</span>
+                <span class="label">Camber Bolt</span>
                 <span class="value">${_sign(data.camberFront)}</span>
               </div>
               <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-                <span class="label">Rear Bolt</span>
+                <span class="label">Caster Bolt</span>
                 <span class="value">${_sign(data.camberRear)}</span>
               </div>
             </div>
@@ -1592,11 +1599,11 @@ function _buildSymmetryPanel(sym) {
           <div class="bolt-values-grid">
             <div class="bolts-col">
               <div class="symmetry-metric front-bolt symmetry-metric--compact">
-                <span class="label">Front Bolt</span>
+                <span class="label">Camber Bolt</span>
                 <span class="value">${_sign(data.casterFront)}</span>
               </div>
               <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-                <span class="label">Rear Bolt</span>
+                <span class="label">Caster Bolt</span>
                 <span class="value">${_sign(data.casterRear)}</span>
               </div>
             </div>
@@ -1639,11 +1646,11 @@ function _buildSymmetryPanel(sym) {
           <div class="bolt-values-grid">
             <div class="bolts-col">
               <div class="symmetry-metric front-bolt symmetry-metric--compact">
-                <span class="label">Front Bolt</span>
+                <span class="label">Camber Bolt</span>
                 <span class="value">${_sign(cpair.flPosition.camberBolt)}</span>
               </div>
               <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-                <span class="label">Rear Bolt</span>
+                <span class="label">Caster Bolt</span>
                 <span class="value">${_sign(cpair.flPosition.casterBolt)}</span>
               </div>
             </div>
@@ -1664,11 +1671,11 @@ function _buildSymmetryPanel(sym) {
           <div class="bolt-values-grid">
             <div class="bolts-col">
               <div class="symmetry-metric front-bolt symmetry-metric--compact">
-                <span class="label">Front Bolt</span>
+                <span class="label">Camber Bolt</span>
                 <span class="value">${_sign(cpair.frPosition.camberBolt)}</span>
               </div>
               <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-                <span class="label">Rear Bolt</span>
+                <span class="label">Caster Bolt</span>
                 <span class="value">${_sign(cpair.frPosition.casterBolt)}</span>
               </div>
             </div>
@@ -1702,11 +1709,11 @@ function _buildSymmetryPanel(sym) {
           <div class="bolt-values-grid">
             <div class="bolts-col">
               <div class="symmetry-metric front-bolt symmetry-metric--compact">
-                <span class="label">Front Bolt</span>
+                <span class="label">Camber Bolt</span>
                 <span class="value">${_sign(kpair.flPosition.camberBolt)}</span>
               </div>
               <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-                <span class="label">Rear Bolt</span>
+                <span class="label">Caster Bolt</span>
                 <span class="value">${_sign(kpair.flPosition.casterBolt)}</span>
               </div>
             </div>
@@ -1727,11 +1734,11 @@ function _buildSymmetryPanel(sym) {
           <div class="bolt-values-grid">
             <div class="bolts-col">
               <div class="symmetry-metric front-bolt symmetry-metric--compact">
-                <span class="label">Front Bolt</span>
+                <span class="label">Camber Bolt</span>
                 <span class="value">${_sign(kpair.frPosition.camberBolt)}</span>
               </div>
               <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-                <span class="label">Rear Bolt</span>
+                <span class="label">Caster Bolt</span>
                 <span class="value">${_sign(kpair.frPosition.casterBolt)}</span>
               </div>
             </div>
@@ -1770,11 +1777,11 @@ function _buildSymmetryPanel(sym) {
         <div class="bolt-values-grid">
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt symmetry-metric--compact">
-              <span class="label">Front Bolt</span>
+              <span class="label">Camber Bolt</span>
               <span class="value">${_sign(rec.flCamberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-              <span class="label">Rear Bolt</span>
+              <span class="label">Caster Bolt</span>
               <span class="value">${_sign(rec.flCasterBolt)}</span>
             </div>
           </div>
@@ -1795,11 +1802,11 @@ function _buildSymmetryPanel(sym) {
         <div class="bolt-values-grid">
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt symmetry-metric--compact">
-              <span class="label">Front Bolt</span>
+              <span class="label">Camber Bolt</span>
               <span class="value">${_sign(rec.frCamberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-              <span class="label">Rear Bolt</span>
+              <span class="label">Caster Bolt</span>
               <span class="value">${_sign(rec.frCasterBolt)}</span>
             </div>
           </div>
@@ -1845,7 +1852,7 @@ function _buildRearSymmetryPanel(rearSymmetry) {
     </thead>
     <tbody>
       <tr>
-        <td class="bold-cell"><span class="camber-label">Camber</span></td>
+        <td class="bold-cell"><span class="metric-camber">Camber</span></td>
         <td>${rearSymmetry.recommendation.camber.toFixed(2)}°</td>
         <td><div>F:${_sign(rearSymmetry.recommendation.leftFront)}</div><div>R:${_sign(rearSymmetry.recommendation.leftRear)}</div></td>
         <td><div>F:${_sign(rearSymmetry.recommendation.rightFront)}</div><div>R:${_sign(rearSymmetry.recommendation.rightRear)}</div></td>
@@ -1862,11 +1869,11 @@ function _buildRearSymmetryPanel(rearSymmetry) {
     card.innerHTML = `
       <div class="title">${wheel}</div>
       <div class="symmetry-metric front-bolt">
-        <span class="label">Best Camber Front Bolt</span>
+        <span class="label">Best Camber Toe Bolt</span>
         <span class="value">${_sign(bestCell.camberBolt)}</span>
       </div>
       <div class="symmetry-metric rear-bolt">
-        <span class="label">Best Camber Rear Bolt</span>
+        <span class="label">Best Camber Camber Bolt</span>
         <span class="value">${_sign(bestCell.casterBolt)}</span>
       </div>
       <div class="symmetry-metric camber">
@@ -1890,13 +1897,13 @@ function _buildRearSymmetryPanel(rearSymmetry) {
     <div class="scenario-grid" style="gap:24px;">
       <div>
         <div class="scenario-header">${rearSymmetry.leftWheel}</div>
-        <div class="symmetry-metric front-bolt"><span class="label">Front Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.leftFront)}</span></div>
-        <div class="symmetry-metric rear-bolt symmetry-metric--compact"><span class="label">Rear Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.leftRear)}</span></div>
+        <div class="symmetry-metric front-bolt"><span class="label">Toe Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.leftFront)}</span></div>
+        <div class="symmetry-metric rear-bolt symmetry-metric--compact"><span class="label">Camber Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.leftRear)}</span></div>
       </div>
       <div>
         <div class="scenario-header">${rearSymmetry.rightWheel}</div>
-        <div class="symmetry-metric front-bolt"><span class="label">Front Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.rightFront)}</span></div>
-        <div class="symmetry-metric rear-bolt symmetry-metric--compact"><span class="label">Rear Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.rightRear)}</span></div>
+        <div class="symmetry-metric front-bolt"><span class="label">Toe Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.rightFront)}</span></div>
+        <div class="symmetry-metric rear-bolt symmetry-metric--compact"><span class="label">Camber Bolt</span><span class="value">${_sign(rearSymmetry.recommendation.rightRear)}</span></div>
       </div>
     </div>`;
   grid.appendChild(recommendation);
@@ -1929,15 +1936,15 @@ function _determineFrontSymmetryStatus(sym) {
     
     if (camberDelta <= greenThreshold) {
       camberStatus = 'green';
-      messages.push(`✓ Camber match at target (${camberValue.toFixed(2)}°)`);
+      messages.push(`✓ <span class="metric-camber">Camber</span> match at target (${camberValue.toFixed(2)}°)`);
     } else if (camberDelta <= orangeThreshold) {
       camberStatus = 'orange';
       overallStatus = 'orange';
-      messages.push(`◐ Camber match found (${camberValue.toFixed(2)}°) but Δ${camberDelta.toFixed(2)}° from target`);
+      messages.push(`◐ <span class="metric-camber">Camber</span> match found (${camberValue.toFixed(2)}°) but Δ${camberDelta.toFixed(2)}° from target`);
     } else {
       camberStatus = 'orange';
       overallStatus = 'orange';
-      messages.push(`◐ Camber match found (${camberValue.toFixed(2)}°) but off-target by Δ${camberDelta.toFixed(2)}°`);
+      messages.push(`◐ <span class="metric-camber">Camber</span> match found (${camberValue.toFixed(2)}°) but off-target by Δ${camberDelta.toFixed(2)}°`);
     }
   } else {
     camberStatus = 'red';
@@ -1952,15 +1959,15 @@ function _determineFrontSymmetryStatus(sym) {
     
     if (casterDelta <= greenThreshold) {
       casterStatus = 'green';
-      messages.push(`✓ Caster match at target (${casterValue.toFixed(2)}°)`);
+      messages.push(`✓ <span class="metric-caster">Caster</span> match at target (${casterValue.toFixed(2)}°)`);
     } else if (casterDelta <= orangeThreshold) {
       casterStatus = 'orange';
       if (overallStatus === 'green') overallStatus = 'orange';
-      messages.push(`◐ Caster match found (${casterValue.toFixed(2)}°) but Δ${casterDelta.toFixed(2)}° from target`);
+      messages.push(`◐ <span class="metric-caster">Caster</span> match found (${casterValue.toFixed(2)}°) but Δ${casterDelta.toFixed(2)}° from target`);
     } else {
       casterStatus = 'orange';
       if (overallStatus === 'green') overallStatus = 'orange';
-      messages.push(`◐ Caster match found (${casterValue.toFixed(2)}°) but off-target by Δ${casterDelta.toFixed(2)}°`);
+      messages.push(`◐ <span class="metric-caster">Caster</span> match found (${casterValue.toFixed(2)}°) but off-target by Δ${casterDelta.toFixed(2)}°`);
     }
   } else {
     casterStatus = 'red';
@@ -2044,7 +2051,7 @@ function _buildFrontConsolidationTableWithStatus(sym) {
   const camberRow = document.createElement('tr');
   const camberCompromise = ((sym.fl.bestCamberValue + sym.fr.bestCamberValue) / 2).toFixed(2);
   camberRow.innerHTML = `
-    <td class="bold-cell"><span class="camber-label">Camber</span></td>
+    <td class="bold-cell"><span class="metric-camber">Camber</span></td>
     <td>${camberCompromise}°</td>
     <td>${camberFlBolts}</td>
     <td>${camberFrBolts}</td>
@@ -2055,7 +2062,7 @@ function _buildFrontConsolidationTableWithStatus(sym) {
   const casterRow = document.createElement('tr');
   const casterCompromise = ((sym.fl.bestCasterValue + sym.fr.bestCasterValue) / 2).toFixed(2);
   casterRow.innerHTML = `
-    <td class="bold-cell"><span class="caster-label">Caster</span></td>
+    <td class="bold-cell"><span class="metric-caster">Caster</span></td>
     <td>${casterCompromise}°</td>
     <td>${casterFlBolts}</td>
     <td>${casterFrBolts}</td>
@@ -2117,7 +2124,7 @@ function _buildFrontConsolidationTable(sym) {
   const camberRow = document.createElement('tr');
   const camberCompromise = ((sym.fl.bestCamberValue + sym.fr.bestCamberValue) / 2).toFixed(2);
   camberRow.innerHTML = `
-    <td class="bold-cell"><span class="camber-label">Camber</span></td>
+    <td class="bold-cell"><span class="metric-camber">Camber</span></td>
     <td>${camberCompromise}°</td>
     <td>${camberFlBolts}</td>
     <td>${camberFrBolts}</td>
@@ -2128,7 +2135,7 @@ function _buildFrontConsolidationTable(sym) {
   const casterRow = document.createElement('tr');
   const casterCompromise = ((sym.fl.bestCasterValue + sym.fr.bestCasterValue) / 2).toFixed(2);
   casterRow.innerHTML = `
-    <td class="bold-cell"><span class="caster-label">Caster</span></td>
+    <td class="bold-cell"><span class="metric-caster">Caster</span></td>
     <td>${casterCompromise}°</td>
     <td>${casterFlBolts}</td>
     <td>${casterFrBolts}</td>

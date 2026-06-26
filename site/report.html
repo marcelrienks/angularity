@@ -110,11 +110,11 @@
     </section>
 
     <!-- ── Section 2.2: Camber & Caster Chart
-         PURPOSE: Show how camber and caster vary with front bolt position (rear bolt = 0 nominal).
+         PURPOSE: Show how camber and caster vary with bolt position (other bolt = 0 nominal).
          Helps visualize trade-offs and identify positions where targets are achievable.
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="chart-section" id="section-chart" style="display:none">
-      <h2 class="header">Camber &amp; Caster vs Front Bolt Position</h2>
+      <h2 class="header">Alignment vs Bolt Position</h2>
       <div class="wheel-selector" id="chart-wheel-tabs" style="margin-bottom:16px; display:none">
         <button class="active sub-header" data-wheel="FL" id="tab-chart-fl">FL</button>
         <button class="sub-header" data-wheel="FR" id="tab-chart-fr">FR</button>
@@ -125,7 +125,7 @@
         <canvas id="main-chart" aria-label="Camber and caster chart"></canvas>
       </div>
       <p class="chart-note paragraph" id="chart-note">
-        X-axis: bolt combination index, grouped by front bolt position (13 groups × 13 rear positions = 169 points) ·
+        X-axis: bolt position (13 positions shown with other bolt set to nominal 0) ·
         Dashed lines: targets (<span id="chart-note-camber">Camber −1.1°</span> · <span id="chart-note-caster">Caster 5.0°</span>) ·
         Solid markers = measured · Hollow markers = interpolated
       </p>

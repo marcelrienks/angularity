@@ -218,6 +218,11 @@ window.addEventListener('beforeunload', () => {
 function _buildGrid() {
   const grid = document.getElementById('input-grid');
   const boltPositions = getBoltPositions();
+  const isRearWheel = REAR_WHEELS.includes(activeWheel);
+
+  // Bolt labels vary by suspension type
+  const frontBoltLabel = isRearWheel ? 'Toe Bolt' : 'Camber Bolt';
+  const rearBoltLabel = isRearWheel ? 'Camber Bolt' : 'Caster Bolt';
 
   // CSS grid: 1 row-header column + N data columns
   const colCount = 1 + boltPositions.length;
@@ -226,14 +231,14 @@ function _buildGrid() {
   // ── Row 0: corner + column headers (front bolt positions) ──────────────
   const corner = _el('div', 'grid-corner sub-header');
   corner.setAttribute('aria-hidden', 'true');
-  corner.textContent = 'Front →\nRear ↓';
+  corner.textContent = `${frontBoltLabel} →\n${rearBoltLabel} ↓`;
   grid.appendChild(corner);
 
   for (const f of boltPositions) {
     const th = _el('div', `grid-col-header sub-header${_isRequired(f) ? ' required' : ''}`);
     th.dataset.col = f;
     th.textContent = _sign(f);
-    th.setAttribute('aria-label', `Front bolt ${_sign(f)}`);
+    th.setAttribute('aria-label', `${frontBoltLabel} ${_sign(f)}`);
     grid.appendChild(th);
   }
 
@@ -243,7 +248,7 @@ function _buildGrid() {
     const rh = _el('div', `grid-row-header sub-header${_isRequired(r) ? ' required' : ''}`);
     rh.dataset.row = r;
     rh.textContent = _sign(r);
-    rh.setAttribute('aria-label', `Rear bolt ${_sign(r)}`);
+    rh.setAttribute('aria-label', `${rearBoltLabel} ${_sign(r)}`);
     grid.appendChild(rh);
 
     // Data cells (column axis is front bolt)

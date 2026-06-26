@@ -40,16 +40,16 @@ const BOLT_MAX =  6;
  * │            FRONT WHEELS (active)                    │
  * ├──────────────────┬──────────────────┤
  * │ Front Left (FL)  │  Front Right (FR) │
- * ├─ Front Bolt     ├─ Front Bolt     │
+ * ├─ Camber Bolt    ├─ Camber Bolt    │
  * │ (Camber)        │ (Camber)        │
- * ├─ Rear Bolt      ├─ Rear Bolt      │
+ * ├─ Caster Bolt    ├─ Caster Bolt    │
  * │ (Caster)        │ (Caster)        │
  * ├─────────────────────────────────────────────────────┤
  * │              REAR WHEELS (active)                   │
  * ├──────────────────┬──────────────────┤
  * │  Rear Left (RL)  │   Rear Right (RR) │
- * ├─ Front Bolt     ├─ Front Bolt     │
- * ├─ Rear Bolt      ├─ Rear Bolt      │
+ * ├─ Toe Bolt       ├─ Toe Bolt       │
+ * ├─ Camber Bolt    ├─ Camber Bolt    │
  * └─────────────────────────────────────────────────────┘
  *
  * @param {string} containerId
@@ -79,8 +79,8 @@ export function renderWasherSection(containerId, recommendations) {
   flGroup.appendChild(flWheelTitle);
   
   if (recommendations.FL) {
-    flGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.FL.camberBolt, COLOURS.blue));
-    flGroup.appendChild(_makeBoltRow('Caster Bolt', 'Caster', recommendations.FL.casterBolt, COLOURS.green));
+    flGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.FL.camberBolt, COLOURS.camber));
+    flGroup.appendChild(_makeBoltRow('Caster Bolt', 'Caster', recommendations.FL.casterBolt, COLOURS.caster));
   }
   frontGrid.appendChild(flGroup);
 
@@ -93,8 +93,8 @@ export function renderWasherSection(containerId, recommendations) {
   frGroup.appendChild(frWheelTitle);
   
   if (recommendations.FR) {
-    frGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.FR.camberBolt, COLOURS.blue));
-    frGroup.appendChild(_makeBoltRow('Caster Bolt', 'Caster', recommendations.FR.casterBolt, COLOURS.green));
+    frGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.FR.camberBolt, COLOURS.camber));
+    frGroup.appendChild(_makeBoltRow('Caster Bolt', 'Caster', recommendations.FR.casterBolt, COLOURS.caster));
   }
   frontGrid.appendChild(frGroup);
 
@@ -122,11 +122,11 @@ export function renderWasherSection(containerId, recommendations) {
   rlWheelTitle.textContent = 'Rear Left (RL)';
   rlGroup.appendChild(rlWheelTitle);
   if (recommendations.RL) {
-    rlGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RL.camberBolt, COLOURS.purple));
-    rlGroup.appendChild(_makeBoltRow('Caster Bolt', 'Camber Support', recommendations.RL.casterBolt, COLOURS.purple));
+    rlGroup.appendChild(_makeBoltRow('Toe Bolt', 'Toe', recommendations.RL.camberBolt, COLOURS.purple));
+    rlGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RL.casterBolt, COLOURS.purple));
   } else {
+    rlGroup.appendChild(_makeBlankBoltRow('Toe Bolt'));
     rlGroup.appendChild(_makeBlankBoltRow('Camber Bolt'));
-    rlGroup.appendChild(_makeBlankBoltRow('Caster Bolt'));
   }
   rearGrid.appendChild(rlGroup);
 
@@ -138,11 +138,11 @@ export function renderWasherSection(containerId, recommendations) {
   rrWheelTitle.textContent = 'Rear Right (RR)';
   rrGroup.appendChild(rrWheelTitle);
   if (recommendations.RR) {
-    rrGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RR.camberBolt, COLOURS.purple));
-    rrGroup.appendChild(_makeBoltRow('Caster Bolt', 'Camber Support', recommendations.RR.casterBolt, COLOURS.purple));
+    rrGroup.appendChild(_makeBoltRow('Toe Bolt', 'Toe', recommendations.RR.camberBolt, COLOURS.purple));
+    rrGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RR.casterBolt, COLOURS.purple));
   } else {
+    rrGroup.appendChild(_makeBlankBoltRow('Toe Bolt'));
     rrGroup.appendChild(_makeBlankBoltRow('Camber Bolt'));
-    rrGroup.appendChild(_makeBlankBoltRow('Caster Bolt'));
   }
   rearGrid.appendChild(rrGroup);
 
@@ -160,7 +160,7 @@ function _makeBoltRow(boltLabel, effectLabel, position, colour) {
   const row = document.createElement('div');
   row.className = 'washer-bolt-row';
 
-  // Bolt label (e.g., "Front Bolt")
+  // Bolt label (e.g., "Camber Bolt", "Caster Bolt", "Toe Bolt")
   const labelArea = document.createElement('div');
   labelArea.className = 'washer-bolt-header';
   

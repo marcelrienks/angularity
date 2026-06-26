@@ -6,7 +6,7 @@
  *   destroyChart(instance)                             → void
  */
 
-import { BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER } from './constants.js';
+import { BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER, REAR_WHEELS } from './constants.js';
 import { _sign } from './format-utils.js';
 
 // Number of rear bolt positions in one "front bolt group"
@@ -63,8 +63,8 @@ export function buildMainChart(canvasId, rows169, wheel, targets = {}) {
     {
       label: `Camber (${wheel})`,
       data: cambers,
-      borderColor: COLOURS.blue,
-      backgroundColor: COLOURS.blue,
+      borderColor: COLOURS.camber,
+      backgroundColor: COLOURS.camber,
       pointBackgroundColor: 'transparent',
       pointBorderColor: 'transparent',
       pointRadius: 0,
@@ -77,7 +77,7 @@ export function buildMainChart(canvasId, rows169, wheel, targets = {}) {
     {
       label: `Camber target (${targetCamber}°)`,
       data: Array(numPoints).fill(targetCamber),
-      borderColor: COLOURS.blue,
+      borderColor: COLOURS.camber,
       borderWidth: 1.5,
       borderDash: [5, 5],
       pointRadius: 0,
@@ -91,8 +91,8 @@ export function buildMainChart(canvasId, rows169, wheel, targets = {}) {
     datasets.splice(1, 0, {
       label: `Caster (${wheel})`,
       data: casters,
-      borderColor: COLOURS.green,
-      backgroundColor: COLOURS.green,
+      borderColor: COLOURS.caster,
+      backgroundColor: COLOURS.caster,
       pointBackgroundColor: 'transparent',
       pointBorderColor: 'transparent',
       pointRadius: 0,
@@ -106,7 +106,7 @@ export function buildMainChart(canvasId, rows169, wheel, targets = {}) {
     datasets.push({
       label: `Caster target (${targetCaster}°)`,
       data: Array(numPoints).fill(targetCaster),
-      borderColor: COLOURS.green,
+      borderColor: COLOURS.caster,
       borderWidth: 1.5,
       borderDash: [5, 5],
       pointRadius: 0,
@@ -123,7 +123,7 @@ export function buildMainChart(canvasId, rows169, wheel, targets = {}) {
       labels,
       datasets,
     },
-    options: _mainChartOptions(aggregated, showCaster),
+    options: _mainChartOptions(aggregated, showCaster, wheel),
   });
 
   return chart;
@@ -165,7 +165,10 @@ export function destroyChart(instance) {
 
 // ── Chart options ─────────────────────────────────────────────────────────
 
-function _mainChartOptions(aggregated, showCaster) {
+function _mainChartOptions(aggregated, showCaster, wheel) {
+  const isRearWheel = REAR_WHEELS.includes(wheel);
+  const xAxisLabel = isRearWheel ? 'Toe Bolt Position' : 'Camber Bolt Position';
+
   const scales = {
     x: {
       type: 'linear',
@@ -179,7 +182,7 @@ function _mainChartOptions(aggregated, showCaster) {
       grid: { color: COLOURS.border + '33' },
       title: {
         display: true,
-        text: 'Front Bolt Position',
+        text: xAxisLabel,
         color: COLOURS.muted,
         font: { family: "'Share Tech Mono', monospace", size: 11 },
       },
@@ -188,14 +191,14 @@ function _mainChartOptions(aggregated, showCaster) {
       type: 'linear',
       position: 'left',
       ticks: {
-        color: COLOURS.blue,
+        color: COLOURS.camber,
         font: { family: "'Share Tech Mono', monospace", size: 10 },
       },
       grid: { color: COLOURS.border + '44' },
       title: {
         display: true,
         text: 'Camber (°)',
-        color: COLOURS.blue,
+        color: COLOURS.camber,
         font: { family: "'Share Tech Mono', monospace", size: 11 },
       },
     },
@@ -206,14 +209,14 @@ function _mainChartOptions(aggregated, showCaster) {
       type: 'linear',
       position: 'right',
       ticks: {
-        color: COLOURS.green,
+        color: COLOURS.caster,
         font: { family: "'Share Tech Mono', monospace", size: 10 },
       },
       grid: { drawOnChartArea: false },
       title: {
         display: true,
         text: 'Caster (°)',
-        color: COLOURS.green,
+        color: COLOURS.caster,
         font: { family: "'Share Tech Mono', monospace", size: 11 },
       },
     };
@@ -290,7 +293,7 @@ function _buildDropLinesPlugin(cambers, casters, targets) {
         if (xPx !== undefined && xPx !== null && !isNaN(xPx)) {
           const yPx = yCamberScale.getPixelForValue(targets.camber);
           if (yPx !== undefined && yPx !== null && !isNaN(yPx)) {
-            ctx.strokeStyle = COLOURS.blue;
+            ctx.strokeStyle = COLOURS.camber;
             ctx.beginPath();
             ctx.moveTo(xPx, yPx);
             ctx.lineTo(xPx, bottom);
@@ -308,7 +311,7 @@ function _buildDropLinesPlugin(cambers, casters, targets) {
         if (xPx !== undefined && xPx !== null && !isNaN(xPx)) {
           const yPx = yCasterScale.getPixelForValue(targets.caster);
           if (yPx !== undefined && yPx !== null && !isNaN(yPx)) {
-            ctx.strokeStyle = COLOURS.green;
+            ctx.strokeStyle = COLOURS.caster;
             ctx.beginPath();
             ctx.moveTo(xPx, yPx);
             ctx.lineTo(xPx, bottom);

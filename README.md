@@ -49,8 +49,8 @@ npm run test:all-sync    # All 149 tests
 ```
 1. MEASURE (on your car)
    ├─ Set steering angle to −20°
-   ├─ Adjust front bolt to position −6, read camber value
-   ├─ Move to rear bolt +3, read camber value again
+   ├─ Adjust camber bolt to position −6, read camber value
+   ├─ Move to caster bolt +3, read camber value again
    └─ Repeat at 0° and +20° steering angles
    
 2. INPUT (in browser at http://localhost:8080/input.html)
@@ -63,7 +63,7 @@ npm run test:all-sync    # All 149 tests
    ├─ View heatmap: which bolt positions are best?
    ├─ See three options: best compromise, best camber, best caster
    ├─ Check FL vs FR symmetry analysis
-   └─ Get final recommendation: "Try Front +1, Rear −2"
+   └─ Get final recommendation: "Try Camber Bolt +1, Caster Bolt −2"
    
 4. ADJUST (back on your car)
    ├─ Loosen eccentric bolts
