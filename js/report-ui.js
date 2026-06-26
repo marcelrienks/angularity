@@ -57,9 +57,13 @@ function buildTable(result, wheel) {
   // Build header
   const thead = table.createTHead();
   const headerRow = thead.insertRow();
-  _th(headerRow, 'Camber↓\nCaster→', 'col-label-row');
+  const columnMetricLabel = isRearWheel ? 'Toe' : 'Camber';
+  const columnMetricClass = isRearWheel ? 'metric-toe' : 'metric-camber';
+  const rowMetricLabel = isRearWheel ? 'Camber' : 'Caster';
+  const rowMetricClass = isRearWheel ? 'metric-camber' : 'metric-caster';
+  _th(headerRow, `<span class="${columnMetricClass}">${columnMetricLabel}</span>→<br><span class="${rowMetricClass}">${rowMetricLabel}</span>↓`, 'col-label-row', true);
   for (const r of BOLT_POSITIONS) {
-    const th = _th(headerRow, _sign(r));
+    const th = _th(headerRow, `<span class="${columnMetricClass}">${_sign(r)}</span>`, '', true);
     if (REQUIRED_POSITIONS.includes(r)) th.classList.add('required-header');
   }
 
@@ -72,7 +76,7 @@ function buildTable(result, wheel) {
     const rowLbl = tr.insertCell();
     rowLbl.className = 'row-label sub-header';
     if (REQUIRED_POSITIONS.includes(f)) rowLbl.classList.add('required-header');
-    rowLbl.textContent = _sign(f);
+    rowLbl.innerHTML = `<span class="${rowMetricClass}">${_sign(f)}</span>`;
 
     for (let ri = 0; ri < BOLT_POSITIONS.length; ri++) {
       const r = BOLT_POSITIONS[ri];

@@ -529,9 +529,13 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
   // ── Header row: rear bolt positions ───────────────────────────────────
   const thead = table.createTHead();
   const headerRow = thead.insertRow();
-  _th(headerRow, 'Camber↓\nCaster→', 'col-label-row');
+  const columnMetricLabel = isRearWheel ? 'Toe' : 'Camber';
+  const columnMetricClass = isRearWheel ? 'metric-toe' : 'metric-camber';
+  const rowMetricLabel = isRearWheel ? 'Camber' : 'Caster';
+  const rowMetricClass = isRearWheel ? 'metric-camber' : 'metric-caster';
+  _th(headerRow, `<span class="${columnMetricClass}">${columnMetricLabel}</span>→<br><span class="${rowMetricClass}">${rowMetricLabel}</span>↓`, 'col-label-row', true);
   for (const r of BOLT_POSITIONS) {
-    const th = _th(headerRow, _sign(r));
+    const th = _th(headerRow, `<span class="${columnMetricClass}">${_sign(r)}</span>`, '', true);
     if (REQUIRED_POSITIONS.includes(r)) th.classList.add('required-header');
   }
 
@@ -545,7 +549,7 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
     const rowLbl = tr.insertCell();
     rowLbl.className = 'row-label sub-header';
     if (REQUIRED_POSITIONS.includes(f)) rowLbl.classList.add('required-header');
-    rowLbl.textContent = _sign(f);
+    rowLbl.innerHTML = `<span class="${rowMetricClass}">${_sign(f)}</span>`;
 
     for (let ri = 0; ri < BOLT_POSITIONS.length; ri++) {
       const r     = BOLT_POSITIONS[ri];
@@ -560,24 +564,34 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
       const td = tr.insertCell();
       if (cell.isInterpolated)  td.classList.add('interpolated');
       if (isHighlighted)        td.classList.add('highlighted-position'); // Symmetric position
-      
+
       // Add target indicator classes based on top matches
+      let isHighlightedCell = false;
       if (matchType === 'both') {
         td.classList.add('best-both');       // Both targets met
+        isHighlightedCell = true;
       } else if (matchType === 'camber') {
         td.classList.add('best-camber');     // Camber target met (blue)
+        isHighlightedCell = true;
       } else if (matchType === 'caster') {
         td.classList.add('best-caster');     // Caster target met (green)
+        isHighlightedCell = true;
       }
-      
-      if (REQUIRED_POSITIONS.includes(r)) td.classList.add('required-col');
+
+      if (REQUIRED_POSITIONS.includes(r)) {
+        td.classList.add('required-col');
+      }
 
       const metricClass = _metricValueClass({ camber, caster, toe: rearToe }, activeTableWheel);
       const metricValue = _formatSelectedMetricValue({ camber, caster, toe: rearToe }, isRearWheel);
 
+      // Add muted class for non-highlighted cells (only best matches and symmetric positions are bright)
+      const isMuted = !isHighlightedCell && !isHighlighted;
+      const mutedClass = isMuted ? 'muted' : '';
+
       td.innerHTML = `
         <div class="cell-value">
-          <div class="${selectedMetric} ${metricClass}">${metricValue}</div>
+          <div class="${selectedMetric} ${metricClass} ${mutedClass}">${metricValue}</div>
         </div>`;
     }
   }
@@ -598,9 +612,13 @@ function _buildTable(result) {
   // ── Header row: rear bolt positions ───────────────────────────────────
   const thead = table.createTHead();
   const headerRow = thead.insertRow();
-  _th(headerRow, 'Camber↓\nCaster→', 'col-label-row');
+  const columnMetricLabel = isRearWheel ? 'Toe' : 'Camber';
+  const columnMetricClass = isRearWheel ? 'metric-toe' : 'metric-camber';
+  const rowMetricLabel = isRearWheel ? 'Camber' : 'Caster';
+  const rowMetricClass = isRearWheel ? 'metric-camber' : 'metric-caster';
+  _th(headerRow, `<span class="${columnMetricClass}">${columnMetricLabel}</span>→<br><span class="${rowMetricClass}">${rowMetricLabel}</span>↓`, 'col-label-row', true);
   for (const r of BOLT_POSITIONS) {
-    const th = _th(headerRow, _sign(r));
+    const th = _th(headerRow, `<span class="${columnMetricClass}">${_sign(r)}</span>`, '', true);
     if (REQUIRED_POSITIONS.includes(r)) th.classList.add('required-header');
   }
 
@@ -614,37 +632,47 @@ function _buildTable(result) {
     const rowLbl = tr.insertCell();
     rowLbl.className = 'row-label sub-header';
     if (REQUIRED_POSITIONS.includes(f)) rowLbl.classList.add('required-header');
-    rowLbl.textContent = _sign(f);
+    rowLbl.innerHTML = `<span class="${rowMetricClass}">${_sign(f)}</span>`;
 
     for (let ri = 0; ri < BOLT_POSITIONS.length; ri++) {
       const r     = BOLT_POSITIONS[ri];
       const cell  = grid[fi][ri];
       const camber = +cell.zero.toFixed(2);
       const caster = +(calculateCaster(cell.neg20, cell.pos20, _getWheelCasterOptions(activeTableWheel, result))).toFixed(2);
-      
+
       const key = `${cell.camberBolt},${cell.casterBolt}`;
       const matchType = targetMatches.get(key);
 
       const td = tr.insertCell();
       if (cell.isInterpolated)  td.classList.add('interpolated');
-      
+
       // Add target indicator classes based on top matches
+      let isHighlightedCell = false;
       if (matchType === 'both') {
         td.classList.add('best-both');       // Both targets met
+        isHighlightedCell = true;
       } else if (matchType === 'camber') {
         td.classList.add('best-camber');     // Camber target met (blue)
+        isHighlightedCell = true;
       } else if (matchType === 'caster') {
         td.classList.add('best-caster');     // Caster target met (green)
+        isHighlightedCell = true;
       }
-      
-      if (REQUIRED_POSITIONS.includes(r)) td.classList.add('required-col');
+
+      if (REQUIRED_POSITIONS.includes(r)) {
+        td.classList.add('required-col');
+      }
 
       const metricClass = _metricValueClass({ camber, caster, toe: rearToe }, activeTableWheel);
       const metricValue = _formatSelectedMetricValue({ camber, caster, toe: rearToe }, isRearWheel);
 
+      // Add muted class for non-highlighted cells (only best matches are bright)
+      const isMuted = !isHighlightedCell;
+      const mutedClass = isMuted ? 'muted' : '';
+
       td.innerHTML = `
         <div class="cell-value">
-          <div class="${selectedMetric} ${metricClass}">${metricValue}</div>
+          <div class="${selectedMetric} ${metricClass} ${mutedClass}">${metricValue}</div>
         </div>`;
     }
   }
@@ -1464,15 +1492,6 @@ function _buildSymmetryPanel(sym) {
   const legendContent = document.createElement('div');
   legendContent.className = 'legend-items';
 
-  // Camber legend item
-  const camberItem = document.createElement('div');
-  camberItem.className = 'legend-item';
-  camberItem.innerHTML = `
-    <span class="legend-swatch legend-swatch--camber"></span>
-    <span class="legend-label--camber">Camber</span>
-  `;
-  legendContent.appendChild(camberItem);
-
   // Caster legend item
   const casterItem = document.createElement('div');
   casterItem.className = 'legend-item';
@@ -1481,6 +1500,15 @@ function _buildSymmetryPanel(sym) {
     <span class="legend-label--caster">Caster</span>
   `;
   legendContent.appendChild(casterItem);
+
+  // Camber legend item
+  const camberItem = document.createElement('div');
+  camberItem.className = 'legend-item';
+  camberItem.innerHTML = `
+    <span class="legend-swatch legend-swatch--camber"></span>
+    <span class="legend-label--camber">Camber</span>
+  `;
+  legendContent.appendChild(camberItem);
 
   // Separator text
   const separatorItem = document.createElement('div');
