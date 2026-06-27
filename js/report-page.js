@@ -600,11 +600,15 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
 }
 
 function _buildTable(result) {
-  const { grid } = result;
+  const { grid, measuredBolts } = result;
   const targetMatches = _getTopTargetMatches(result, activeTableWheel);
   const isRearWheel = REAR_WHEELS.includes(activeTableWheel);
   const measuredToe = Number(result.measuredToe);
   const rearToe = Number.isFinite(measuredToe) ? measuredToe : null;
+
+  // Use measured bolt positions, not hardcoded 13
+  const measuredCamber = measuredBolts.camber;  // e.g., [-2, -1, 0, 1, 2] for 5x5 config
+  const measuredCaster = measuredBolts.caster;
 
   const table = document.createElement('table');
   table.className = 'data-table';
@@ -617,15 +621,14 @@ function _buildTable(result) {
   const rowMetricLabel = isRearWheel ? 'Camber' : 'Caster';
   const rowMetricClass = isRearWheel ? 'metric-camber' : 'metric-caster';
   _th(headerRow, `<span class="${columnMetricClass}">${columnMetricLabel}</span>→<br><span class="${rowMetricClass}">${rowMetricLabel}</span>↓`, 'col-label-row', true);
-  for (const r of BOLT_POSITIONS) {
+  for (const r of measuredCaster) {
     const th = _th(headerRow, `<span class="${columnMetricClass}">${_sign(r)}</span>`, '', true);
     if (REQUIRED_POSITIONS.includes(r)) th.classList.add('required-header');
   }
 
   // ── Data rows ──────────────────────────────────────────────────────────
   const tbody = table.createTBody();
-  for (let fi = 0; fi < BOLT_POSITIONS.length; fi++) {
-    const f = BOLT_POSITIONS[fi];
+  for (const f of measuredCamber) {
     const tr = tbody.insertRow();
 
     // Row header
@@ -634,8 +637,9 @@ function _buildTable(result) {
     if (REQUIRED_POSITIONS.includes(f)) rowLbl.classList.add('required-header');
     rowLbl.innerHTML = `<span class="${rowMetricClass}">${_sign(f)}</span>`;
 
-    for (let ri = 0; ri < BOLT_POSITIONS.length; ri++) {
-      const r     = BOLT_POSITIONS[ri];
+    for (const r of measuredCaster) {
+      const fi = BOLT_POSITIONS.indexOf(f);
+      const ri = BOLT_POSITIONS.indexOf(r);
       const cell  = grid[fi][ri];
       const camber = +cell.zero.toFixed(2);
       const caster = +(calculateCaster(cell.neg20, cell.pos20, _getWheelCasterOptions(activeTableWheel, result))).toFixed(2);
