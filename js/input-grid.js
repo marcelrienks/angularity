@@ -606,6 +606,16 @@ function _bindControls() {
  */
 function _loadSampleData() {
   console.log('_loadSampleData called for wheel:', activeWheel);
+
+  // Force measurement density to 13 (13x13 full grid)
+  localStorage.setItem('alignment_measurement_density', '13');
+
+  // Update density selector UI if it exists
+  const densitySelect = document.getElementById('measurement-density-select');
+  if (densitySelect) {
+    densitySelect.value = '13';
+  }
+
   const boltPositions = getBoltPositions();
 
   // Check if there's existing data before reinitializing
@@ -619,6 +629,9 @@ function _loadSampleData() {
   });
 
   if (hasAnyData && !confirm('Replace all wheel data with sample data?')) return;
+
+  // Show modal explaining sample data behavior
+  _showSampleDataModal();
 
   // Reinitialize gridState with current bolt positions (handles config changes)
   _initializeGridState();
@@ -665,6 +678,89 @@ function _loadSampleData() {
   _hideWarning();
   _flushAllWheelsToStorage();
   _saveAllToeToStorage();
+}
+
+// ── Sample data modal ─────────────────────────────────────────────────────
+
+function _showSampleDataModal() {
+  // Remove existing modal if present
+  const existingModal = document.getElementById('sample-data-modal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  const modalHTML = `
+    <div id="sample-data-modal" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      font-family: 'Share Tech Mono', monospace;
+    ">
+      <div style="
+        background-color: var(--bg);
+        color: var(--text);
+        padding: 32px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        max-width: 500px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      ">
+        <h2 style="margin-top: 0; color: var(--accent); font-size: 18px;">Sample Data Loaded</h2>
+        <p style="margin: 16px 0; line-height: 1.6;">
+          Sample data has been loaded with measurement points set to <strong>13×13</strong> (maximum).
+        </p>
+        <p style="margin: 16px 0; line-height: 1.6;">
+          This demonstrates what a complete measurement grid looks like. All 169 positions are populated with synthetic data across all four wheels (FL, FR, RL, RR).
+        </p>
+        <p style="margin: 16px 0; line-height: 1.6; color: var(--muted); font-size: 13px;">
+          You can adjust the measurement point density in Settings if you want to use fewer measurement positions.
+        </p>
+        <button id="sample-data-modal-close" style="
+          background-color: var(--accent);
+          color: var(--bg);
+          border: none;
+          padding: 10px 20px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-family: 'Share Tech Mono', monospace;
+          font-size: 14px;
+          margin-top: 20px;
+        ">Close</button>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+  const closeBtn = document.getElementById('sample-data-modal-close');
+  const modal = document.getElementById('sample-data-modal');
+
+  closeBtn.addEventListener('click', () => {
+    modal.remove();
+  });
+
+  // Close modal if clicking outside the dialog
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
+
+  // Close on Escape key
+  const closeOnEscape = (e) => {
+    if (e.key === 'Escape') {
+      modal.remove();
+      document.removeEventListener('keydown', closeOnEscape);
+    }
+  };
+  document.addEventListener('keydown', closeOnEscape);
 }
 
 // ── CSV download ──────────────────────────────────────────────────────────
