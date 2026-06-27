@@ -273,7 +273,7 @@ function _buildGrid() {
   }
 }
 
-/** Build a single grid cell with 3 inputs for front, 4 inputs for rear (includes toe in mm). */
+/** Build a single grid cell with 3 inputs for front, 2 inputs for rear (camber + toe). */
 function _buildCell(camberBolt, casterBolt) {
   const isReq = _isRequired(camberBolt) && _isRequired(casterBolt);
   const cell = _el('div', `grid-cell${isReq ? ' required' : ''}`);
@@ -282,54 +282,75 @@ function _buildCell(camberBolt, casterBolt) {
   cell.setAttribute('role', 'gridcell');
   cell.setAttribute('aria-label', `Camber ${_sign(camberBolt)}, Caster ${_sign(casterBolt)}`);
 
-  const defs = getInputLabels();
   const isRearWheel = REAR_WHEELS.includes(activeWheel);
 
-  for (const { key, label } of defs) {
-    const wrap = _el('div', 'cell-row');
-
-    const lbl = _el('span', 'cell-label');
-    lbl.textContent = label;
-
-    const inp = _el('input', 'cell-input');
-    inp.type        = 'text';
-    inp.inputMode   = 'decimal';
-    inp.placeholder = '—';
-    inp.dataset.front = camberBolt;
-    inp.dataset.rear  = casterBolt;
-    inp.dataset.key   = key;
-    inp.setAttribute('aria-label', `${label} steering wheel, camber ${_sign(camberBolt)}, caster ${_sign(casterBolt)}`);
-
-    inp.addEventListener('input',   () => _onInputChange(camberBolt, casterBolt));
-    inp.addEventListener('focus',   () => _onInputFocus(camberBolt, casterBolt));
-    inp.addEventListener('blur',    _onInputBlur);
-    inp.addEventListener('keydown', _onKeyDown);
-
-    wrap.appendChild(lbl);
-    wrap.appendChild(inp);
-    cell.appendChild(wrap);
-  }
-
   if (isRearWheel) {
-    const wrap = _el('div', 'cell-row');
-    const lbl = _el('span', 'cell-label');
-    lbl.textContent = 'Toe (mm)';
-    const inp = _el('input', 'cell-input');
-    inp.type        = 'text';
-    inp.inputMode   = 'decimal';
-    inp.placeholder = '—';
-    inp.dataset.front = camberBolt;
-    inp.dataset.rear  = casterBolt;
-    inp.dataset.key   = 'toe';
-    inp.setAttribute('aria-label', `Toe mm, front bolt ${_sign(camberBolt)}, rear bolt ${_sign(casterBolt)}`);
-    inp.addEventListener('input',   () => _onInputChange(camberBolt, casterBolt));
-    inp.addEventListener('focus',   () => _onInputFocus(camberBolt, casterBolt));
-    inp.addEventListener('blur',    _onInputBlur);
-    inp.addEventListener('keydown', _onKeyDown);
+    // Rear wheels: camber at 0° + toe (mm)
+    const camberWrap = _el('div', 'cell-row');
+    const camberLbl = _el('span', 'cell-label');
+    camberLbl.textContent = 'Camber';
+    const camberInp = _el('input', 'cell-input');
+    camberInp.type = 'text';
+    camberInp.inputMode = 'decimal';
+    camberInp.placeholder = '—';
+    camberInp.dataset.front = camberBolt;
+    camberInp.dataset.rear = casterBolt;
+    camberInp.dataset.key = 'zero';
+    camberInp.setAttribute('aria-label', `Camber at 0°, camber bolt ${_sign(camberBolt)}, toe bolt ${_sign(casterBolt)}`);
+    camberInp.addEventListener('input', () => _onInputChange(camberBolt, casterBolt));
+    camberInp.addEventListener('focus', () => _onInputFocus(camberBolt, casterBolt));
+    camberInp.addEventListener('blur', _onInputBlur);
+    camberInp.addEventListener('keydown', _onKeyDown);
+    camberWrap.appendChild(camberLbl);
+    camberWrap.appendChild(camberInp);
+    cell.appendChild(camberWrap);
 
-    wrap.appendChild(lbl);
-    wrap.appendChild(inp);
-    cell.appendChild(wrap);
+    // Toe input
+    const toeWrap = _el('div', 'cell-row');
+    const toeLbl = _el('span', 'cell-label');
+    toeLbl.textContent = 'Toe (mm)';
+    const toeInp = _el('input', 'cell-input');
+    toeInp.type = 'text';
+    toeInp.inputMode = 'decimal';
+    toeInp.placeholder = '—';
+    toeInp.dataset.front = camberBolt;
+    toeInp.dataset.rear = casterBolt;
+    toeInp.dataset.key = 'toe';
+    toeInp.setAttribute('aria-label', `Toe mm string-box delta, camber bolt ${_sign(camberBolt)}, toe bolt ${_sign(casterBolt)}`);
+    toeInp.addEventListener('input', () => _onInputChange(camberBolt, casterBolt));
+    toeInp.addEventListener('focus', () => _onInputFocus(camberBolt, casterBolt));
+    toeInp.addEventListener('blur', _onInputBlur);
+    toeInp.addEventListener('keydown', _onKeyDown);
+    toeWrap.appendChild(toeLbl);
+    toeWrap.appendChild(toeInp);
+    cell.appendChild(toeWrap);
+  } else {
+    // Front wheels: camber at three steering angles
+    const defs = getInputLabels();
+    for (const { key, label } of defs) {
+      const wrap = _el('div', 'cell-row');
+
+      const lbl = _el('span', 'cell-label');
+      lbl.textContent = label;
+
+      const inp = _el('input', 'cell-input');
+      inp.type = 'text';
+      inp.inputMode = 'decimal';
+      inp.placeholder = '—';
+      inp.dataset.front = camberBolt;
+      inp.dataset.rear = casterBolt;
+      inp.dataset.key = key;
+      inp.setAttribute('aria-label', `${label} steering wheel, camber ${_sign(camberBolt)}, caster ${_sign(casterBolt)}`);
+
+      inp.addEventListener('input', () => _onInputChange(camberBolt, casterBolt));
+      inp.addEventListener('focus', () => _onInputFocus(camberBolt, casterBolt));
+      inp.addEventListener('blur', _onInputBlur);
+      inp.addEventListener('keydown', _onKeyDown);
+
+      wrap.appendChild(lbl);
+      wrap.appendChild(inp);
+      cell.appendChild(wrap);
+    }
   }
 
   return cell;
@@ -838,7 +859,7 @@ function _el(tag, className = '') {
 function _getInputs(f, r) {
   const inputs = document.querySelectorAll(`input.cell-input[data-front="${f}"][data-rear="${r}"]`);
   const isRearWheel = REAR_WHEELS.includes(activeWheel);
-  const expectedCount = isRearWheel ? 4 : 3;
+  const expectedCount = isRearWheel ? 2 : 3;
   if (inputs.length !== expectedCount) return null;
   const out = { neg20: null, zero: null, pos20: null };
   if (isRearWheel) out.toe = null;
