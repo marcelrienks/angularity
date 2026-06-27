@@ -169,11 +169,17 @@ function _mainChartOptions(aggregated, showCaster, wheel) {
   const isRearWheel = REAR_WHEELS.includes(wheel);
   const xAxisLabel = isRearWheel ? 'Toe Bolt Position' : 'Camber Bolt Position';
 
+  // Calculate x-axis bounds from actual measured positions (not hardcoded 13)
+  const boltPositions = aggregated.map(r => r.camberBolt);
+  const xMin = Math.min(...boltPositions);
+  const xMax = Math.max(...boltPositions);
+  const xPadding = Math.max(1, Math.ceil((xMax - xMin) * 0.1));  // 10% padding
+
   const scales = {
     x: {
       type: 'linear',
-      min: -6,
-      max: 6,
+      min: xMin - xPadding,
+      max: xMax + xPadding,
       ticks: {
         color: COLOURS.mutedStrong,
         font: { family: "'Share Tech Mono', monospace", size: 9 },
