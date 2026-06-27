@@ -192,9 +192,9 @@ export function processWheel(parsedCSV, options = {}) {
         row.push({
           camberBolt,
           casterBolt,
-          zero: cell.camber0,
-          neg20: cell.camberNeg20,
-          pos20: cell.camberPos20,
+          zero: cell.zero,
+          neg20: cell.neg20,
+          pos20: cell.pos20,
           isInterpolated: false
         });
       } else {
@@ -210,8 +210,8 @@ export function processWheel(parsedCSV, options = {}) {
     for (const casterBolt of casterMeasured) {
       const cell = measuredMap[camberBolt][casterBolt];
       if (!cell) continue;
-      const camber = cell.camber0;
-      const caster = calculateCaster(cell.camberNeg20, cell.camberPos20, casterOptions);
+      const camber = cell.zero;
+      const caster = calculateCaster(cell.neg20, cell.pos20, casterOptions);
       const toe = effectiveToe;
 
       const camberDelta = camber - targetCamber;
