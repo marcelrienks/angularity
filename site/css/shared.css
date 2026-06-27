@@ -341,7 +341,7 @@ body {
   position: absolute;
   top: 100%;
   right: 0;
-  background: var(--panel-alt, #f0f0f0);
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 4px;
   margin-top: 4px;
@@ -351,7 +351,6 @@ body {
   min-width: 120px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  backdrop-filter: blur(0px);
 }
 
 .theme-dropdown.visible {
