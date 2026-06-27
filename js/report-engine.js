@@ -167,15 +167,51 @@ export function processWheel(parsedCSV, options = {}) {
 
   const csvToe = parsedCSV.find(r => r.toe != null && Number.isFinite(Number(r.toe)));
   const effectiveToe = csvToe ? Number(csvToe.toe) : measuredToe;
-  const grid = interpolateGrid(parsedCSV);
+
+  // Build grid from MEASURED data only — no interpolation
+  // Infer measured positions from the data itself
+  const camberMeasured = [...new Set(parsedCSV.map(r => r.camberBolt))].sort((a, b) => a - b);
+  const casterMeasured = [...new Set(parsedCSV.map(r => r.casterBolt))].sort((a, b) => a - b);
+
+  // Create map for quick lookup
+  const measuredMap = {};
+  for (const row of parsedCSV) {
+    if (!measuredMap[row.camberBolt]) measuredMap[row.camberBolt] = {};
+    measuredMap[row.camberBolt][row.casterBolt] = row;
+  }
+
+  // Build grid with only measured positions (sparse 13x13, unmeasured positions undefined)
+  const grid = [];
+  for (let fi = 0; fi < BOLT_POSITIONS.length; fi++) {
+    const row = [];
+    for (let ri = 0; ri < BOLT_POSITIONS.length; ri++) {
+      const camberBolt = BOLT_POSITIONS[fi];
+      const casterBolt = BOLT_POSITIONS[ri];
+      const cell = measuredMap[camberBolt]?.[casterBolt];
+      if (cell) {
+        row.push({
+          camberBolt,
+          casterBolt,
+          zero: cell.camber0,
+          neg20: cell.camberNeg20,
+          pos20: cell.camberPos20,
+          isInterpolated: false
+        });
+      } else {
+        row.push(undefined);
+      }
+    }
+    grid.push(row);
+  }
 
   const rows169 = [];
 
-  for (let fi = 0; fi < BOLT_POSITIONS.length; fi++) {
-    for (let ri = 0; ri < BOLT_POSITIONS.length; ri++) {
-      const cell = grid[fi][ri];
-      const camber = cell.zero;
-      const caster = calculateCaster(cell.neg20, cell.pos20, casterOptions);
+  for (const camberBolt of camberMeasured) {
+    for (const casterBolt of casterMeasured) {
+      const cell = measuredMap[camberBolt][casterBolt];
+      if (!cell) continue;
+      const camber = cell.camber0;
+      const caster = calculateCaster(cell.camberNeg20, cell.camberPos20, casterOptions);
       const toe = effectiveToe;
 
       const camberDelta = camber - targetCamber;
@@ -191,7 +227,7 @@ export function processWheel(parsedCSV, options = {}) {
         camber,
         caster,
         toe,
-        isInterpolated: cell.isInterpolated,
+        isInterpolated: false,  // No interpolation — all measured
         camberDelta,
         casterDelta,
         toeDelta,
@@ -242,6 +278,10 @@ export function processWheel(parsedCSV, options = {}) {
     bestCell,
     bestCamberCell,
     bestCasterCell,
+    measuredBolts: {
+      camber: camberMeasured,
+      caster: casterMeasured,
+    },
     targets: {
       camber: targetCamber,
       caster: targetCaster,
