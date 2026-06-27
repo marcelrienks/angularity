@@ -119,6 +119,19 @@ function _saveToeToStorage() {
   } catch (_) {}
 }
 
+function _saveAllToeToStorage() {
+  try {
+    for (const wheel of WHEELS) {
+      const raw = toeState[wheel];
+      if (raw === '' || raw == null) {
+        localStorage.removeItem(_getToeStorageKey(wheel));
+      } else {
+        localStorage.setItem(_getToeStorageKey(wheel), raw);
+      }
+    }
+  } catch (_) {}
+}
+
 // ── Persistent storage ───────────────────────────────────────────────────
 
 /**
@@ -134,6 +147,17 @@ function _flushStorage() {
     // localStorage unavailable or quota exceeded — fail silently
   }
   _hasPendingChanges = false;
+}
+
+function _flushAllWheelsToStorage() {
+  try {
+    for (const wheel of WHEELS) {
+      const key = _getStorageKey(wheel);
+      localStorage.setItem(key, JSON.stringify(gridState[wheel]));
+    }
+  } catch (_) {
+    // localStorage unavailable or quota exceeded — fail silently
+  }
 }
 
 /**
@@ -383,19 +407,36 @@ function _buildCell(camberBolt, casterBolt) {
 function _populateGrid(wheel) {
   const boltPositions = getBoltPositions();
   const isRearWheel = REAR_WHEELS.includes(wheel);
-  for (const f of boltPositions) {
-    for (const r of boltPositions) {
-      const state = gridState[wheel][f][r];
-      const inputs = _getInputs(f, r);
-      if (inputs) {
-        inputs.neg20.value = state.neg20;
-        inputs.zero.value  = state.zero;
-        inputs.pos20.value = state.pos20;
-        if (isRearWheel && inputs.toe) {
-          inputs.toe.value = state.toe || '';
-        }
 
-        _updateCellClass(f, r);
+  if (isRearWheel) {
+    // Rear wheels: grid axes swapped (camber on columns, toe on rows)
+    // Iterate matching _buildGrid(): f=toe (rows), r=camber (columns)
+    for (const f of boltPositions) {
+      for (const r of boltPositions) {
+        const state = gridState[wheel][f][r];
+        // Grid built with _buildCell(r, f), so inputs have data-front=r, data-rear=f
+        const inputs = _getInputs(r, f);
+        if (inputs) {
+          inputs.zero.value  = state.zero;
+          if (inputs.toe) {
+            inputs.toe.value = state.toe || '';
+          }
+          _updateCellClass(r, f);
+        }
+      }
+    }
+  } else {
+    // Front wheels: standard iteration
+    for (const f of boltPositions) {
+      for (const r of boltPositions) {
+        const state = gridState[wheel][f][r];
+        const inputs = _getInputs(f, r);
+        if (inputs) {
+          inputs.neg20.value = state.neg20;
+          inputs.zero.value  = state.zero;
+          inputs.pos20.value = state.pos20;
+          _updateCellClass(f, r);
+        }
       }
     }
   }
@@ -566,47 +607,59 @@ function _bindControls() {
 function _loadSampleData() {
   console.log('_loadSampleData called for wheel:', activeWheel);
   const boltPositions = getBoltPositions();
-  if (gridState[activeWheel]) {
-    const nonEmpty = boltPositions.some(f =>
-      boltPositions.some(r => gridState[activeWheel][f][r].neg20 !== '')
-    );
-    if (nonEmpty && !confirm('Replace current ' + activeWheel + ' data with sample data?')) return;
-  }
-
-  // Generate grid using the three-color test scenario
-  console.log('Generating sample data grid...');
-  const generatedGrid = generateThreeColorGrid(activeWheel);
-  console.log('Generated grid:', generatedGrid);
-
-  // Import generated data into gridState
-  for (const f of boltPositions) {
-    for (const r of boltPositions) {
-      const zeroValue = generatedGrid[f][r].zero;
-      gridState[activeWheel][f][r] = {
-        neg20: _isRearWheel(activeWheel) ? zeroValue : generatedGrid[f][r].neg20,
-        zero:  zeroValue,
-        pos20: _isRearWheel(activeWheel) ? zeroValue : generatedGrid[f][r].pos20
-      };
+  const hasAnyData = WHEELS.some(wheel => {
+    if (gridState[wheel]) {
+      return boltPositions.some(f =>
+        boltPositions.some(r => gridState[wheel][f][r].neg20 !== '')
+      );
     }
-  }
+    return false;
+  });
 
-  // Set toe value with distinct offsets for wheel selection testing
-  let toeValue = 0.08;
-  // Add distinct offsets for rear wheels during sample data load for testing
-  if (activeWheel === 'RL') {
-    toeValue = 0.04;
-  } else if (activeWheel === 'RR') {
-    toeValue = 0.12;
+  if (hasAnyData && !confirm('Replace all wheel data with sample data?')) return;
+
+  // Load sample data for all wheels
+  for (const wheel of WHEELS) {
+    console.log('Generating sample data for wheel:', wheel);
+    const generatedGrid = generateThreeColorGrid(wheel);
+
+    // Import generated data into gridState
+    const isRearWheel = _isRearWheel(wheel);
+    let globalToeValue = 0.08;
+    if (wheel === 'RL') {
+      globalToeValue = 0.04;
+    } else if (wheel === 'RR') {
+      globalToeValue = 0.12;
+    }
+
+    for (const f of boltPositions) {
+      for (const r of boltPositions) {
+        const zeroValue = generatedGrid[f][r].zero;
+        gridState[wheel][f][r] = {
+          neg20: isRearWheel ? zeroValue : generatedGrid[f][r].neg20,
+          zero:  zeroValue,
+          pos20: isRearWheel ? zeroValue : generatedGrid[f][r].pos20
+        };
+
+        // Per-cell toe data for rear wheels (varies slightly by position)
+        if (isRearWheel) {
+          const positionVariation = (f + r) * 0.001;  // Slight variation by position
+          gridState[wheel][f][r].toe = (globalToeValue + positionVariation).toFixed(2);
+        }
+      }
+    }
+
+    // Set global toe value for wheel
+    toeState[wheel] = globalToeValue.toFixed(2);
   }
-  toeState[activeWheel] = toeValue.toFixed(2);
 
   _populateGrid(activeWheel);
   _renderToeInput();
   _updateProgress();
   _hideError();
   _hideWarning();
-  _saveToStorage();
-  _saveToeToStorage();
+  _flushAllWheelsToStorage();
+  _saveAllToeToStorage();
 }
 
 // ── CSV download ──────────────────────────────────────────────────────────
