@@ -46,7 +46,7 @@ textarea {
   /* ── White-Label System Colors (CSS named colors) ── */
   --bg:           Canvas;
   --panel:        rgba(0, 0, 0, 0.04);
-  --panel-alt:    rgba(0, 0, 0, 0.08);
+  --panel-alt:    rgba(0, 0, 0, 0.15);
   --panel-deep:   rgba(0, 0, 0, 0.12);
   --border:       ButtonBorder;
   --text:         CanvasText;
@@ -341,7 +341,7 @@ body {
   position: absolute;
   top: 100%;
   right: 0;
-  background: var(--panel-alt);
+  background: var(--panel-alt, #f0f0f0);
   border: 1px solid var(--border);
   border-radius: 4px;
   margin-top: 4px;
@@ -349,8 +349,9 @@ body {
   flex-direction: column;
   gap: 0;
   min-width: 120px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 1000;
+  backdrop-filter: blur(0px);
 }
 
 .theme-dropdown.visible {
