@@ -607,6 +607,8 @@ function _bindControls() {
 function _loadSampleData() {
   console.log('_loadSampleData called for wheel:', activeWheel);
   const boltPositions = getBoltPositions();
+
+  // Check if there's existing data before reinitializing
   const hasAnyData = WHEELS.some(wheel => {
     if (gridState[wheel]) {
       return boltPositions.some(f =>
@@ -617,6 +619,9 @@ function _loadSampleData() {
   });
 
   if (hasAnyData && !confirm('Replace all wheel data with sample data?')) return;
+
+  // Reinitialize gridState with current bolt positions (handles config changes)
+  _initializeGridState();
 
   // Load sample data for all wheels
   for (const wheel of WHEELS) {
