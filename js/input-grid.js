@@ -632,11 +632,118 @@ function _loadSampleData() {
     return false;
   });
 
-  if (hasAnyData && !confirm('Replace all wheel data with sample data?')) return;
+  // Show modal as confirmation dialog (replaces native confirm)
+  _showSampleDataConfirmModal(hasAnyData, boltPositions);
+}
 
-  // Show modal explaining sample data behavior
-  _showSampleDataModal();
+// ── Sample data confirmation modal ────────────────────────────────────────
 
+function _showSampleDataConfirmModal(hasExistingData, boltPositions) {
+  // Remove existing modal if present
+  const existingModal = document.getElementById('sample-data-modal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  const replacementWarning = hasExistingData
+    ? '<p style="margin: 16px 0; line-height: 1.6; color: var(--warning); font-weight: bold;">⚠️ This will replace all existing measurement data across all wheels (FL, FR, RL, RR).</p>'
+    : '';
+
+  const modalHTML = `
+    <div id="sample-data-modal" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      font-family: 'Share Tech Mono', monospace;
+    ">
+      <div style="
+        background-color: var(--bg);
+        color: var(--text);
+        padding: 32px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        max-width: 500px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      ">
+        <h2 style="margin-top: 0; color: var(--accent); font-size: 18px;">Load Sample Data</h2>
+        <p style="margin: 16px 0; line-height: 1.6;">
+          Sample data will be loaded with measurement points set to <strong>13×13</strong> (maximum).
+        </p>
+        <p style="margin: 16px 0; line-height: 1.6;">
+          This demonstrates a complete measurement grid with all 169 positions populated with synthetic data across all four wheels (FL, FR, RL, RR).
+        </p>
+        ${replacementWarning}
+        <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
+          <button id="sample-data-modal-cancel" style="
+            background-color: var(--panel-alt);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+          ">Cancel</button>
+          <button id="sample-data-modal-confirm" style="
+            background-color: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+          ">Load Sample Data</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+  const modal = document.getElementById('sample-data-modal');
+  const confirmBtn = document.getElementById('sample-data-modal-confirm');
+  const cancelBtn = document.getElementById('sample-data-modal-cancel');
+
+  function closeModal() {
+    modal.remove();
+  }
+
+  function proceedWithSampleData() {
+    closeModal();
+    _loadSampleDataIntoGrid(boltPositions);
+  }
+
+  confirmBtn.addEventListener('click', proceedWithSampleData);
+  cancelBtn.addEventListener('click', closeModal);
+
+  // Close modal if clicking outside the dialog
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Close on Escape key
+  const closeOnEscape = (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', closeOnEscape);
+    }
+  };
+  document.addEventListener('keydown', closeOnEscape);
+}
+
+// ── Load sample data into grid (called after confirmation) ──────────────────
+
+function _loadSampleDataIntoGrid(boltPositions) {
   // Load sample data for all wheels
   for (const wheel of WHEELS) {
     console.log('Generating sample data for wheel:', wheel);
@@ -679,89 +786,6 @@ function _loadSampleData() {
   _hideWarning();
   _flushAllWheelsToStorage();
   _saveAllToeToStorage();
-}
-
-// ── Sample data modal ─────────────────────────────────────────────────────
-
-function _showSampleDataModal() {
-  // Remove existing modal if present
-  const existingModal = document.getElementById('sample-data-modal');
-  if (existingModal) {
-    existingModal.remove();
-  }
-
-  const modalHTML = `
-    <div id="sample-data-modal" style="
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      font-family: 'Share Tech Mono', monospace;
-    ">
-      <div style="
-        background-color: var(--bg);
-        color: var(--text);
-        padding: 32px;
-        border-radius: 4px;
-        border: 1px solid var(--border);
-        max-width: 500px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-      ">
-        <h2 style="margin-top: 0; color: var(--accent); font-size: 18px;">Sample Data Loaded</h2>
-        <p style="margin: 16px 0; line-height: 1.6;">
-          Sample data has been loaded with measurement points set to <strong>13×13</strong> (maximum).
-        </p>
-        <p style="margin: 16px 0; line-height: 1.6;">
-          This demonstrates what a complete measurement grid looks like. All 169 positions are populated with synthetic data across all four wheels (FL, FR, RL, RR).
-        </p>
-        <p style="margin: 16px 0; line-height: 1.6; color: var(--muted); font-size: 13px;">
-          You can adjust the measurement point density in Settings if you want to use fewer measurement positions.
-        </p>
-        <button id="sample-data-modal-close" style="
-          background-color: var(--accent);
-          color: var(--bg);
-          border: none;
-          padding: 10px 20px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-family: 'Share Tech Mono', monospace;
-          font-size: 14px;
-          margin-top: 20px;
-        ">Close</button>
-      </div>
-    </div>
-  `;
-
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-
-  const closeBtn = document.getElementById('sample-data-modal-close');
-  const modal = document.getElementById('sample-data-modal');
-
-  closeBtn.addEventListener('click', () => {
-    modal.remove();
-  });
-
-  // Close modal if clicking outside the dialog
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.remove();
-    }
-  });
-
-  // Close on Escape key
-  const closeOnEscape = (e) => {
-    if (e.key === 'Escape') {
-      modal.remove();
-      document.removeEventListener('keydown', closeOnEscape);
-    }
-  };
-  document.addEventListener('keydown', closeOnEscape);
 }
 
 // ── CSV download ──────────────────────────────────────────────────────────
