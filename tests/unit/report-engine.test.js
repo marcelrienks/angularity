@@ -23,7 +23,7 @@ import {
   singlePointGrid,
   sparseCornerPoints
 } from './fixtures/index.js';
-import { TARGET_CAMBER, TARGET_CASTER, CASTER_MULTIPLIER, SYMMETRY_TOLERANCE } from '../../js/constants.js';
+import { TARGET_CAMBER, TARGET_CASTER, CASTER_MULTIPLIER, SYMMETRY_TOLERANCE, TOE_SYMMETRY_TOLERANCE, TARGET_TOE_FRONT } from '../../js/constants.js';
 
 describe('report-engine.js', () => {
   describe('processWheel()', () => {
@@ -605,6 +605,150 @@ describe('report-engine.js', () => {
       const sweep = Math.abs(-1.5 - (-0.5));
       const expectedCaster = (1 / (2 * Math.sin(24 * Math.PI / 180))) * sweep;
       expect(result.bestCell.caster).toBeCloseTo(expectedCaster, 4);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // REGRESSION TESTS: Audit-identified bugs — prevent silent reintroduction
+  // ─────────────────────────────────────────────────────────────────────────
+
+  describe('_summariseIndependent field semantics (Bug 1 regression)', () => {
+    // Input: two bolt positions where best-camber and best-caster differ.
+    // Position A (camberBolt=-6): camber=-1.1° (target), caster≈0.25° (well below 5° target)
+    // Position B (camberBolt=+6): camber=-1.4° (off),   caster≈6.1° (nearest to 5° target)
+    // After interpolation: bestCamberCell ≈ A, bestCasterCell ≈ B.
+    const twoPointInput = [
+      { camberBolt: -6, casterBolt: 0, neg20: -1.0, zero: -1.1, pos20: -1.2 },
+      { camberBolt:  6, casterBolt: 0, neg20:  0.0, zero: -1.4, pos20: -5.0 },
+    ];
+
+    test('bestCamberCell and bestCasterCell are distinct positions', () => {
+      const result = processWheel(twoPointInput);
+      expect(result.bestCamberCell.camberBolt).not.toBe(result.bestCasterCell.camberBolt);
+      expect(Math.abs(result.bestCamberCell.camberDelta)).toBeLessThan(
+        Math.abs(result.bestCasterCell.camberDelta)
+      );
+    });
+
+    test('camberCasterAtBestCamber equals caster at best-camber position', () => {
+      const result = processWheel(twoPointInput);
+      const sym = symmetryAnalysis(result, result);
+      expect(sym.fl.camberCasterAtBestCamber).toBeCloseTo(result.bestCamberCell.caster, 4);
+    });
+
+    test('casterCamberAtBestCaster equals camber at best-caster position', () => {
+      const result = processWheel(twoPointInput);
+      const sym = symmetryAnalysis(result, result);
+      expect(sym.fl.casterCamberAtBestCaster).toBeCloseTo(result.bestCasterCell.camber, 4);
+    });
+
+    test('camberCasterAtBestCamber and casterCamberAtBestCaster are numerically distinct', () => {
+      // If these were the same value, swapping them in the UI would be undetectable.
+      const result = processWheel(twoPointInput);
+      const sym = symmetryAnalysis(result, result);
+      const diff = Math.abs(sym.fl.camberCasterAtBestCamber - sym.fl.casterCamberAtBestCaster);
+      expect(diff).toBeGreaterThan(0.5);
+    });
+
+    test('camberCasterAtBestCamber is a caster-range value (positive, matches caster formula)', () => {
+      const result = processWheel(twoPointInput);
+      const sym = symmetryAnalysis(result, result);
+      // Caster is always non-negative (Math.abs in formula); camber is typically negative
+      expect(sym.fl.camberCasterAtBestCamber).toBeGreaterThanOrEqual(0);
+    });
+
+    test('casterCamberAtBestCaster is a camber-range value (typically negative for road cars)', () => {
+      const result = processWheel(twoPointInput);
+      const sym = symmetryAnalysis(result, result);
+      // Camber at the best-caster position should reflect that position's camber measurement
+      expect(typeof sym.fl.casterCamberAtBestCaster).toBe('number');
+      expect(Number.isFinite(sym.fl.casterCamberAtBestCaster)).toBe(true);
+    });
+  });
+
+  describe('Rear _summariseIndependent shape — no bestCell (Bug 2 regression)', () => {
+    test('result.rear.rl has camberOptCamberBolt, not bestCell', () => {
+      const rlResult = processWheel([excellentCamberGoodCaster], { targetCaster: null, targetCamber: -1.5 });
+      const rrResult = processWheel([excellentCamberGoodCaster], { targetCaster: null, targetCamber: -1.5 });
+      const sym = symmetryAnalysis(null, null, rlResult, rrResult);
+
+      expect(sym.rear).toBeDefined();
+      expect(sym.rear.rl).toBeDefined();
+      expect(sym.rear.rl.bestCell).toBeUndefined();
+      expect(sym.rear.rl.camberOptCamberBolt).toBeDefined();
+      expect(sym.rear.rl.camberOptCasterBolt).toBeDefined();
+      expect(sym.rear.rl.bestCamberValue).toBeDefined();
+      expect(sym.rear.rl.camberCasterAtBestCamber).toBeDefined();
+    });
+
+    test('result.rear.rr has camberOptCamberBolt, not bestCell', () => {
+      const rlResult = processWheel([excellentCamberGoodCaster], { targetCaster: null, targetCamber: -1.5 });
+      const rrResult = processWheel([excellentCamberGoodCaster], { targetCaster: null, targetCamber: -1.5 });
+      const sym = symmetryAnalysis(null, null, rlResult, rrResult);
+
+      expect(sym.rear.rr).toBeDefined();
+      expect(sym.rear.rr.bestCell).toBeUndefined();
+      expect(sym.rear.rr.camberOptCamberBolt).toBeDefined();
+    });
+
+    test('camberOptCamberBolt from rear summary is a valid bolt position', () => {
+      const rlResult = processWheel([excellentCamberGoodCaster], { targetCaster: null, targetCamber: -1.5 });
+      const rrResult = processWheel([excellentCamberGoodCaster], { targetCaster: null, targetCamber: -1.5 });
+      const sym = symmetryAnalysis(null, null, rlResult, rrResult);
+
+      const validPositions = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6];
+      expect(validPositions).toContain(sym.rear.rl.camberOptCamberBolt);
+      expect(validPositions).toContain(sym.rear.rl.camberOptCasterBolt);
+    });
+  });
+
+  describe('Toe values in symmetry result are in degrees, not mm (Bug 3 regression)', () => {
+    const toeInput = [{
+      camberBolt: 0, casterBolt: 0,
+      neg20: -0.95, zero: -1.08, pos20: -1.24,
+      toe: 0.07,  // 0.07° — same order of magnitude as TARGET_TOE_FRONT
+    }];
+
+    test('bestToe in _summariseIndependent is in degrees (same scale as target)', () => {
+      const result = processWheel(toeInput, { targetToe: TARGET_TOE_FRONT });
+      const sym = symmetryAnalysis(result, result);
+      // bestToe should be ≈ 0.07° — not ≈ 0.57 mm
+      expect(sym.fl.bestToe).toBeCloseTo(0.07, 2);
+      // Not in mm range — toe in mm for 0.07° at 469mm diameter ≈ 0.57mm
+      expect(Math.abs(sym.fl.bestToe)).toBeLessThan(0.5);
+    });
+
+    test('flToe in camberSymmetricPair is in degrees', () => {
+      const result = processWheel(toeInput, { targetToe: TARGET_TOE_FRONT });
+      const sym = symmetryAnalysis(result, result);
+      if (sym.camberSymmetricPair) {
+        expect(Math.abs(sym.camberSymmetricPair.flToe)).toBeLessThan(0.5);
+        expect(Math.abs(sym.camberSymmetricPair.frToe)).toBeLessThan(0.5);
+      }
+    });
+
+    test('toeMismatch in symmetry result is in degrees (sub-0.5 for matched wheels)', () => {
+      const result = processWheel(toeInput, { targetToe: TARGET_TOE_FRONT });
+      const sym = symmetryAnalysis(result, result);
+      // Identical FL/FR data → toeMismatch = 0
+      if (sym.recommendation && sym.recommendation.toeMismatch != null) {
+        expect(sym.recommendation.toeMismatch).toBeCloseTo(0, 5);
+        expect(sym.recommendation.toeMismatch).toBeLessThan(0.5);
+      }
+    });
+  });
+
+  describe('Symmetry tolerance constant values (Bug 4 regression)', () => {
+    test('SYMMETRY_TOLERANCE is 0.3° (matches UI text "±0.3°")', () => {
+      expect(SYMMETRY_TOLERANCE).toBe(0.3);
+    });
+
+    test('TOE_SYMMETRY_TOLERANCE is 0.031° (matches UI text "±0.031°")', () => {
+      expect(TOE_SYMMETRY_TOLERANCE).toBeCloseTo(0.031, 4);
+    });
+
+    test('TOE_SYMMETRY_TOLERANCE is below 0.1° (was incorrectly shown as 0.10 in UI)', () => {
+      expect(TOE_SYMMETRY_TOLERANCE).toBeLessThan(0.1);
     });
   });
 });

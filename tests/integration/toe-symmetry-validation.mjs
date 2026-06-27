@@ -5,7 +5,7 @@
  *
  * Validates that toe values are properly:
  * 1. Captured and stored in alignment data
- * 2. Included in symmetry pair matching (within ±0.10 mm tolerance)
+ * 2. Included in symmetry pair matching (within ±0.031° tolerance)
  * 3. Displayed in the report UI
  * 4. Used to score and rank symmetric pairs
  *

@@ -1,9 +1,10 @@
 /**
  * Symmetry Fixtures: Front-left/right and rear axle pair tests
  * 
- * Symmetry Tolerance (from research.md):
+ * Symmetry Tolerance (from constants.js SYMMETRY_TOLERANCE):
  * - Camber: ±0.3° between FL and FR (or RL and RR)
- * - Caster: ±0.15° between FL and FR
+ * - Caster: ±0.3° between FL and FR (same tolerance as camber)
+ * - Toe: ±0.031° (TOE_SYMMETRY_TOLERANCE)
  * - Rear wheels: targetCaster = null (no caster adjustment)
  */
 
@@ -41,7 +42,7 @@ export const flFrSymmetricCaster = {
     frontBolt: 0,
     rearBolt: 0,
     camber: -1.10,
-    caster: 5.12,    // Within ±0.15° of FL (5.00°)
+    caster: 5.12,    // Within ±0.3° of FL (5.00°)
   },
 };
 
@@ -79,7 +80,7 @@ export const flFrAsymmetricCaster = {
     frontBolt: 0,
     rearBolt: 0,
     camber: -1.10,
-    caster: 5.20,    // Difference: 0.20°, exceeds ±0.15° tolerance
+    caster: 5.40,    // Difference: 0.40°, exceeds ±0.3° tolerance
   },
 };
 

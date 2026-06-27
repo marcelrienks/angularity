@@ -70,7 +70,7 @@ export function loadWheelFromStorage(wheel) {
  * Load a single wheel toe measurement from localStorage.
  *
  * @param {string} wheel - Wheel identifier
- * @returns {number|null} Toe in mm per side, or null when missing/invalid
+ * @returns {number|null} Toe in degrees per side, or null when missing/invalid
  */
 export function loadWheelToeFromStorage(wheel) {
   try {

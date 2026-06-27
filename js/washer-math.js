@@ -57,7 +57,7 @@ export function calculateRotationAngle(boltPosition) {
  * Formula (standard trigonometry with SVG y-axis adjustment):
  *   angle = calculateRotationAngle(boltPosition)
  *   x = centerX + radius * cos(angle * π/180)
- *   y = centerY - radius * sin(angle * π/180)
+ *   y = centerY + radius * sin(angle * π/180)
  *
  * Note: SVG y-axis increases downward; we add sin() (not subtract) because the
  *   angle mapping already places 90° at the bottom (6 o'clock), making +sin correct.

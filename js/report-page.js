@@ -952,11 +952,16 @@ function _renderSymmetry() {
       const rearIndepGrid = document.createElement('div');
       rearIndepGrid.className = 'symmetry-grid';
 
-      // Use rearSym.rear.rl and rearSym.rear.rr which have bestCell data
       if (rearSym.rear && rearSym.rear.rl && rearSym.rear.rr) {
         for (const [wheel, wheelData] of [['RL', rearSym.rear.rl], ['RR', rearSym.rear.rr]]) {
-          if (wheelData && wheelData.bestCell) {
-            const card = _buildRearIndependentOptimizationCard(wheel, wheelData.bestCell, TARGET_CAMBER_REAR);
+          if (wheelData && wheelData.camberOptCamberBolt != null) {
+            const bestCell = {
+              camberBolt: wheelData.camberOptCamberBolt,
+              casterBolt: wheelData.camberOptCasterBolt,
+              camber: wheelData.bestCamberValue,
+              caster: wheelData.camberCasterAtBestCamber,
+            };
+            const card = _buildRearIndependentOptimizationCard(wheel, bestCell, TARGET_CAMBER_REAR);
             rearIndepGrid.appendChild(card);
           }
         }
@@ -1013,7 +1018,7 @@ function _renderSymmetry() {
       } else {
         const noPairDiv = document.createElement('div');
         noPairDiv.className = 'empty-state';
-        noPairDiv.textContent = 'No caster symmetry pair found within ±0.15° tolerance';
+        noPairDiv.textContent = 'No caster symmetry pair found within ±0.3° tolerance';
         frontOptGrid.appendChild(noPairDiv);
       }
 
@@ -1117,7 +1122,7 @@ function _buildIndependentOptimizationCard(wheel, data) {
             </div>
             <div class="symmetry-metric caster symmetry-metric--compact">
               <span class="label"><span class="metric-caster">Resulting Caster</span></span>
-              <span class="value">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
+              <span class="value">${data.camberCasterAtBestCamber.toFixed(2)}°</span>
             </div>
           </div>
         </div>
@@ -1347,7 +1352,7 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
     return notAvailable;
   }
 
-  const toeMismatchStable = pairData.toeMismatch != null && pairData.toeMismatch <= 0.10;
+  const toeMismatchStable = pairData.toeMismatch != null && pairData.toeMismatch <= 0.031;
   const toeMismatchClass = toeMismatchStable ? 'match' : 'partial';
 
   // Bolt labels differ between front and rear suspension
@@ -1359,7 +1364,7 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
 
   card.innerHTML = `
     <div class="title">${title}</div>
-    <div class="section-desc">${leftWheel} and ${rightWheel} <span class="metric-toe">toe</span> mismatch: ${(pairData.toeMismatch || 0).toFixed(2)} mm (within ±0.10 mm limit)</div>
+    <div class="section-desc">${leftWheel} and ${rightWheel} <span class="metric-toe">toe</span> mismatch: ${(pairData.toeMismatch || 0).toFixed(3)}° (within ±0.031° limit)</div>
     <div class="scenario-grid">
       <div class="scenario-col">
         <div class="scenario-header">${leftWheel}</div>
@@ -1377,7 +1382,7 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
           <div class="values-col">
             <div class="symmetry-metric toe symmetry-metric--compact">
               <span class="label"><span class="metric-toe">Toe</span></span>
-              <span class="value">${(leftToeValue || 0).toFixed(2)} mm</span>
+              <span class="value">${(leftToeValue || 0).toFixed(3)}°</span>
             </div>
           </div>
         </div>
@@ -1398,7 +1403,7 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
           <div class="values-col">
             <div class="symmetry-metric toe symmetry-metric--compact">
               <span class="label"><span class="metric-toe">Toe</span></span>
-              <span class="value">${(rightToeValue || 0).toFixed(2)} mm</span>
+              <span class="value">${(rightToeValue || 0).toFixed(3)}°</span>
             </div>
           </div>
         </div>
@@ -1471,8 +1476,8 @@ function _buildRearConsolidationTable(rearSymmetryResult) {
         : 'Toe';
     toeRow.innerHTML = `
       <td class="bold-cell"><span class="metric-toe">${toeLabel}</span></td>
-      <td>${recommendation.rlToe ? recommendation.rlToe.toFixed(2) : '—'} mm</td>
-      <td colspan="2" class="note-cell">RL: ${recommendation.rlToe ? recommendation.rlToe.toFixed(2) : '—'} mm | RR: ${recommendation.rrToe ? recommendation.rrToe.toFixed(2) : '—'} mm</td>
+      <td>${recommendation.rlToe ? recommendation.rlToe.toFixed(3) : '—'}°</td>
+      <td colspan="2" class="note-cell">RL: ${recommendation.rlToe ? recommendation.rlToe.toFixed(3) : '—'}° | RR: ${recommendation.rrToe ? recommendation.rrToe.toFixed(3) : '—'}°</td>
     `;
     tbody.appendChild(toeRow);
   }
@@ -2006,7 +2011,7 @@ function _determineFrontSymmetryStatus(sym) {
   } else {
     casterStatus = 'red';
     if (overallStatus !== 'red') overallStatus = 'orange'; // partial if only caster missing
-    messages.push(`◐ No caster symmetric pair found within ±0.15° tolerance`);
+    messages.push(`◐ No caster symmetric pair found within ±0.3° tolerance`);
   }
   
   return {

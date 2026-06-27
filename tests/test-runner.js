@@ -45,6 +45,7 @@ const INTEGRATION_TESTS = [
   'test:data-to-ui',
   'test:comprehensive',
   'test:e2e-data-integrity',
+  'test:report-bugfix',
 ];
 
 const C = {
