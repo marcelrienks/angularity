@@ -616,6 +616,10 @@ function _loadSampleData() {
     densitySelect.value = '13';
   }
 
+  // Reinitialize gridState with current bolt positions (handles config changes)
+  // Must do this BEFORE checking for existing data, since density changed
+  _initializeGridState();
+
   const boltPositions = getBoltPositions();
 
   // Check if there's existing data before reinitializing
@@ -632,9 +636,6 @@ function _loadSampleData() {
 
   // Show modal explaining sample data behavior
   _showSampleDataModal();
-
-  // Reinitialize gridState with current bolt positions (handles config changes)
-  _initializeGridState();
 
   // Load sample data for all wheels
   for (const wheel of WHEELS) {
