@@ -57,7 +57,7 @@ export function buildMainChart(canvasId, rows169, wheel, targets = {}) {
   }
 
   // Build drop lines plugin (vertical lines at intersections with targets)
-  const dropLinesPlugin = _buildDropLinesPlugin(cambers, casters, { camber: targetCamber, caster: targetCaster });
+  const dropLinesPlugin = _buildDropLinesPlugin(cambers, casters, aggregated, { camber: targetCamber, caster: targetCaster });
 
   const datasets = [
     {
@@ -268,12 +268,12 @@ function _mainChartOptions(aggregated, showCaster, wheel) {
 
 // ── Drop lines plugin (vertical lines at target intersections) ────────────
 
-function _buildDropLinesPlugin(cambers, casters, targets) {
+function _buildDropLinesPlugin(cambers, casters, aggregated, targets) {
   return {
     id: 'dropLines',
     afterDatasetsDraw(chart) {
       const { ctx, chartArea: { left, right, top, bottom }, scales } = chart;
-      
+
       // Require x and yCamber; yCaster is optional (null for rear wheels with camber-only)
       if (!scales || !scales.x || !scales.yCamber) {
         return;  // Missing required scales; skip drop-lines
@@ -293,7 +293,8 @@ function _buildDropLinesPlugin(cambers, casters, targets) {
 
       // Draw drop line for camber crossing (BLUE)
       if (camberCrossing !== null && camberCrossing !== undefined) {
-        const xVal = -6 + camberCrossing; // Convert index to front bolt value
+        // Convert crossing index to actual bolt position
+        const xVal = aggregated[Math.floor(camberCrossing)].camberBolt;
         const xPx = xScale.getPixelForValue(xVal);
         
         if (xPx !== undefined && xPx !== null && !isNaN(xPx)) {
@@ -311,7 +312,8 @@ function _buildDropLinesPlugin(cambers, casters, targets) {
       // Draw drop line for caster crossing (GREEN)
       // Only draw if caster target exists and caster scale is available (front wheels only)
       if (targets.caster != null && yCasterScale && casterCrossing !== null && casterCrossing !== undefined) {
-        const xVal = -6 + casterCrossing; // Convert index to front bolt value
+        // Convert crossing index to actual bolt position
+        const xVal = aggregated[Math.floor(casterCrossing)].camberBolt;
         const xPx = xScale.getPixelForValue(xVal);
         
         if (xPx !== undefined && xPx !== null && !isNaN(xPx)) {
