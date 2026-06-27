@@ -73,14 +73,15 @@ const toeState = {};
 
 /**
  * Initialize grid state based on current bolt positions (dynamic based on measurement density).
+ * Rear wheels get an additional 'toe' field per cell.
  */
 function _initializeGridState() {
   const boltPositions = getBoltPositions();
-  
+
   // Clear existing state
   Object.keys(gridState).forEach(key => delete gridState[key]);
   Object.keys(toeState).forEach(key => delete toeState[key]);
-  
+
   // Reinitialize with current bolt positions
   for (const w of WHEELS) {
     gridState[w] = {};
@@ -88,7 +89,11 @@ function _initializeGridState() {
     for (const f of boltPositions) {
       gridState[w][f] = {};
       for (const r of boltPositions) {
-        gridState[w][f][r] = { neg20: '', zero: '', pos20: '' };
+        const cellState = { neg20: '', zero: '', pos20: '' };
+        if (REAR_WHEELS.includes(w)) {
+          cellState.toe = '';
+        }
+        gridState[w][f][r] = cellState;
       }
     }
   }
@@ -164,15 +169,20 @@ function _restoreFromStorage() {
       const raw = localStorage.getItem(key);
       if (!raw) continue;
       const saved = JSON.parse(raw);
+      const isRearWheel = REAR_WHEELS.includes(wheel);
       for (const f of boltPositions) {
         for (const r of boltPositions) {
           const cell = saved?.[f]?.[r];
           if (!cell) continue;
-          gridState[wheel][f][r] = {
+          const restored = {
             neg20: cell.neg20 ?? '',
             zero:  cell.zero  ?? '',
             pos20: cell.pos20 ?? '',
           };
+          if (isRearWheel) {
+            restored.toe = cell.toe ?? '';
+          }
+          gridState[wheel][f][r] = restored;
         }
       }
 
@@ -263,7 +273,7 @@ function _buildGrid() {
   }
 }
 
-/** Build a single grid cell with 3 inputs. */
+/** Build a single grid cell with 3 inputs for front, 4 inputs for rear (includes toe in mm). */
 function _buildCell(camberBolt, casterBolt) {
   const isReq = _isRequired(camberBolt) && _isRequired(casterBolt);
   const cell = _el('div', `grid-cell${isReq ? ' required' : ''}`);
@@ -273,6 +283,7 @@ function _buildCell(camberBolt, casterBolt) {
   cell.setAttribute('aria-label', `Camber ${_sign(camberBolt)}, Caster ${_sign(casterBolt)}`);
 
   const defs = getInputLabels();
+  const isRearWheel = REAR_WHEELS.includes(activeWheel);
 
   for (const { key, label } of defs) {
     const wrap = _el('div', 'cell-row');
@@ -299,6 +310,28 @@ function _buildCell(camberBolt, casterBolt) {
     cell.appendChild(wrap);
   }
 
+  if (isRearWheel) {
+    const wrap = _el('div', 'cell-row');
+    const lbl = _el('span', 'cell-label');
+    lbl.textContent = 'Toe (mm)';
+    const inp = _el('input', 'cell-input');
+    inp.type        = 'text';
+    inp.inputMode   = 'decimal';
+    inp.placeholder = '—';
+    inp.dataset.front = camberBolt;
+    inp.dataset.rear  = casterBolt;
+    inp.dataset.key   = 'toe';
+    inp.setAttribute('aria-label', `Toe mm, front bolt ${_sign(camberBolt)}, rear bolt ${_sign(casterBolt)}`);
+    inp.addEventListener('input',   () => _onInputChange(camberBolt, casterBolt));
+    inp.addEventListener('focus',   () => _onInputFocus(camberBolt, casterBolt));
+    inp.addEventListener('blur',    _onInputBlur);
+    inp.addEventListener('keydown', _onKeyDown);
+
+    wrap.appendChild(lbl);
+    wrap.appendChild(inp);
+    cell.appendChild(wrap);
+  }
+
   return cell;
 }
 
@@ -307,6 +340,7 @@ function _buildCell(camberBolt, casterBolt) {
 /** Write gridState[wheel] values into the DOM inputs. */
 function _populateGrid(wheel) {
   const boltPositions = getBoltPositions();
+  const isRearWheel = REAR_WHEELS.includes(wheel);
   for (const f of boltPositions) {
     for (const r of boltPositions) {
       const state = gridState[wheel][f][r];
@@ -315,6 +349,9 @@ function _populateGrid(wheel) {
         inputs.neg20.value = state.neg20;
         inputs.zero.value  = state.zero;
         inputs.pos20.value = state.pos20;
+        if (isRearWheel && inputs.toe) {
+          inputs.toe.value = state.toe || '';
+        }
 
         _updateCellClass(f, r);
       }
@@ -324,14 +361,18 @@ function _populateGrid(wheel) {
   if (window.location.pathname.includes('input') && boltPositions.length > 0) {
     const firstPos = boltPositions[0];
     const state0 = gridState[wheel][firstPos][firstPos];
-    console.log(`[DEBUG] _populateGrid(${wheel}): first cell (${firstPos},${firstPos}) = ${state0.zero || '(empty)'}`);
+    console.log(`[DEBUG] _populateGrid(${wheel}): first cell (${firstPos},${firstPos}) = ${state0.zero || '(empty)'}${isRearWheel ? `, toe ${state0.toe || '(empty)'}` : ''}`);
   }
 }
 
 // ── Event handlers ────────────────────────────────────────────────────────
 
 function _onInputChange(f, r) {
-  const values = { neg20: '', zero: '', pos20: '' };
+  const isRearWheel = REAR_WHEELS.includes(activeWheel);
+  const values = isRearWheel
+    ? { neg20: '', zero: '', pos20: '', toe: '' }
+    : { neg20: '', zero: '', pos20: '' };
+
   const inputs = document.querySelectorAll(`input.cell-input[data-front="${f}"][data-rear="${r}"]`);
   inputs.forEach(input => {
     const key = input.dataset.key;
@@ -339,13 +380,13 @@ function _onInputChange(f, r) {
   });
 
   // Rear wheels are camber-at-straight only. Mirror zero to keep pipeline compatible.
-  if (_isRearWheel(activeWheel)) {
+  if (isRearWheel) {
     values.neg20 = values.zero;
     values.pos20 = values.zero;
   }
 
   gridState[activeWheel][f][r] = values;
-  console.log(`[DEBUG] _onInputChange(${activeWheel}, ${f}, ${r}): saved ${values.zero}`);
+  console.log(`[DEBUG] _onInputChange(${activeWheel}, ${f}, ${r}): saved ${values.zero}${isRearWheel ? `, toe ${values.toe}` : ''}`);
   _updateCellClass(f, r);
   _updateProgress();
   _saveToStorage();
@@ -757,8 +798,11 @@ function _el(tag, className = '') {
 
 function _getInputs(f, r) {
   const inputs = document.querySelectorAll(`input.cell-input[data-front="${f}"][data-rear="${r}"]`);
-  if (inputs.length !== 3) return null;
+  const isRearWheel = REAR_WHEELS.includes(activeWheel);
+  const expectedCount = isRearWheel ? 4 : 3;
+  if (inputs.length !== expectedCount) return null;
   const out = { neg20: null, zero: null, pos20: null };
+  if (isRearWheel) out.toe = null;
   inputs.forEach(input => {
     out[input.dataset.key] = input;
   });
