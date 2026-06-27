@@ -554,6 +554,7 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
     for (let ri = 0; ri < BOLT_POSITIONS.length; ri++) {
       const r     = BOLT_POSITIONS[ri];
       const cell  = grid[fi][ri];
+      if (!cell) continue;  // Skip unmeasured positions
       const camber = +cell.zero.toFixed(2);
       const caster = +(calculateCaster(cell.neg20, cell.pos20, _getWheelCasterOptions(activeTableWheel, result))).toFixed(2);
       const isHighlighted = (cell.camberBolt === highlightFront && cell.casterBolt === highlightRear);
@@ -641,6 +642,7 @@ function _buildTable(result) {
       const fi = BOLT_POSITIONS.indexOf(f);
       const ri = BOLT_POSITIONS.indexOf(r);
       const cell  = grid[fi][ri];
+      if (!cell) continue;  // Skip unmeasured positions
       const camber = +cell.zero.toFixed(2);
       const caster = +(calculateCaster(cell.neg20, cell.pos20, _getWheelCasterOptions(activeTableWheel, result))).toFixed(2);
 
