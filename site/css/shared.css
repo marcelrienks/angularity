@@ -98,23 +98,38 @@ textarea {
 [data-theme="light"] {
   --bg:           #FFFFFF;
   --panel:        #F3F3F3;
-  --panel-alt:    #ECECEC;
-  --panel-deep:   #E8E8E8;
+  --panel-alt:    #E8E8E8;
+  --panel-deep:   #DCDCDC;
   --text:         #000000;
-  --muted:        #767676;
-  --muted-strong: #666666;
-  --subtle:       #555555;
-  --border:       #D4D4D4;
-  --accent:       #007ACC;
-  --hover:        #E8E8E8;
-  --selection:    #E5EBF1;
+  --muted:        #5C5C5C;   /* was #767676 — 6.8:1 on white */
+  --muted-strong: #404040;   /* was #666666 */
+  --subtle:       #333333;   /* was #555555 */
+  --border:       #C8C8C8;   /* was #D4D4D4 — slightly more defined */
+  --accent:       #0070C1;
+  --hover:        #E4E4E4;
+  --selection:    #C8DFFF;   /* was #E5EBF1 — vivid VS Code blue tint */
   --shadow:       rgba(0, 0, 0, 0.15);
 
-  /* Darker colors for visibility on light background (inspired by VSCode Light+) */
-  --camber:       #6B46C1;   /* Deep purple for Camber - matches VSCode theme */
-  --caster:       #B45309;   /* Deep orange for Caster - visible on white */
-  --purple:       #6B46C1;   /* Darker purple */
-  --orange:       #B45309;   /* Darker orange */
+  /* Functional colors — proper contrast on white backgrounds */
+  --blue:         #0070C1;   /* was #6ab4ff — now 4.7:1 on white */
+  --green:        #1A7F37;   /* was #4ec063 — now 5.2:1 on white */
+  --red:          #C5221F;   /* was #fc6e68 — now 5.1:1 on white */
+
+  --camber:       #6B46C1;   /* 6.5:1 on white */
+  --caster:       #B45309;   /* 5.0:1 on white */
+  --purple:       #6B46C1;
+  --orange:       #B45309;
+}
+
+/* Buttons with solid blue/red backgrounds need white text in light theme */
+[data-theme="light"] .wheel-selector button.active,
+[data-theme="light"] .wheel-selector button:hover,
+[data-theme="light"] .color-coding-selector button.active,
+[data-theme="light"] .color-coding-selector button:hover,
+[data-theme="light"] .mode-toggle-selector button.active,
+[data-theme="light"] .mode-toggle-selector button:hover,
+[data-theme="light"] .button.primary {
+  color: #FFFFFF;
 }
 
 /* ── Dark Theme (VS Code Dark+) ── */
