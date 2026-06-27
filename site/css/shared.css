@@ -46,7 +46,7 @@ textarea {
   /* ── White-Label System Colors (CSS named colors) ── */
   --bg:           Canvas;
   --panel:        rgba(0, 0, 0, 0.04);
-  --panel-alt:    rgba(0, 0, 0, 0.15);
+  --panel-alt:    rgba(0, 0, 0, 0.25);
   --panel-deep:   rgba(0, 0, 0, 0.12);
   --border:       ButtonBorder;
   --text:         CanvasText;
