@@ -230,11 +230,13 @@ function _buildGrid() {
   const boltPositions = getBoltPositions();
   const isRearWheel = REAR_WHEELS.includes(activeWheel);
 
-  // Bolt labels vary by suspension type
-  const frontBoltLabel = isRearWheel ? 'Toe Bolt' : 'Camber Bolt';
-  const rearBoltLabel = isRearWheel ? 'Camber Bolt' : 'Caster Bolt';
-  const frontMetricLabel = isRearWheel ? 'Toe' : 'Camber';
-  const rearMetricLabel = isRearWheel ? 'Camber' : 'Caster';
+  // Bolt labels - keep camber on columns for both front and rear
+  // Columns (horizontal): always Camber
+  // Rows (vertical): Caster for front, Toe for rear
+  const frontBoltLabel = 'Camber Bolt';  // columns are always camber
+  const rearBoltLabel = isRearWheel ? 'Toe Bolt' : 'Caster Bolt';  // rows differ
+  const frontMetricLabel = 'Camber';  // columns are always camber
+  const rearMetricLabel = isRearWheel ? 'Toe' : 'Caster';  // rows differ
 
   // CSS grid: 1 row-header column + N data columns
   const colCount = 1 + boltPositions.length;
@@ -257,18 +259,36 @@ function _buildGrid() {
   }
 
   // ── Rows 1–N: row header + N cells ───────────────────────────────────
-  for (const r of boltPositions) {
-    // Row header (rear bolt)
-    const rh = _el('div', `grid-row-header sub-header${_isRequired(r) ? ' required' : ''}`);
-    rh.dataset.row = r;
-    rh.innerHTML = `<span class="${rearBoltClass}">${_sign(r)}</span>`;
-    rh.setAttribute('aria-label', `${rearBoltLabel} ${_sign(r)}`);
-    grid.appendChild(rh);
-
-    // Data cells (column axis is front bolt)
+  // For rear wheels: swap axes so camber is on columns (same as front)
+  // Front: columns=camber, rows=caster
+  // Rear: columns=camber, rows=toe (NOT columns=toe, rows=camber)
+  if (isRearWheel) {
+    // Rear: use r for columns (camber), f for rows (toe)
     for (const f of boltPositions) {
-      const cell = _buildCell(f, r);
-      grid.appendChild(cell);
+      const rh = _el('div', `grid-row-header sub-header${_isRequired(f) ? ' required' : ''}`);
+      rh.dataset.row = f;
+      rh.innerHTML = `<span class="${rearBoltClass}">${_sign(f)}</span>`;
+      rh.setAttribute('aria-label', `${rearBoltLabel} ${_sign(f)}`);
+      grid.appendChild(rh);
+
+      for (const r of boltPositions) {
+        const cell = _buildCell(r, f);
+        grid.appendChild(cell);
+      }
+    }
+  } else {
+    // Front: standard layout (f=columns, r=rows)
+    for (const r of boltPositions) {
+      const rh = _el('div', `grid-row-header sub-header${_isRequired(r) ? ' required' : ''}`);
+      rh.dataset.row = r;
+      rh.innerHTML = `<span class="${rearBoltClass}">${_sign(r)}</span>`;
+      rh.setAttribute('aria-label', `${rearBoltLabel} ${_sign(r)}`);
+      grid.appendChild(rh);
+
+      for (const f of boltPositions) {
+        const cell = _buildCell(f, r);
+        grid.appendChild(cell);
+      }
     }
   }
 }
