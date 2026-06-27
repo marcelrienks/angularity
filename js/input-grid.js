@@ -565,27 +565,36 @@ function _loadSampleData() {
 
 function _downloadCSV() {
   const boltPositions = getBoltPositions();
-  const toeRaw = toeState[activeWheel];
-  const normalizedToe = toeRaw.replace(',', '.');
-  const toeValue = toeRaw === '' ? null : parseFloat(normalizedToe);
-
-  if (toeRaw !== '' && Number.isNaN(toeValue)) {
-    _showError('Toe must be a valid number before exporting CSV.');
-    return;
-  }
+  const isRearWheel = REAR_WHEELS.includes(activeWheel);
 
   const rows = [];
   for (const f of boltPositions) {
     for (const r of boltPositions) {
-      const { neg20, zero, pos20 } = gridState[activeWheel][f][r];
-      const exportNeg20 = _isRearWheel(activeWheel) ? zero : neg20;
-      const exportPos20 = _isRearWheel(activeWheel) ? zero : pos20;
+      const cellState = gridState[activeWheel][f][r];
+      const { neg20, zero, pos20, toe } = cellState;
+      const exportNeg20 = isRearWheel ? zero : neg20;
+      const exportPos20 = isRearWheel ? zero : pos20;
+
       if (exportNeg20 !== '' && zero !== '' && exportPos20 !== '') {
         const n20 = parseFloat(exportNeg20);
         const z   = parseFloat(zero);
         const p20 = parseFloat(exportPos20);
+
         if (!Number.isNaN(n20) && !Number.isNaN(z) && !Number.isNaN(p20)) {
-          rows.push({ frontBolt: f, rearBolt: r, camberNeg20: n20, camber0: z, camberPos20: p20, toe: toeValue });
+          let cellToe = null;
+          if (isRearWheel && toe) {
+            const normalizedToe = (toe || '').toString().replace(',', '.');
+            cellToe = normalizedToe === '' ? null : parseFloat(normalizedToe);
+          }
+
+          rows.push({
+            camberBolt: f,
+            casterBolt: r,
+            camberNeg20: n20,
+            camber0: z,
+            camberPos20: p20,
+            toe: cellToe
+          });
         }
       }
     }
@@ -665,26 +674,38 @@ function _loadCSV(e) {
 
 function _applyCSVToGrid(rows) {
   const boltPositions = getBoltPositions();
+  const isRearWheel = REAR_WHEELS.includes(activeWheel);
+
   // Clear current wheel's grid state first, then apply CSV rows
   for (const f of boltPositions) {
     for (const r of boltPositions) {
-      gridState[activeWheel][f][r] = { neg20: '', zero: '', pos20: '' };
+      const cellState = { neg20: '', zero: '', pos20: '' };
+      if (isRearWheel) {
+        cellState.toe = '';
+      }
+      gridState[activeWheel][f][r] = cellState;
     }
   }
 
   for (const row of rows) {
-    const { frontBolt: f, rearBolt: r, camberNeg20, camber0, camberPos20, toe } = row;
+    const { camberBolt: f, casterBolt: r, camberNeg20, camber0, camberPos20, toe } = row;
     if (gridState[activeWheel][f] && gridState[activeWheel][f][r] !== undefined) {
-      const neg20 = _isRearWheel(activeWheel) ? camber0 : camberNeg20;
-      const pos20 = _isRearWheel(activeWheel) ? camber0 : camberPos20;
-      gridState[activeWheel][f][r] = {
+      const neg20 = isRearWheel ? camber0 : camberNeg20;
+      const pos20 = isRearWheel ? camber0 : camberPos20;
+      const cellState = {
         neg20: String(neg20),
         zero:  String(camber0),
         pos20: String(pos20),
       };
-    }
-    if (toe != null && !Number.isNaN(Number(toe.toString().replace(',', '.')))) {
-      toeState[activeWheel] = Number(toe.toString().replace(',', '.')).toFixed(2);
+
+      if (isRearWheel && toe != null) {
+        const normalizedToe = toe.toString().replace(',', '.');
+        if (!Number.isNaN(Number(normalizedToe))) {
+          cellState.toe = normalizedToe;
+        }
+      }
+
+      gridState[activeWheel][f][r] = cellState;
     }
   }
 
@@ -715,6 +736,8 @@ async function _loadFromDataFiles() {
     );
     if (hasLocalData) continue;
 
+    const isRearWheel = REAR_WHEELS.includes(wheel);
+
     try {
       const res = await fetch(`./data/alignment-${wheel}.csv`);
       if (!res.ok) continue;
@@ -723,22 +746,32 @@ async function _loadFromDataFiles() {
 
       for (const f of boltPositions) {
         for (const r of boltPositions) {
-          gridState[wheel][f][r] = { neg20: '', zero: '', pos20: '' };
+          const cellState = { neg20: '', zero: '', pos20: '' };
+          if (isRearWheel) {
+            cellState.toe = '';
+          }
+          gridState[wheel][f][r] = cellState;
         }
       }
       for (const row of rows) {
-        const { frontBolt: f, rearBolt: r, camberNeg20, camber0, camberPos20, toe } = row;
+        const { camberBolt: f, casterBolt: r, camberNeg20, camber0, camberPos20, toe } = row;
         if (gridState[wheel][f]?.[r] !== undefined) {
-          const neg20 = _isRearWheel(wheel) ? camber0 : camberNeg20;
-          const pos20 = _isRearWheel(wheel) ? camber0 : camberPos20;
-          gridState[wheel][f][r] = {
+          const neg20 = isRearWheel ? camber0 : camberNeg20;
+          const pos20 = isRearWheel ? camber0 : camberPos20;
+          const cellState = {
             neg20: String(neg20),
             zero:  String(camber0),
             pos20: String(pos20),
           };
-        }
-        if (toe != null && !Number.isNaN(Number(toe.toString().replace(',', '.')))) {
-          toeState[wheel] = Number(toe.toString().replace(',', '.')).toFixed(2);
+
+          if (isRearWheel && toe != null) {
+            const normalizedToe = toe.toString().replace(',', '.');
+            if (!Number.isNaN(Number(normalizedToe))) {
+              cellState.toe = normalizedToe;
+            }
+          }
+
+          gridState[wheel][f][r] = cellState;
         }
       }
     } catch (_) {
