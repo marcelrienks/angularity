@@ -719,6 +719,11 @@ function _showSampleDataConfirmModal(hasExistingData) {
     // Reinitialize gridState with NEW 13x13 structure
     _initializeGridState();
 
+    // Rebuild grid HTML to match new 13x13 structure (was built with 5x5)
+    const gridContainer = document.getElementById('input-grid');
+    gridContainer.innerHTML = '';
+    _buildGrid();
+
     // Get bolt positions with new config
     const boltPositions = getBoltPositions();
 
