@@ -2334,8 +2334,8 @@ body {
 .form-fieldset {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 12px;
+  gap: var(--space-md);
+  padding: var(--space-md);
   background: var(--panel-alt);
   border: none;
   border-left: 3px solid var(--border);
