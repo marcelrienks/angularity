@@ -607,38 +607,26 @@ function _bindControls() {
 function _loadSampleData() {
   console.log('_loadSampleData called for wheel:', activeWheel);
 
-  // Force measurement density to 13 (13x13 full grid)
-  localStorage.setItem('alignment_measurement_density', '13');
-
-  // Update density selector UI if it exists
-  const densitySelect = document.getElementById('measurement-density-select');
-  if (densitySelect) {
-    densitySelect.value = '13';
-  }
-
-  // Reinitialize gridState with current bolt positions (handles config changes)
-  // Must do this BEFORE checking for existing data, since density changed
-  _initializeGridState();
-
-  const boltPositions = getBoltPositions();
-
-  // Check if there's existing data before reinitializing
+  // Check if there's existing data BEFORE changing config
+  // Save current bolt positions for the check
+  const currentBoltPositions = getBoltPositions();
   const hasAnyData = WHEELS.some(wheel => {
     if (gridState[wheel]) {
-      return boltPositions.some(f =>
-        boltPositions.some(r => gridState[wheel][f][r].neg20 !== '')
+      return currentBoltPositions.some(f =>
+        currentBoltPositions.some(r => gridState[wheel][f][r].neg20 !== '')
       );
     }
     return false;
   });
 
   // Show modal as confirmation dialog (replaces native confirm)
-  _showSampleDataConfirmModal(hasAnyData, boltPositions);
+  // Modal will handle setting config and loading data if user confirms
+  _showSampleDataConfirmModal(hasAnyData);
 }
 
 // ── Sample data confirmation modal ────────────────────────────────────────
 
-function _showSampleDataConfirmModal(hasExistingData, boltPositions) {
+function _showSampleDataConfirmModal(hasExistingData) {
   // Remove existing modal if present
   const existingModal = document.getElementById('sample-data-modal');
   if (existingModal) {
@@ -718,6 +706,23 @@ function _showSampleDataConfirmModal(hasExistingData, boltPositions) {
 
   function proceedWithSampleData() {
     closeModal();
+
+    // NOW set config to 13x13 (after user confirmed)
+    localStorage.setItem('alignment_measurement_density', '13');
+
+    // Update density selector UI if it exists (on settings page)
+    const densitySelect = document.getElementById('measurement-density-select');
+    if (densitySelect) {
+      densitySelect.value = '13';
+    }
+
+    // Reinitialize gridState with NEW 13x13 structure
+    _initializeGridState();
+
+    // Get bolt positions with new config
+    const boltPositions = getBoltPositions();
+
+    // Load sample data
     _loadSampleDataIntoGrid(boltPositions);
   }
 
