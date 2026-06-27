@@ -878,18 +878,27 @@ function _applyWheelInputMode(wheel) {
   document.querySelectorAll('#input-grid .cell-row').forEach(row => {
     const input = row.querySelector('input.cell-input');
     if (!input) return;
-    const isZero = input.dataset.key === 'zero';
+    const key = input.dataset.key;
+    const isZero = key === 'zero';
+    const isToe = key === 'toe';
 
-    if (rearMode && !isZero) {
-      row.style.display = 'none';
-      input.disabled = true;
-      input.tabIndex = -1;
-      return;
+    if (rearMode) {
+      // Rear wheels: show zero (camber) and toe, hide pos20/neg20
+      if (isZero || isToe) {
+        row.style.display = '';
+        input.disabled = false;
+        input.tabIndex = 0;
+      } else {
+        row.style.display = 'none';
+        input.disabled = true;
+        input.tabIndex = -1;
+      }
+    } else {
+      // Front wheels: show all (pos20, zero, neg20)
+      row.style.display = '';
+      input.disabled = false;
+      input.tabIndex = 0;
     }
-
-    row.style.display = '';
-    input.disabled = false;
-    input.tabIndex = 0;
   });
 }
 
