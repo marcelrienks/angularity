@@ -131,8 +131,8 @@ export function generateGrid(wheel = 'FL') {
  * Used by "Load Sample Data" to demonstrate status indicators with clean chart slopes
  * AND allow validation that wheel selection properly switches between distinct datasets.
  */
-export function generateThreeColorGrid(wheel = 'FL') {
-  const BP = BOLT_POSITIONS;
+export function generateThreeColorGrid(wheel = 'FL', boltPositions = null) {
+  const BP = boltPositions || BOLT_POSITIONS;
   const gridData = {};
   
   // FL: GREEN camber (top-left to bottom-right), caster opposite (bottom-left to top-right)

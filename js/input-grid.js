@@ -621,7 +621,7 @@ function _loadSampleData() {
   // Load sample data for all wheels
   for (const wheel of WHEELS) {
     console.log('Generating sample data for wheel:', wheel);
-    const generatedGrid = generateThreeColorGrid(wheel);
+    const generatedGrid = generateThreeColorGrid(wheel, boltPositions);
 
     // Import generated data into gridState
     const isRearWheel = _isRearWheel(wheel);
