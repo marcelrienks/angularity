@@ -485,6 +485,12 @@ function _bindControls() {
       });
 
       activeWheel = wheel;
+
+      // Rebuild grid for new wheel type (front wheels don't have toe, rear wheels do)
+      const gridContainer = document.getElementById('input-grid');
+      gridContainer.innerHTML = '';
+      _buildGrid();
+
       _applyWheelInputMode(activeWheel);
       _populateGrid(activeWheel);
     });
