@@ -245,8 +245,9 @@ function _buildGrid() {
   // ── Row 0: corner + column headers (front bolt positions) ──────────────
   const corner = _el('div', 'grid-corner sub-header');
   corner.setAttribute('aria-hidden', 'true');
-  const frontBoltClass = isRearWheel ? 'metric-toe' : 'metric-camber';
-  const rearBoltClass = isRearWheel ? 'metric-camber' : 'metric-caster';
+  // Classes based on metric type, not position
+  const frontBoltClass = 'metric-camber';  // columns always camber
+  const rearBoltClass = isRearWheel ? 'metric-toe' : 'metric-caster';  // rows differ
   corner.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; white-space: nowrap;"><span class="${frontBoltClass}">${frontMetricLabel}</span>→</div><div style="display: flex; align-items: center; justify-content: center; white-space: nowrap;"><span class="${rearBoltClass}">${rearMetricLabel}</span>↓</div>`;
   grid.appendChild(corner);
 
