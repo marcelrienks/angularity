@@ -109,6 +109,12 @@ textarea {
   --hover:        #E8E8E8;
   --selection:    #E5EBF1;
   --shadow:       rgba(0, 0, 0, 0.15);
+
+  /* Darker colors for visibility on light background (inspired by VSCode Light+) */
+  --camber:       #6B46C1;   /* Deep purple for Camber - matches VSCode theme */
+  --caster:       #B45309;   /* Deep orange for Caster - visible on white */
+  --purple:       #6B46C1;   /* Darker purple */
+  --orange:       #B45309;   /* Darker orange */
 }
 
 /* ── Dark Theme (VS Code Dark+) ── */
@@ -1570,19 +1576,19 @@ body {
 
 /* Camber target met */
 .data-table td.best-camber {
-  background: rgba(188, 140, 255, 0.12);  /* light purple */
+  background: rgba(107, 70, 193, 0.15);  /* light purple */
 }
 
 /* Caster target met */
 .data-table td.best-caster {
-  background: rgba(245, 158, 11, 0.12);   /* light gold */
+  background: rgba(180, 83, 9, 0.15);   /* light gold */
 }
 
 /* Both targets met: split visualization (left = purple, right = gold) */
 .data-table td.best-both {
   background: linear-gradient(to right,
-    rgba(188, 140, 255, 0.15) 50%,
-    rgba(245, 158, 11, 0.15) 50%);
+    rgba(107, 70, 193, 0.18) 50%,
+    rgba(180, 83, 9, 0.18) 50%);
 }
 
 /* Add colored outline to indicate active target indicator */
