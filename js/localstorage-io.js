@@ -242,13 +242,13 @@ export function saveTargets(camber, caster, toeFront, camberRear, toeRear, steer
  * Reset all targets to defaults
  */
 export function resetTargets() {
-  localStorage.removeItem(STORAGE_KEY_CAMBER);
-  localStorage.removeItem(STORAGE_KEY_CASTER);
-  localStorage.removeItem(STORAGE_KEY_TOE_FRONT);
-  localStorage.removeItem(STORAGE_KEY_CAMBER_REAR);
-  localStorage.removeItem(STORAGE_KEY_TOE_REAR);
-  localStorage.removeItem(STORAGE_KEY_STEERING_RATIO);
-  localStorage.removeItem(STORAGE_KEY_STEERING_RATIO_LEGACY);
+  localStorage.setItem(STORAGE_KEY_CAMBER, String(DEFAULT_CAMBER));
+  localStorage.setItem(STORAGE_KEY_CASTER, String(DEFAULT_CASTER));
+  localStorage.setItem(STORAGE_KEY_TOE_FRONT, String(DEFAULT_TOE_FRONT));
+  localStorage.setItem(STORAGE_KEY_CAMBER_REAR, String(DEFAULT_CAMBER_REAR));
+  localStorage.setItem(STORAGE_KEY_TOE_REAR, String(DEFAULT_TOE_REAR));
+  localStorage.setItem(STORAGE_KEY_STEERING_RATIO, String(DEFAULT_STEERING_RATIO));
+  localStorage.setItem(STORAGE_KEY_STEERING_RATIO_LEGACY, String(DEFAULT_STEERING_RATIO));
 }
 
 // ────────────────────────────────────────────────────────────────────────────

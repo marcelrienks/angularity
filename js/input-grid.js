@@ -13,11 +13,11 @@
  *   - Setup overlay blocks use until user picks the data/ save folder once per session
  *   - Auto-load from data/alignment-{wheel}.csv on page open (via fetch)
  *   - CSV save via showDirectoryPicker (data/ folder, picked once, then silent)
- *   - CSV load (file input → parseCSV → populate grid, manual override)
+ *   - JSON import (file input → importGridFromJSON → populate all wheels)
  */
 
 import { REQUIRED_POSITIONS, WHEELS, FRONT_WHEELS, REAR_WHEELS, TARGET_TOE_FRONT, TARGET_TOE_REAR, getRequiredPositions, getCurrentMeasurementDensity, getBoltPositions } from './constants.js';
-import { buildCSVString, downloadCSVBlob, parseCSV } from './csv-io.js';
+import { exportGridToJSON, importGridFromJSON } from './json-io.js';
 import { _sign } from './format-utils.js';
 import { _showError, _hideError, _showWarning, _hideWarning } from './error-utils.js';
 import { _getStorageKey, _getToeStorageKey } from './localstorage-io.js';
@@ -579,11 +579,11 @@ function _bindControls() {
     });
   });
 
-  // CSV download
-  document.getElementById('btn-download')?.addEventListener('click', _downloadCSV);
+  // JSON export
+  document.getElementById('btn-download')?.addEventListener('click', _exportJSON);
 
-  // CSV load
-  document.getElementById('csv-upload')?.addEventListener('change', _loadCSV);
+  // JSON import
+  document.getElementById('csv-upload')?.addEventListener('change', _importJSON);
 
   // Load sample data
   const sampleBtn = document.getElementById('btn-sample');
@@ -798,99 +798,82 @@ function _loadSampleDataIntoGrid(boltPositions) {
   _saveAllToeToStorage();
 }
 
-// ── CSV download ──────────────────────────────────────────────────────────
+// ── JSON export ───────────────────────────────────────────────────────────
 
-function _downloadCSV() {
+function _exportJSON() {
   const boltPositions = getBoltPositions();
-  const isRearWheel = REAR_WHEELS.includes(activeWheel);
+  const hasAnyData = WHEELS.some(wheel =>
+    boltPositions.some(f =>
+      boltPositions.some(r => {
+        const c = gridState[wheel][f][r];
+        return c.neg20 !== '' || c.zero !== '' || c.pos20 !== '';
+      })
+    )
+  );
 
-  const rows = [];
-  for (const f of boltPositions) {
-    for (const r of boltPositions) {
-      const cellState = gridState[activeWheel][f][r];
-      const { neg20, zero, pos20, toe } = cellState;
-      const exportNeg20 = isRearWheel ? zero : neg20;
-      const exportPos20 = isRearWheel ? zero : pos20;
-
-      if (exportNeg20 !== '' && zero !== '' && exportPos20 !== '') {
-        const n20 = parseFloat(exportNeg20);
-        const z   = parseFloat(zero);
-        const p20 = parseFloat(exportPos20);
-
-        if (!Number.isNaN(n20) && !Number.isNaN(z) && !Number.isNaN(p20)) {
-          let cellToe = null;
-          if (isRearWheel && toe) {
-            const normalizedToe = (toe || '').toString().replace(',', '.');
-            cellToe = normalizedToe === '' ? null : parseFloat(normalizedToe);
-          }
-
-          rows.push({
-            camberBolt: f,
-            casterBolt: r,
-            camberNeg20: n20,
-            camber0: z,
-            camberPos20: p20,
-            toe: cellToe
-          });
-        }
-      }
-    }
-  }
-
-  if (rows.length === 0) {
-    _showError('No complete measurements to export. Fill in all 3 readings for at least one cell.');
+  if (!hasAnyData) {
+    _showError('No measurements to export. Fill in at least one cell.');
     return;
   }
 
   _hideError();
 
-  // Warn if fewer than minimum required cells are complete (interpolation quality suffers)
+  // Warn if any wheel has incomplete required positions
   const requiredPos = getRequiredPositions();
   const minRequiredCount = requiredPos.length * requiredPos.length;
-  const requiredFilled = rows.filter(
-    row => requiredPos.includes(row.frontBolt) && requiredPos.includes(row.rearBolt)
-  ).length;
-  if (requiredFilled < minRequiredCount) {
+  const incompleteWheels = WHEELS.filter(wheel => {
+    let filled = 0;
+    for (const f of requiredPos) {
+      for (const r of requiredPos) {
+        const c = gridState[wheel][f]?.[r];
+        if (c && c.zero !== '') filled++;
+      }
+    }
+    return filled < minRequiredCount;
+  });
+
+  if (incompleteWheels.length > 0) {
     const posLabels = requiredPos.map(p => (p > 0 ? '+' : '') + p).join(', ');
     _showWarning(
-      `Only ${requiredFilled}/${minRequiredCount} required positions are filled. ` +
+      `Wheels ${incompleteWheels.join(', ')} have incomplete required positions. ` +
       `Interpolation accuracy may be reduced. Required positions: ${posLabels} on both axes.`
     );
   } else {
     _hideWarning();
   }
 
-  const csvContent = buildCSVString(rows);
-  const wheel      = activeWheel;
+  const settings = {
+    measurementMode: localStorage.getItem('alignment_constant_caster_input_mode') || 'steering-ratio',
+    measurementDensity: parseInt(localStorage.getItem('alignment_measurement_density')) || 5,
+  };
+  const jsonContent = exportGridToJSON(gridState, toeState, settings);
 
   if (_dirHandle) {
-    // FSAPI path — write silently into the directory handle acquired at startup.
     (async () => {
       try {
-        const fileHandle = await _dirHandle.getFileHandle(`alignment-${wheel}.csv`, { create: true });
+        const fileHandle = await _dirHandle.getFileHandle('alignment.json', { create: true });
         const writable   = await fileHandle.createWritable();
-        await writable.write(csvContent);
+        await writable.write(jsonContent);
         await writable.close();
         _hideError();
       } catch (err) {
-        _showError(`Save failed: ${err.message}`);
+        _showError(`Export failed: ${err.message}`);
       }
     })();
   } else {
-    // Fallback for browsers without FSAPI (Firefox, Safari) — trigger browser download.
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([jsonContent], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href     = url;
-    a.download = `alignment-${wheel}.csv`;
+    a.download = 'alignment.json';
     a.click();
     URL.revokeObjectURL(url);
   }
 }
 
-// ── CSV load ──────────────────────────────────────────────────────────────
+// ── JSON import ───────────────────────────────────────────────────────────
 
-function _loadCSV(e) {
+function _importJSON(e) {
   const file = e.target.files?.[0];
   if (!file) return;
 
@@ -898,153 +881,141 @@ function _loadCSV(e) {
   reader.onload = evt => {
     _hideError();
     try {
-      const rows = parseCSV(evt.target.result);
-      _applyCSVToGrid(rows);
+      const { gridState: importedGrid, toeState: importedToe, settings } = importGridFromJSON(evt.target.result);
+      if (settings) _applyImportedSettings(settings);
+      _applyJSONToGrid(importedGrid, importedToe);
     } catch (err) {
-      _showError(`CSV error: ${err.message}`);
+      _showError(`Import error: ${err.message}`);
     }
-    // Reset file input so the same file can be re-loaded if needed
     e.target.value = '';
   };
   reader.readAsText(file);
 }
 
-function _applyCSVToGrid(rows) {
-  const boltPositions = getBoltPositions();
-  const isRearWheel = REAR_WHEELS.includes(activeWheel);
+function _applyImportedSettings(settings) {
+  const currentMode    = localStorage.getItem('alignment_constant_caster_input_mode') || 'steering-ratio';
+  const currentDensity = parseInt(localStorage.getItem('alignment_measurement_density')) || 5;
+  let needsRebuild = false;
 
-  // Clear current wheel's grid state first, then apply CSV rows
-  for (const f of boltPositions) {
-    for (const r of boltPositions) {
-      const cellState = { neg20: '', zero: '', pos20: '' };
-      if (isRearWheel) {
-        cellState.toe = '';
-      }
-      gridState[activeWheel][f][r] = cellState;
-    }
+  if (settings.measurementMode && settings.measurementMode !== currentMode) {
+    localStorage.setItem('alignment_constant_caster_input_mode', settings.measurementMode);
+    needsRebuild = true;
+  }
+  if (settings.measurementDensity && settings.measurementDensity !== currentDensity) {
+    localStorage.setItem('alignment_measurement_density', String(settings.measurementDensity));
+    needsRebuild = true;
   }
 
-  for (const row of rows) {
-    const { camberBolt: f, casterBolt: r, camberNeg20, camber0, camberPos20, toe } = row;
-    if (gridState[activeWheel][f] && gridState[activeWheel][f][r] !== undefined) {
-      const neg20 = isRearWheel ? camber0 : camberNeg20;
-      const pos20 = isRearWheel ? camber0 : camberPos20;
-      const cellState = {
-        neg20: String(neg20),
-        zero:  String(camber0),
-        pos20: String(pos20),
-      };
+  if (needsRebuild) {
+    _initializeGridState();
+    const gridContainer = document.getElementById('input-grid');
+    if (gridContainer) {
+      gridContainer.innerHTML = '';
+      _buildGrid();
+    }
+  }
+}
 
-      if (isRearWheel && toe != null) {
-        const normalizedToe = toe.toString().replace(',', '.');
-        if (!Number.isNaN(Number(normalizedToe))) {
-          cellState.toe = normalizedToe;
+function _applyJSONToGrid(importedGrid, importedToe) {
+  const boltPositions = getBoltPositions();
+
+  for (const wheel of WHEELS) {
+    const isRearWheel = REAR_WHEELS.includes(wheel);
+
+    // Reset all cells for this wheel
+    for (const f of boltPositions) {
+      for (const r of boltPositions) {
+        gridState[wheel][f][r] = isRearWheel
+          ? { neg20: '', zero: '', pos20: '', toe: '' }
+          : { neg20: '', zero: '', pos20: '' };
+      }
+    }
+    toeState[wheel] = '';
+
+    // Apply imported cell data (JSON keys are strings; JS numeric keys coerce automatically)
+    const wheelGrid = importedGrid[wheel];
+    if (wheelGrid) {
+      for (const f of boltPositions) {
+        for (const r of boltPositions) {
+          const cell = wheelGrid[f]?.[r];
+          if (!cell) continue;
+          const target = gridState[wheel][f][r];
+          if (cell.neg20 !== undefined) target.neg20 = String(cell.neg20);
+          if (cell.zero  !== undefined) target.zero  = String(cell.zero);
+          if (cell.pos20 !== undefined) target.pos20 = String(cell.pos20);
+          if (isRearWheel && cell.toe !== undefined) target.toe = String(cell.toe);
         }
       }
-
-      gridState[activeWheel][f][r] = cellState;
     }
+
+    if (importedToe[wheel] !== undefined) toeState[wheel] = String(importedToe[wheel]);
   }
 
   _populateGrid(activeWheel);
   _renderToeInput();
   _updateProgress();
-  _saveToStorage();
-  _saveToeToStorage();
+  _flushAllWheelsToStorage();
+  _saveAllToeToStorage();
 }
 
 // ── Auto-load from data/ folder ───────────────────────────────────────────
 
 /**
- * On page open, fetch both wheel CSVs from ./data/ and populate the grids.
- * Silently skips wheels whose files are absent or unparseable.
+ * On page open, fetch alignment.json from ./data/ and populate all wheel grids.
+ * Silently skips if the file is absent, unparseable, or localStorage already has data.
  */
 async function _loadFromDataFiles() {
   const boltPositions = getBoltPositions();
-  if (location.protocol === 'file:') return; // fetch blocked on file:// — skip silently
+  if (location.protocol === 'file:') return;
 
-  for (const wheel of WHEELS) {
-    // Skip fetch if localStorage already has in-progress data for this wheel.
-    const hasLocalData = boltPositions.some(f =>
+  // Skip fetch if localStorage already has in-progress data for any wheel
+  const hasLocalData = WHEELS.some(wheel =>
+    boltPositions.some(f =>
       boltPositions.some(r => {
         const c = gridState[wheel][f][r];
         return c.neg20 !== '' || c.zero !== '' || c.pos20 !== '';
       })
-    );
-    if (hasLocalData) continue;
+    )
+  );
+  if (hasLocalData) return;
 
-    const isRearWheel = REAR_WHEELS.includes(wheel);
-
-    try {
-      const res = await fetch(`./data/alignment-${wheel}.csv`);
-      if (!res.ok) continue;
-      const text = await res.text();
-      const rows = parseCSV(text);
-
-      for (const f of boltPositions) {
-        for (const r of boltPositions) {
-          const cellState = { neg20: '', zero: '', pos20: '' };
-          if (isRearWheel) {
-            cellState.toe = '';
-          }
-          gridState[wheel][f][r] = cellState;
-        }
-      }
-      for (const row of rows) {
-        const { camberBolt: f, casterBolt: r, camberNeg20, camber0, camberPos20, toe } = row;
-        if (gridState[wheel][f]?.[r] !== undefined) {
-          const neg20 = isRearWheel ? camber0 : camberNeg20;
-          const pos20 = isRearWheel ? camber0 : camberPos20;
-          const cellState = {
-            neg20: String(neg20),
-            zero:  String(camber0),
-            pos20: String(pos20),
-          };
-
-          if (isRearWheel && toe != null) {
-            const normalizedToe = toe.toString().replace(',', '.');
-            if (!Number.isNaN(Number(normalizedToe))) {
-              cellState.toe = normalizedToe;
-            }
-          }
-
-          gridState[wheel][f][r] = cellState;
-        }
-      }
-    } catch (_) {
-      // File missing or parse error — leave grid empty
-    }
+  try {
+    const res = await fetch('./data/alignment.json');
+    if (!res.ok) return;
+    const text = await res.text();
+    const { gridState: importedGrid, toeState: importedToe, settings } = importGridFromJSON(text);
+    if (settings) _applyImportedSettings(settings);
+    _applyJSONToGrid(importedGrid, importedToe);
+  } catch (_) {
+    // File missing or parse error — leave grid empty
   }
-
-  _populateGrid(activeWheel);
-  _renderToeInput();
-  _updateProgress();
 }
 
 // ── Clear all ─────────────────────────────────────────────────────────────
 
 function _clearAll() {
   const boltPositions = getBoltPositions();
-  if (!confirm(`Clear all ${activeWheel} measurements? This cannot be undone.`)) return;
+  if (!confirm('Clear ALL wheel measurements? This cannot be undone.')) return;
 
-  for (const f of boltPositions) {
-    for (const r of boltPositions) {
-      gridState[activeWheel][f][r] = { neg20: '', zero: '', pos20: '' };
+  for (const wheel of WHEELS) {
+    for (const f of boltPositions) {
+      for (const r of boltPositions) {
+        gridState[wheel][f][r] = { neg20: '', zero: '', pos20: '' };
+      }
     }
+    toeState[wheel] = '';
   }
-
-  toeState[activeWheel] = '';
 
   _populateGrid(activeWheel);
   _renderToeInput();
   _updateProgress();
   _hideError();
-  
-  // Remove only the active wheel from localStorage; other wheels remain unaffected
+
   try {
-    const key = _getStorageKey(activeWheel);
-    localStorage.removeItem(key);
-    localStorage.removeItem(_getToeStorageKey(activeWheel));
+    for (const wheel of WHEELS) {
+      localStorage.removeItem(_getStorageKey(wheel));
+      localStorage.removeItem(_getToeStorageKey(wheel));
+    }
   } catch (_) {
     // localStorage unavailable — fail silently
   }

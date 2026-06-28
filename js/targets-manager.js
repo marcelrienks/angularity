@@ -120,12 +120,19 @@ function saveConfigs(values) {
 }
 
 function resetTargets() {
-  Object.values(TARGET_STORAGE).forEach((key) => localStorage.removeItem(key));
+  localStorage.setItem(TARGET_STORAGE.camber, String(TARGET_DEFAULTS.camber));
+  localStorage.setItem(TARGET_STORAGE.caster, String(TARGET_DEFAULTS.caster));
+  localStorage.setItem(TARGET_STORAGE.toeFront, String(TARGET_DEFAULTS.toeFront));
+  localStorage.setItem(TARGET_STORAGE.camberRear, String(TARGET_DEFAULTS.camberRear));
+  localStorage.setItem(TARGET_STORAGE.toeRear, String(TARGET_DEFAULTS.toeRear));
 }
 
 function resetConfigs() {
-  Object.values(CONSTANT_STORAGE).forEach((key) => localStorage.removeItem(key));
-  localStorage.removeItem(LEGACY_STORAGE.steeringRatio);
+  localStorage.setItem(CONSTANT_STORAGE.casterInputMode, CONSTANT_DEFAULTS.casterInputMode);
+  localStorage.setItem(CONSTANT_STORAGE.steeringRatio, String(CONSTANT_DEFAULTS.steeringRatio));
+  localStorage.setItem(CONSTANT_STORAGE.casterWheelDegrees, String(CONSTANT_DEFAULTS.casterWheelDegrees));
+  localStorage.setItem(CONSTANT_STORAGE.wheelDiameter, String(CONSTANT_DEFAULTS.wheelDiameter));
+  localStorage.setItem(LEGACY_STORAGE.steeringRatio, String(CONSTANT_DEFAULTS.steeringRatio));
 }
 
 function setTargetInputs(values) {
@@ -259,10 +266,14 @@ function bindTargetEvents() {
     if (saveBtn) saveBtn.classList.remove('primary');
   };
 
-  document.getElementById('btn-reset-targets').addEventListener('click', () => {
+  const resetTargetsBtn = document.getElementById('btn-reset-targets');
+  resetTargetsBtn.addEventListener('click', () => {
     resetTargets();
     setTargetInputs(getTargets());
     markClean();
+    const label = resetTargetsBtn.textContent;
+    resetTargetsBtn.textContent = 'Restored defaults';
+    setTimeout(() => { resetTargetsBtn.textContent = label; }, 1500);
   });
 
   form.querySelectorAll('input').forEach(input => {
@@ -296,10 +307,14 @@ function bindConfigEvents() {
     if (saveBtn) saveBtn.classList.remove('primary');
   };
 
-  document.getElementById('btn-reset-configs').addEventListener('click', () => {
+  const resetConfigsBtn = document.getElementById('btn-reset-configs');
+  resetConfigsBtn.addEventListener('click', () => {
     resetConfigs();
     setConfigInputs(getConfigs());
     markClean();
+    const label = resetConfigsBtn.textContent;
+    resetConfigsBtn.textContent = 'Restored defaults';
+    setTimeout(() => { resetConfigsBtn.textContent = label; }, 1500);
   });
 
   const toggleVisibility = () => {

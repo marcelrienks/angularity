@@ -5,7 +5,9 @@
  * Parses:     parseCSV(text) → array of measurement objects
  */
 
-const HEADER = 'camber_bolt,caster_bolt,camber_360acw,camber_0,camber_360cw,toe';
+const HEADER = 'camber_bolt_pos,caster_bolt_pos,camber_lock_left_deg,camber_center_deg,camber_lock_right_deg,toe_mm';
+const LEGACY_HEADER_V1 = 'camber_bolt,caster_bolt,camber_360acw,camber_0,camber_360cw,toe';
+const LEGACY_HEADER_V1_NO_TOE = 'camber_bolt,caster_bolt,camber_360acw,camber_0,camber_360cw';
 const LEGACY_HEADER = 'camber_bolt,caster_bolt,camber_neg20,camber_0,camber_pos20';
 const LEGACY_HEADER_WITH_TOE = 'camber_bolt,caster_bolt,camber_neg20,camber_0,camber_pos20,toe';
 const ALT_HEADER = 'camber_bolt,caster_bolt,camber_360acw,camber_0,camber_360cw';
@@ -88,6 +90,8 @@ export function parseCSV(text) {
 
   const header = lines[0].toLowerCase().replace(/\s+/g, '');
   const expectedHeader = HEADER.replace(/\s+/g, '');
+  const expectedLegacyV1Header = LEGACY_HEADER_V1.replace(/\s+/g, '');
+  const expectedLegacyV1NoToeHeader = LEGACY_HEADER_V1_NO_TOE.replace(/\s+/g, '');
   const expectedLegacyHeader = LEGACY_HEADER.replace(/\s+/g, '');
   const expectedLegacyHeaderWithToe = LEGACY_HEADER_WITH_TOE.replace(/\s+/g, '');
   const expectedAltHeader = ALT_HEADER.replace(/\s+/g, '');
@@ -96,12 +100,12 @@ export function parseCSV(text) {
   const expectedOldLegacyHeaderWithToe = LEGACY_OLD_HEADER_WITH_TOE.replace(/\s+/g, '');
   const expectedOldAltHeader = LEGACY_OLD_ALT_HEADER.replace(/\s+/g, '');
 
-  const hasToeColumn = header === expectedHeader || header === expectedLegacyHeaderWithToe || header === expectedOldHeader || header === expectedOldLegacyHeaderWithToe;
+  const hasToeColumn = header === expectedHeader || header === expectedLegacyV1Header || header === expectedLegacyHeaderWithToe || header === expectedOldHeader || header === expectedOldLegacyHeaderWithToe;
   const isLegacyOldFormat = header === expectedOldHeader || header === expectedOldLegacyHeader || header === expectedOldLegacyHeaderWithToe || header === expectedOldAltHeader;
 
-  if (!hasToeColumn && header !== expectedLegacyHeader && header !== expectedAltHeader && header !== expectedOldLegacyHeader && header !== expectedOldAltHeader) {
+  if (!hasToeColumn && header !== expectedLegacyV1NoToeHeader && header !== expectedLegacyHeader && header !== expectedAltHeader && header !== expectedOldLegacyHeader && header !== expectedOldAltHeader) {
     throw new Error(
-      `Unexpected CSV header.\nExpected: ${HEADER} (or legacy ${LEGACY_HEADER})\nGot: ${lines[0]}`
+      `Unexpected CSV header.\nExpected: ${HEADER} (or legacy ${LEGACY_HEADER_V1})\nGot: ${lines[0]}`
     );
   }
 
