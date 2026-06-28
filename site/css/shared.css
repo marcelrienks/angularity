@@ -811,10 +811,28 @@ body {
   transition: all 0.2s ease;
 }
 
-/* Muted state: de-emphasized when not the active color-code mode */
-.cell-value .camber.muted,
-.cell-value .caster.muted {
+/* Bold state: highlighted cells */
+.cell-value.bold .camber,
+.cell-value.bold .caster,
+.cell-value.bold .toe {
+  font-weight: 700;
+}
+
+/* Muted state: non-highlighted cells */
+.cell-value.muted .camber,
+.cell-value.muted .caster,
+.cell-value.muted .toe {
+  font-weight: 400;
   color: var(--muted);
+}
+
+/* Font sizes: highlighted larger, non-highlighted smaller */
+.cell-value-large {
+  font-size: 1rem;
+}
+
+.cell-value-small {
+  font-size: 0.8125rem;
 }
 
 /* Status indicators use Sub Header style uniformly */
@@ -1696,6 +1714,11 @@ body {
   background: rgba(180, 83, 9, 0.15);   /* light gold */
 }
 
+/* Toe target met */
+.data-table td.best-toe {
+  background: rgba(180, 83, 9, 0.15);   /* light gold (same as caster) */
+}
+
 /* Both targets met: split visualization (left = purple, right = gold) */
 .data-table td.best-both {
   background: linear-gradient(to right,
@@ -1710,6 +1733,11 @@ body {
 }
 
 .data-table td.best-caster {
+  outline: 2px solid var(--caster);
+  outline-offset: -2px;
+}
+
+.data-table td.best-toe {
   outline: 2px solid var(--caster);
   outline-offset: -2px;
 }

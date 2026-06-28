@@ -87,22 +87,12 @@
          Shows which positions best match alignment targets.
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="summary-table" id="section-table" style="display:none">
-      <!-- Wheel tabs and color coding toggle -->
-      <div style="display:flex; gap:24px; margin-bottom:12px; align-items:flex-start;">
-        <!-- Wheel selector -->
-        <div class="wheel-selector" id="table-wheel-tabs" style="display:none">
-          <button class="active sub-header" data-wheel="FL" id="tab-table-fl">FL</button>
-          <button class="sub-header" data-wheel="FR" id="tab-table-fr">FR</button>
-          <button class="sub-header" data-wheel="RL" id="tab-table-rl">RL</button>
-          <button class="sub-header" data-wheel="RR" id="tab-table-rr">RR</button>
-        </div>
-
-        <!-- Metric selector -->
-        <div class="color-coding-selector" id="color-coding-group">
-          <button class="active sub-header" data-metric="camber" id="btn-metric-camber">Camber</button>
-          <button class="sub-header" data-metric="caster" id="btn-metric-caster">Caster</button>
-          <button class="sub-header" data-metric="toe" id="btn-metric-toe">Toe</button>
-        </div>
+      <!-- Wheel selector -->
+      <div class="wheel-selector" id="table-wheel-tabs" style="margin-bottom:16px;">
+        <button class="active sub-header" data-wheel="FL" id="tab-table-fl">FL</button>
+        <button class="sub-header" data-wheel="FR" id="tab-table-fr">FR</button>
+        <button class="sub-header" data-wheel="RL" id="tab-table-rl">RL</button>
+        <button class="sub-header" data-wheel="RR" id="tab-table-rr">RR</button>
       </div>
 
       <div style="overflow-x:auto">
@@ -116,7 +106,7 @@
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="chart-section" id="section-chart" style="display:none">
       <h2 class="header">Alignment vs Bolt Position</h2>
-      <div class="wheel-selector" id="chart-wheel-tabs" style="margin-bottom:16px; display:none">
+      <div class="wheel-selector" id="chart-wheel-tabs" style="margin-bottom:16px;">
         <button class="active sub-header" data-wheel="FL" id="tab-chart-fl">FL</button>
         <button class="sub-header" data-wheel="FR" id="tab-chart-fr">FR</button>
         <button class="sub-header" data-wheel="RL" id="tab-chart-rl">RL</button>

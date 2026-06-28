@@ -27,9 +27,6 @@ import { _showError, _hideError, _showWarning, _hideWarning } from './error-util
 /** @type {Object<string, object|null>} */
 const results = Object.fromEntries(WHEELS.map(wheel => [wheel, null]));
 
-/** Selected summary metric: 'camber' | 'caster' | 'toe' */
-let selectedMetric = 'camber';
-
 /** @type {{ main: Chart|null }} */
 const charts = { main: null };
 
@@ -116,7 +113,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Always bind UI controls first
   _bindFileInputs();
   _bindWheelTabs();
-  _bindMetricToggle();
 
   // Load data ONLY from localStorage (user's previous session)
   _loadFromLocalStorage();
@@ -352,7 +348,7 @@ function _rebuildAll() {
 
 function _bindWheelTabs() {
   const groups = [
-    { selector: '#table-wheel-tabs button',       setter: w => { activeTableWheel = w; _normalizeSelectedMetricForWheel(); _updateMetricButtonStates(); _renderSummaryTable(); } },
+    { selector: '#table-wheel-tabs button',       setter: w => { activeTableWheel = w; _renderSummaryTable(); } },
     { selector: '#chart-wheel-tabs button',       setter: w => { activeChartWheel = w; _renderMainChart(); } },
   ];
 
@@ -365,34 +361,6 @@ function _bindWheelTabs() {
       });
     });
   }
-}
-
-// ── Mode toggle ──────────────────────────────────────────────────────────────
-
-/**
- * (Removed: Analysis mode toggle - only symmetric analysis is shown)
- */
-
-/**
- * Bind the metric toggle to re-render the table when changed.
- */
-function _bindMetricToggle() {
-  const buttons = document.querySelectorAll('.color-coding-selector button');
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (btn.disabled) return;
-
-      // Update active state
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      
-      // Update selected metric and re-render
-      selectedMetric = btn.getAttribute('data-metric');
-      _renderSummaryTable();
-    });
-  });
-
-  _updateMetricButtonStates();
 }
 
 /**
@@ -414,41 +382,9 @@ function _rebuildWheelTabs(loadedWheels) {
   for (const [sel, activeWheel] of tabMap) {
     const el = document.querySelector(sel);
     if (!el) continue;
-    el.style.display = loadedWheels.length > 1 ? '' : 'none';
     el.querySelectorAll('button').forEach(btn => {
-      btn.style.display = loadedWheels.includes(btn.dataset.wheel) ? '' : 'none';
       btn.classList.toggle('active', btn.dataset.wheel === activeWheel);
     });
-  }
-
-  _normalizeSelectedMetricForWheel();
-  _updateMetricButtonStates();
-}
-
-function _allowedMetricsForWheel(wheel) {
-  return REAR_WHEELS.includes(wheel) ? ['camber', 'toe'] : ['camber', 'caster'];
-}
-
-function _isMetricAllowedForWheel(metric, wheel) {
-  return _allowedMetricsForWheel(wheel).includes(metric);
-}
-
-function _normalizeSelectedMetricForWheel() {
-  if (!_isMetricAllowedForWheel(selectedMetric, activeTableWheel)) {
-    selectedMetric = 'camber';
-  }
-}
-
-function _updateMetricButtonStates() {
-  const buttons = document.querySelectorAll('.color-coding-selector button');
-  if (!buttons.length) return;
-
-  for (const btn of buttons) {
-    const metric = btn.getAttribute('data-metric');
-    const allowed = _isMetricAllowedForWheel(metric, activeTableWheel);
-    btn.disabled = !allowed;
-    btn.classList.toggle('active', allowed && metric === selectedMetric);
-    btn.setAttribute('aria-disabled', String(!allowed));
   }
 }
 
@@ -463,28 +399,31 @@ function _updateMetricButtonStates() {
  * @returns {Map<string, string>} Map of 'f,r' → 'camber'|'caster'|'both'
  */
 function _getTopTargetMatches(result, wheel) {
-  const { topByCamberDelta, topByCasterDelta } = result;
+  const { topByCamberDelta, topByCasterDelta, topByToeDelta } = result;
   const isRearWheel = REAR_WHEELS.includes(wheel);
-  
+
   // Convert pre-sorted rows to keys
   const topCamber = topByCamberDelta.map(r => `${r.camberBolt},${r.casterBolt}`);
-  const topCaster = isRearWheel ? [] : topByCasterDelta.map(r => `${r.camberBolt},${r.casterBolt}`);
-  
+  const topSecondary = isRearWheel
+    ? topByToeDelta.map(r => `${r.camberBolt},${r.casterBolt}`)
+    : topByCasterDelta.map(r => `${r.camberBolt},${r.casterBolt}`);
+
   // Build result map
   const result_map = new Map();
   for (const key of topCamber) {
-    if (topCaster.includes(key)) {
+    if (topSecondary.includes(key)) {
       result_map.set(key, 'both');        // Both targets close
     } else {
       result_map.set(key, 'camber');      // Only camber close
     }
   }
-  for (const key of topCaster) {
+  for (const key of topSecondary) {
     if (!result_map.has(key)) {
-      result_map.set(key, 'caster');      // Only caster close
+      const label = isRearWheel ? 'toe' : 'caster';
+      result_map.set(key, label);         // Only secondary target close
     }
   }
-  
+
   return result_map;
 }
 
@@ -568,6 +507,9 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
       } else if (matchType === 'caster') {
         td.classList.add('best-caster');     // Caster target met (green)
         isHighlightedCell = true;
+      } else if (matchType === 'toe') {
+        td.classList.add('best-toe');        // Toe target met (orange)
+        isHighlightedCell = true;
       }
 
       if (REQUIRED_POSITIONS.includes(r)) {
@@ -636,6 +578,7 @@ function _buildTable(result) {
       if (!cell) continue;  // Skip unmeasured positions
       const camber = +cell.zero.toFixed(2);
       const caster = +(calculateCaster(cell.neg20, cell.pos20, _getWheelCasterOptions(activeTableWheel, result))).toFixed(2);
+      const toe = rearToe;
 
       const key = `${cell.camberBolt},${cell.casterBolt}`;
       const matchType = targetMatches.get(key);
@@ -654,22 +597,39 @@ function _buildTable(result) {
       } else if (matchType === 'caster') {
         td.classList.add('best-caster');     // Caster target met (green)
         isHighlightedCell = true;
+      } else if (matchType === 'toe') {
+        td.classList.add('best-toe');        // Toe target met (orange)
+        isHighlightedCell = true;
       }
 
       if (REQUIRED_POSITIONS.includes(r)) {
         td.classList.add('required-col');
       }
 
-      const metricClass = _metricValueClass({ camber, caster, toe: rearToe }, activeTableWheel);
-      const metricValue = _formatSelectedMetricValue({ camber, caster, toe: rearToe }, isRearWheel);
+      const weightClass = !isHighlightedCell ? 'muted' : 'bold';
+      const sizeClass = !isHighlightedCell ? 'cell-value-small' : 'cell-value-large';
 
-      // Add muted class for non-highlighted cells (only best matches are bright)
-      const isMuted = !isHighlightedCell;
-      const mutedClass = isMuted ? 'muted' : '';
+      // Format both values: camber always, plus caster (front) or toe (rear)
+      const camberValue = `${camber > 0 ? '+' : ''}${camber.toFixed(2)}°`;
+      let secondValue = '';
+      let secondLabel = '';
+
+      if (isRearWheel) {
+        secondLabel = 'Toe';
+        if (toe != null && !Number.isNaN(Number(toe))) {
+          secondValue = `${Number(toe) >= 0 ? '+' : ''}${Number(toe).toFixed(2)}°`;
+        } else {
+          secondValue = 'n/a';
+        }
+      } else {
+        secondLabel = 'Caster';
+        secondValue = `${caster.toFixed(2)}°`;
+      }
 
       td.innerHTML = `
-        <div class="cell-value">
-          <div class="${selectedMetric} ${metricClass} ${mutedClass}">${metricValue}</div>
+        <div class="cell-value ${weightClass} ${sizeClass}">
+          <div class="metric-camber">${camberValue}</div>
+          <div class="metric-${secondLabel.toLowerCase()}">${secondValue}</div>
         </div>`;
     }
   }
