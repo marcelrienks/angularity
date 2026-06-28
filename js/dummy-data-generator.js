@@ -116,133 +116,77 @@ export function generateGrid(wheel = 'FL') {
 }
 
 /**
- * Generate three-color test scenario data with clean diagonal slopes corner-to-corner.
- * 
- * Each wheel has DISTINCT camber values for wheel selection testing:
- * - FL Camber: top-left to bottom-right diagonal (high to low) — GREEN
- * - FL Caster: bottom-left to top-right diagonal (low to high) — opposite camber
- * - FR Camber: same slope as FL but offset -0.15° — verifies wheel switching shows different data
- * - FR Caster: reduced slope (ORANGE off-target)
- * - RL Camber: top-left to bottom-right diagonal, offset -0.10° — rear wheel variation
- * - RL Caster: consistent with camber pattern
- * - RR Camber: bottom-left to top-right diagonal with +0.20° offset — opposite RL, verifies wheel switching
- * - RR Caster: opposite sweep pattern
- * 
- * Used by "Load Sample Data" to demonstrate status indicators with clean chart slopes
- * AND allow validation that wheel selection properly switches between distinct datasets.
+ * Generate realistic alignment data based on real FR measurement data.
+ *
+ * Model derived from real FR 5×5 alignment data:
+ *   camber0 = base − 0.50·CmB + 0.12·CsB  (zero-steer camber, °)
+ *   majorSwing = clamp(4.3 − 0.22·CmB + 0.30·CsB, 1.0, 8.0)
+ *     — caster-induced camber gain when steered toward the outside of a turn
+ *   minorSwing = clamp(1.9 − 0.27·CmB + 0.38·CsB, 0.3, 4.5)
+ *     — caster-induced camber loss when steered toward the inside of a turn
+ *
+ * FR (right front): turning left puts FR on outside → large positive camber at neg20
+ *   neg20 = camber0 + majorSwing,  pos20 = camber0 − minorSwing
+ * FL (left front):  turning right puts FL on outside → large positive camber at pos20
+ *   neg20 = camber0 − minorSwing,  pos20 = camber0 + majorSwing
+ * RL/RR (rear):     no steering swing; camber follows bolt position; fixed toe per CsB.
+ *
+ * Each wheel has distinct base offsets so switching wheels shows different data.
  */
 export function generateThreeColorGrid(wheel = 'FL', boltPositions = null) {
   const BP = boltPositions || BOLT_POSITIONS;
   const gridData = {};
-  
-  // FL: GREEN camber (top-left to bottom-right), caster opposite (bottom-left to top-right)
-  if (wheel === 'FL') {
-    for (const f of BP) {
-      gridData[f] = {};
-      const nF = (f + 6) / 12; // 0 to 1
-      
-      // Camber diagonal: -3.2° (left) to +1.8° (right) — wider range, target -1.1° near center
-      const camberBase = -3.2 + (5.0 * nF);
-      
-      // Steering diagonal OPPOSITE: 5.0 (left) to 1.5 (right) — creates bottom-left to top-right for caster
-      const steeringDiff = 5.0 - (3.5 * nF);
-      
-      for (const r of BP) {
-        const rearInfluence = (r / 6) * 0.12;
-        const c0 = camberBase + rearInfluence;
-        const half = steeringDiff / 2;
-        
+
+  // Wheel-specific base camber at (CmB=0, CsB=0)
+  const camber0Base = { FR: 0.0, FL: -0.10, RL: -0.55, RR: -0.50 }[wheel];
+  // Slightly different CmB slope per wheel for realistic asymmetry
+  const cmBRate    = { FR: -0.50, FL: -0.48, RL: -0.45, RR: -0.47 }[wheel];
+  // Slightly different CsB slope per wheel
+  const csBRate    = { FR:  0.12, FL:  0.13, RL:  0.10, RR:  0.11 }[wheel];
+
+  const isRear = wheel === 'RL' || wheel === 'RR';
+
+  for (const f of BP) {
+    gridData[f] = {};
+    for (const r of BP) {
+      const camber0 = camber0Base + cmBRate * f + csBRate * r;
+
+      if (isRear) {
+        // Rear wheels: no steering swing — neg20/zero/pos20 all equal.
+        // Toe-in varies with CsB: more positive CsB → slightly less toe-in.
+        const toeBase = wheel === 'RL' ? 0.15 : 0.17;
+        const toe = Math.max(0.05, toeBase - 0.015 * r).toFixed(2);
+        const c0str = String(+camber0.toFixed(2));
+        gridData[f][r] = { neg20: c0str, zero: c0str, pos20: c0str, toe };
+      } else {
+        // Front wheels: asymmetric caster-induced camber response at lock.
+        // Wheel-specific scale factors produce distinct but similar FR/FL data.
+        const mScale  = wheel === 'FL' ? 0.97 : 1.00;
+        const miScale = wheel === 'FL' ? 1.02 : 1.00;
+
+        const major = Math.min(8.0, Math.max(1.0, 4.3 - 0.22 * f + 0.30 * r)) * mScale;
+        const minor = Math.min(4.5, Math.max(0.3, 1.9 - 0.27 * f + 0.38 * r)) * miScale;
+
+        let neg20, pos20;
+        if (wheel === 'FR') {
+          // FR outside at left lock → big positive camber gain at neg20
+          neg20 = camber0 + major;
+          pos20 = camber0 - minor;
+        } else {
+          // FL outside at right lock → big positive camber gain at pos20
+          neg20 = camber0 - minor;
+          pos20 = camber0 + major;
+        }
+
         gridData[f][r] = {
-          neg20: String(+(c0 - half).toFixed(2)),
-          zero: String(+(c0).toFixed(2)),
-          pos20: String(+(c0 + half).toFixed(2))
+          neg20: String(+neg20.toFixed(2)),
+          zero:  String(+camber0.toFixed(2)),
+          pos20: String(+pos20.toFixed(2))
         };
       }
     }
-    return gridData;
   }
-  
-  // FR: GREEN camber (similar to FL but offset -0.15°), ORANGE caster (reduced/different slope)
-  if (wheel === 'FR') {
-    for (const f of BP) {
-      gridData[f] = {};
-      const nF = (f + 6) / 12;
-      
-      // Camber diagonal: offset -0.15° from FL — distinguishable during wheel selection testing
-      const camberBase = -3.2 + (5.0 * nF) - 0.15;
-      
-      // Steering reduced: 3.8 (left) to 1.0 (right) — shallower slope = off-target (ORANGE)
-      const steeringDiff = 3.8 - (2.8 * nF);
-      
-      for (const r of BP) {
-        const rearInfluence = (r / 6) * 0.12;
-        const c0 = camberBase + rearInfluence;
-        const half = steeringDiff / 2;
-        
-        gridData[f][r] = {
-          neg20: String(+(c0 - half).toFixed(2)),
-          zero: String(+(c0).toFixed(2)),
-          pos20: String(+(c0 + half).toFixed(2))
-        };
-      }
-    }
-    return gridData;
-  }
-  
-  // RL: rear camber diagonal top-left to bottom-right with -0.10° offset for wheel selection testing
-  if (wheel === 'RL') {
-    for (const f of BP) {
-      gridData[f] = {};
-      const nF = (f + 6) / 12;
-      
-      // Camber diagonal: -3.5° (left) to +1.5° (right) — wider range, target near center, -0.10° offset for testing
-      const camberBase = -3.5 + (5.0 * nF) - 0.10;
-      
-      // Steering for display (rear wheels show constant in input grid anyway)
-      const steeringDiff = 5.2 - (3.2 * nF);
-      
-      for (const r of BP) {
-        const rearInfluence = (r / 6) * 0.12;
-        const c0 = camberBase + rearInfluence;
-        const half = steeringDiff / 2;
-        
-        gridData[f][r] = {
-          neg20: String(+(c0 - half).toFixed(2)),
-          zero: String(+(c0).toFixed(2)),
-          pos20: String(+(c0 + half).toFixed(2))
-        };
-      }
-    }
-    return gridData;
-  }
-  
-  // RR: rear camber diagonal OPPOSITE with +0.20° offset for wheel selection testing
-  if (wheel === 'RR') {
-    for (const f of BP) {
-      gridData[f] = {};
-      const nF = (f + 6) / 12;
-      
-      // Camber diagonal OPPOSITE with offset: -1.2° (left) to +4.8° (right) — opposite slope, +0.20° offset from RL for testing
-      const camberBase = -1.2 + (6.0 * nF) + 0.20;
-      
-      // Steering opposite slope: 1.8 (left) to 5.2 (right)
-      const steeringDiff = 1.8 + (3.4 * nF);
-      
-      for (const r of BP) {
-        const rearInfluence = (r / 6) * 0.12;
-        const c0 = camberBase + rearInfluence;
-        const half = steeringDiff / 2;
-        
-        gridData[f][r] = {
-          neg20: String(+(c0 - half).toFixed(2)),
-          zero: String(+(c0).toFixed(2)),
-          pos20: String(+(c0 + half).toFixed(2))
-        };
-      }
-    }
-    return gridData;
-  }
-  
+
   return gridData;
 }
 

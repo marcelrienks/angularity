@@ -759,34 +759,32 @@ function _loadSampleDataIntoGrid(boltPositions) {
     console.log('Generating sample data for wheel:', wheel);
     const generatedGrid = generateThreeColorGrid(wheel, boltPositions);
 
-    // Import generated data into gridState
     const isRearWheel = _isRearWheel(wheel);
-    let globalToeValue = 0.08;
-    if (wheel === 'RL') {
-      globalToeValue = 0.04;
-    } else if (wheel === 'RR') {
-      globalToeValue = 0.12;
-    }
+
+    // Rear wheel toe at center bolt position (matches generateThreeColorGrid model)
+    const centerToeBase = wheel === 'RL' ? 0.15 : wheel === 'RR' ? 0.17 : 0;
 
     for (const f of boltPositions) {
       for (const r of boltPositions) {
-        const zeroValue = generatedGrid[f][r].zero;
+        const cell = generatedGrid[f][r];
+        const zeroValue = cell.zero;
         gridState[wheel][f][r] = {
-          neg20: isRearWheel ? zeroValue : generatedGrid[f][r].neg20,
+          neg20: isRearWheel ? zeroValue : cell.neg20,
           zero:  zeroValue,
-          pos20: isRearWheel ? zeroValue : generatedGrid[f][r].pos20
+          pos20: isRearWheel ? zeroValue : cell.pos20
         };
 
-        // Per-cell toe data for rear wheels (varies slightly by position)
+        // Use toe from generated grid if available, otherwise compute from model
         if (isRearWheel) {
-          const positionVariation = (f + r) * 0.001;  // Slight variation by position
-          gridState[wheel][f][r].toe = (globalToeValue + positionVariation).toFixed(2);
+          gridState[wheel][f][r].toe = cell.toe !== undefined
+            ? cell.toe
+            : Math.max(0.05, centerToeBase - 0.015 * r).toFixed(2);
         }
       }
     }
 
-    // Set global toe value for wheel
-    toeState[wheel] = globalToeValue.toFixed(2);
+    // Global toe: value at center bolt position (CsB=0)
+    toeState[wheel] = isRearWheel ? centerToeBase.toFixed(2) : '';
   }
 
   _populateGrid(activeWheel);

@@ -1451,10 +1451,9 @@ body {
   overflow: hidden;
 }
 
-/* Compact symmetry metric (no bottom margin, reduced emphasis) */
+/* Compact symmetry metric (no bottom margin, secondary emphasis) */
 .symmetry-metric--compact {
   margin-bottom: 0;
-  opacity: 0.6;
 }
 
 /* Success-colored card title */
@@ -1680,8 +1679,22 @@ body {
 }
 
 .symmetry-metric .label {
+  font-size: var(--font-size-p);
   letter-spacing: 0.08em;
-  color: var(--text);
+  color: var(--muted);
+}
+
+.symmetry-metric .value {
+  font-size: var(--font-size-p);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bolt position values are secondary reference info — mute like the BOLT column in front tables */
+.symmetry-metric.front-bolt .value,
+.symmetry-metric.rear-bolt .value {
+  color: var(--muted-strong);
+  font-weight: normal;
 }
 
 .symmetry-delta {
