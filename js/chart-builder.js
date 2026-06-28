@@ -419,40 +419,33 @@ function _delta(d) {
  */
 function _aggregateByFrontBolt(rows169) {
   const result = [];
-  
-  // Create a map for fast lookup: map[camberBolt][casterBolt] = row
+
+  // Group rows by camberBolt position
   const map = {};
   for (const row of rows169) {
-    if (!map[row.camberBolt]) map[row.camberBolt] = {};
-    map[row.camberBolt][row.casterBolt] = row;
+    if (!map[row.camberBolt]) map[row.camberBolt] = [];
+    map[row.camberBolt].push(row);
   }
 
-  // For each front bolt position, get the row where rear bolt = 0
-  // This gives us the nominal aligned configuration curve
+  // For each camberBolt, pick the casterBolt that gets closest to the caster target.
+  // rows169 already carry casterDelta; null means rear wheel (no caster target) → fall
+  // back to minimising |camberDelta| so the camber line is still meaningful.
   const frontPositions = Object.keys(map).map(Number).sort((a, b) => a - b);
-  
+
   for (const camberBolt of frontPositions) {
-    const rearZeroRow = map[camberBolt][0];
-    
-    if (rearZeroRow) {
-      result.push({
-        camberBolt: rearZeroRow.camberBolt,
-        camber: rearZeroRow.camber,
-        caster: rearZeroRow.caster,
-      });
-    } else {
-      // Fallback: if rear=0 not available, pick the best available row
-      const candidates = Object.values(map[camberBolt]);
-      const bestRow = candidates.reduce((best, row) =>
-        (row.camberDelta ** 2 + row.casterDelta ** 2) <
-        (best.camberDelta ** 2 + best.casterDelta ** 2) ? row : best
-      );
-      result.push({
-        camberBolt: bestRow.camberBolt,
-        camber: bestRow.camber,
-        caster: bestRow.caster,
-      });
-    }
+    const candidates = map[camberBolt];
+    const bestRow = candidates.reduce((best, row) => {
+      const hasCaster = row.casterDelta != null && best.casterDelta != null;
+      if (hasCaster) {
+        return Math.abs(row.casterDelta) < Math.abs(best.casterDelta) ? row : best;
+      }
+      return Math.abs(row.camberDelta) < Math.abs(best.camberDelta) ? row : best;
+    });
+    result.push({
+      camberBolt: bestRow.camberBolt,
+      camber: bestRow.camber,
+      caster: bestRow.caster,
+    });
   }
 
   return result;

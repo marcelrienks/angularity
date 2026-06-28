@@ -110,7 +110,7 @@
     </section>
 
     <!-- ── Section 2.2: Camber & Caster Chart
-         PURPOSE: Show how camber and caster vary with bolt position (other bolt = 0 nominal).
+         PURPOSE: Show how camber and caster vary with camber bolt position (caster bolt set to best caster for each point).
          Helps visualize trade-offs and identify positions where targets are achievable.
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="chart-section" id="section-chart" style="display:none">
@@ -125,7 +125,7 @@
         <canvas id="main-chart" aria-label="Camber and caster chart"></canvas>
       </div>
       <p class="chart-note paragraph" id="chart-note">
-        X-axis: bolt position (13 positions shown with other bolt set to nominal 0) ·
+        X-axis: camber bolt position · caster bolt set to best caster for each point ·
         Dashed lines: targets (<span id="chart-note-camber">Camber −1.1°</span> · <span id="chart-note-caster">Caster 5.0°</span>) ·
         Solid markers = measured · Hollow markers = interpolated
       </p>
