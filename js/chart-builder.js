@@ -173,13 +173,12 @@ function _mainChartOptions(aggregated, showCaster, wheel) {
   const boltPositions = aggregated.map(r => r.camberBolt);
   const xMin = Math.min(...boltPositions);
   const xMax = Math.max(...boltPositions);
-  const xPadding = Math.max(1, Math.ceil((xMax - xMin) * 0.1));  // 10% padding
 
   const scales = {
     x: {
       type: 'linear',
-      min: xMin - xPadding,
-      max: xMax + xPadding,
+      min: xMin,
+      max: xMax,
       ticks: {
         color: COLOURS.mutedStrong,
         font: { family: "'Share Tech Mono', monospace", size: 9 },

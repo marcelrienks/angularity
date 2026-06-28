@@ -336,13 +336,13 @@ function _rebuildAll() {
 
   _rebuildWheelTabs(loadedWheels);
   _renderSummaryTable();
-  _renderMainChart();
   _renderToeSummary();
   _renderWashers();
   _renderSymmetry();
 
   _showSection('section-table');
   _showSection('section-chart');
+  _renderMainChart();
 
   if (hasFrontPair || hasRearPair) {
     _showSection('section-symmetry');
@@ -538,8 +538,8 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
 
   // ── Data rows ──────────────────────────────────────────────────────────
   const tbody = table.createTBody();
-  for (let fi = 0; fi < BOLT_POSITIONS.length; fi++) {
-    const f = BOLT_POSITIONS[fi];
+  for (let ri = 0; ri < BOLT_POSITIONS.length; ri++) {
+    const f = BOLT_POSITIONS[ri];
     const tr = tbody.insertRow();
 
     // Row header
@@ -548,8 +548,8 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
     if (REQUIRED_POSITIONS.includes(f)) rowLbl.classList.add('required-header');
     rowLbl.innerHTML = `<span class="${rowMetricClass}">${_sign(f)}</span>`;
 
-    for (let ri = 0; ri < BOLT_POSITIONS.length; ri++) {
-      const r     = BOLT_POSITIONS[ri];
+    for (let fi = 0; fi < BOLT_POSITIONS.length; fi++) {
+      const r     = BOLT_POSITIONS[fi];
       const cell  = grid[fi][ri];
       if (!cell) continue;  // Skip unmeasured positions
       const camber = +cell.zero.toFixed(2);
@@ -619,14 +619,14 @@ function _buildTable(result) {
   const rowMetricLabel = isRearWheel ? 'Camber' : 'Caster';
   const rowMetricClass = isRearWheel ? 'metric-camber' : 'metric-caster';
   _th(headerRow, `<span class="${columnMetricClass}">${columnMetricLabel}</span>→<br><span class="${rowMetricClass}">${rowMetricLabel}</span>↓`, 'col-label-row', true);
-  for (const r of measuredCaster) {
+  for (const r of measuredCamber) {
     const th = _th(headerRow, `<span class="${columnMetricClass}">${_sign(r)}</span>`, '', true);
     if (REQUIRED_POSITIONS.includes(r)) th.classList.add('required-header');
   }
 
   // ── Data rows ──────────────────────────────────────────────────────────
   const tbody = table.createTBody();
-  for (const f of measuredCamber) {
+  for (const f of measuredCaster) {
     const tr = tbody.insertRow();
 
     // Row header
@@ -635,9 +635,9 @@ function _buildTable(result) {
     if (REQUIRED_POSITIONS.includes(f)) rowLbl.classList.add('required-header');
     rowLbl.innerHTML = `<span class="${rowMetricClass}">${_sign(f)}</span>`;
 
-    for (const r of measuredCaster) {
-      const fi = BOLT_POSITIONS.indexOf(f);
-      const ri = BOLT_POSITIONS.indexOf(r);
+    for (const r of measuredCamber) {
+      const fi = BOLT_POSITIONS.indexOf(r);
+      const ri = BOLT_POSITIONS.indexOf(f);
       const cell  = grid[fi][ri];
       if (!cell) continue;  // Skip unmeasured positions
       const camber = +cell.zero.toFixed(2);
@@ -1163,11 +1163,11 @@ function _buildRearIndependentOptimizationCard(wheel, bestCell, targetCamber) {
     <div class="title">${wheel}</div>
     <div>
       <div class="symmetry-metric front-bolt">
-        <span class="label">Best <span class="metric-camber">Camber</span> Toe Bolt</span>
+        <span class="label">Best <span class="metric-camber">Camber</span> Camber Bolt</span>
         <span class="value">${_sign(bestCell.camberBolt)}</span>
       </div>
       <div class="symmetry-metric rear-bolt">
-        <span class="label">Best <span class="metric-camber">Camber</span> Camber Bolt</span>
+        <span class="label">Best <span class="metric-camber">Camber</span> Toe Bolt</span>
         <span class="value">${_sign(bestCell.casterBolt)}</span>
       </div>
       <div class="symmetry-metric camber">
@@ -1284,11 +1284,11 @@ function _buildRearSymmetryPairCard(title, rearData, rearPair) {
         <div class="bolt-values-grid">
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt symmetry-metric--compact">
-              <span class="label">Toe Bolt</span>
+              <span class="label">Camber Bolt</span>
               <span class="value">${_sign(rearPair.rlPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-              <span class="label">Camber Bolt</span>
+              <span class="label">Toe Bolt</span>
               <span class="value">${_sign(rearPair.rlPosition.casterBolt)}</span>
             </div>
           </div>
@@ -1305,11 +1305,11 @@ function _buildRearSymmetryPairCard(title, rearData, rearPair) {
         <div class="bolt-values-grid">
           <div class="bolts-col">
             <div class="symmetry-metric front-bolt symmetry-metric--compact">
-              <span class="label">Toe Bolt</span>
+              <span class="label">Camber Bolt</span>
               <span class="value">${_sign(rearPair.rrPosition.camberBolt)}</span>
             </div>
             <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-              <span class="label">Camber Bolt</span>
+              <span class="label">Toe Bolt</span>
               <span class="value">${_sign(rearPair.rrPosition.casterBolt)}</span>
             </div>
           </div>
@@ -1348,8 +1348,8 @@ function _buildToeSymmetryPairCard(title, pairData, wheelPrefix = 'FL/FR') {
   const toeMismatchClass = toeMismatchStable ? 'match' : 'partial';
 
   // Bolt labels differ between front and rear suspension
-  const frontBoltLabel = isRear ? 'Toe Bolt' : 'Camber Bolt';
-  const rearBoltLabel = isRear ? 'Camber Bolt' : 'Caster Bolt';
+  const frontBoltLabel = 'Camber Bolt';
+  const rearBoltLabel = isRear ? 'Toe Bolt' : 'Caster Bolt';
 
   const card = document.createElement('div');
   card.className = 'symmetry-card';
@@ -1453,8 +1453,8 @@ function _buildRearConsolidationTable(rearSymmetryResult) {
   camberRow.innerHTML = `
     <td class="bold-cell"><span class="metric-camber">Camber</span></td>
     <td>${recommendation.camber.toFixed(2)}°</td>
-    <td><div>Toe:${rlCamberBoltBolt}</div><div>Camber:${rlCasterBoltBolt}</div></td>
-    <td><div>Toe:${rrCamberBoltBolt}</div><div>Camber:${rrCasterBoltBolt}</div></td>
+    <td><div>Camber:${rlCamberBoltBolt}</div><div>Toe:${rlCasterBoltBolt}</div></td>
+    <td><div>Camber:${rrCamberBoltBolt}</div><div>Toe:${rrCasterBoltBolt}</div></td>
   `;
   tbody.appendChild(camberRow);
 

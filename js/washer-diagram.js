@@ -122,8 +122,8 @@ export function renderWasherSection(containerId, recommendations) {
   rlWheelTitle.textContent = 'Rear Left (RL)';
   rlGroup.appendChild(rlWheelTitle);
   if (recommendations.RL) {
-    rlGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RL.casterBolt, COLOURS.camber));
-    rlGroup.appendChild(_makeBoltRow('Toe Bolt', 'Toe', recommendations.RL.camberBolt, COLOURS.caster));
+    rlGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RL.camberBolt, COLOURS.camber));
+    rlGroup.appendChild(_makeBoltRow('Toe Bolt', 'Toe', recommendations.RL.casterBolt, COLOURS.caster));
   } else {
     rlGroup.appendChild(_makeBlankBoltRow('Camber Bolt'));
     rlGroup.appendChild(_makeBlankBoltRow('Toe Bolt'));
@@ -138,8 +138,8 @@ export function renderWasherSection(containerId, recommendations) {
   rrWheelTitle.textContent = 'Rear Right (RR)';
   rrGroup.appendChild(rrWheelTitle);
   if (recommendations.RR) {
-    rrGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RR.casterBolt, COLOURS.camber));
-    rrGroup.appendChild(_makeBoltRow('Toe Bolt', 'Toe', recommendations.RR.camberBolt, COLOURS.caster));
+    rrGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.RR.camberBolt, COLOURS.camber));
+    rrGroup.appendChild(_makeBoltRow('Toe Bolt', 'Toe', recommendations.RR.casterBolt, COLOURS.caster));
   } else {
     rrGroup.appendChild(_makeBlankBoltRow('Camber Bolt'));
     rrGroup.appendChild(_makeBlankBoltRow('Toe Bolt'));
