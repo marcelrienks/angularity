@@ -20,9 +20,6 @@ import { buildMainChart, destroyChart, updateChartNote } from './chart-builder.j
 import { renderWasherSection } from './washer-diagram.js';
 import { loadFullGridState, loadWheelFromStorage, loadWheelToeFromStorage, hasSufficientData, invalidateCache } from './localstorage-io.js';
 import { calculateCaster, toeDegreesToResultantMm } from './math-utils.js';
-import { renderSummaryTable as renderTableUI,
-         renderMainChart as renderChartUI,
-         renderSymmetryPanel as renderSymmetryUI } from './report-ui.js';
 import { _th } from './table-utils.js';
 import { _sign } from './format-utils.js';
 import { _showError, _hideError, _showWarning, _hideWarning } from './error-utils.js';

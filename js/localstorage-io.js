@@ -428,27 +428,6 @@ export async function handleFileUpload(file, wheel) {
   }
 }
 
-/**
- * Get cached result for a wheel
- * @param {string} wheel - Wheel ID
- * @returns {object|null}
- */
-export function getWheelResult(wheel) {
-  return resultsCache[wheel];
-}
-
-/**
- * Get symmetry analysis for front axle
- * @returns {object|null}
- */
-export function getSymmetryAnalysis() {
-  const flResult = resultsCache['FL'];
-  const frResult = resultsCache['FR'];
-
-  if (!flResult || !frResult) return null;
-
-  return symmetryAnalysis(flResult, frResult);
-}
 
 /**
  * Clear all cached data

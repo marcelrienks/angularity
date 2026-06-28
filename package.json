@@ -35,13 +35,7 @@
     "test:required-fields": "node tests/integration/required-fields-e2e.mjs",
     "test:target-values": "node tests/integration/target-values-validation.mjs",
     "test:toe-symmetry": "node tests/integration/toe-symmetry-validation.mjs",
-    "test:report-bugfix": "node tests/integration/report-bugfix-validation.mjs",
-    "deploy": "bash scripts/deploy.sh",
-    "setup:aws-infrastructure": "bash scripts/setup-aws-infrastructure.sh",
-    "terraform:init": "cd infrastructure && terraform init",
-    "terraform:plan": "cd infrastructure && terraform plan",
-    "terraform:apply": "cd infrastructure && terraform apply",
-    "terraform:destroy": "cd infrastructure && terraform destroy"
+    "test:report-bugfix": "node tests/integration/report-bugfix-validation.mjs"
   },
   "keywords": [
     "mx5",
