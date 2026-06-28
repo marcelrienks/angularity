@@ -1100,60 +1100,55 @@ function _buildIndependentOptimizationCard(wheel, data) {
   card.innerHTML = `
     <div class="title">${wheel}</div>
     <div class="scenario-grid">
-      <!-- LEFT SIDE: Best Camber Scenario -->
       <div class="scenario-col">
-        <div class="scenario-header">Best Camber</div>
-        <div class="bolt-values-grid">
-          <div class="bolts-col">
-            <div class="symmetry-metric camber-bolt symmetry-metric--compact">
-              <span class="label">Camber Bolt</span>
-              <span class="value">${_sign(data.camberOptCamberBolt)}</span>
-            </div>
-            <div class="symmetry-metric caster-bolt symmetry-metric--compact">
-              <span class="label">Caster Bolt</span>
-              <span class="value">${_sign(data.camberOptCasterBolt)}</span>
-            </div>
-          </div>
-          <div class="values-col">
-            <div class="symmetry-metric camber symmetry-metric--compact">
-              <span class="label"><span class="metric-camber">Camber</span></span>
-              <span class="value">${data.bestCamberValue.toFixed(2)}°</span>
-              <span class="symmetry-target">Target: ${TARGET_CAMBER.toFixed(2)}° &nbsp; Δ ${_delta(data.camberDelta)}°</span>
-            </div>
-            <div class="symmetry-metric caster symmetry-metric--compact">
-              <span class="label"><span class="metric-caster">Resulting Caster</span></span>
-              <span class="value">${data.camberCasterAtBestCamber.toFixed(2)}°</span>
-            </div>
-          </div>
-        </div>
+        <div class="scenario-header">Optimize Camber</div>
+        <table class="scenario-table">
+          <thead><tr>
+            <th class="sct-metric"></th>
+            <th class="sct-bolt">Bolt</th>
+            <th class="sct-result">Achieved</th>
+            <th class="sct-vs">vs Target</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="sct-metric"><span class="metric-camber">Camber</span></td>
+              <td class="sct-bolt">${_sign(data.camberOptCamberBolt)}</td>
+              <td class="sct-result">${data.bestCamberValue.toFixed(2)}°</td>
+              <td class="sct-vs">Δ ${_delta(data.camberDelta)}°</td>
+            </tr>
+            <tr class="sct-side-effect">
+              <td class="sct-metric"><span class="metric-caster">Caster</span></td>
+              <td class="sct-bolt">${_sign(data.camberOptCasterBolt)}</td>
+              <td class="sct-result">${data.camberCasterAtBestCamber.toFixed(2)}°</td>
+              <td class="sct-vs">side effect</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-
-      <!-- RIGHT SIDE: Best Caster Scenario -->
       <div class="scenario-col scenario-col--right">
-        <div class="scenario-header">Best Caster</div>
-        <div class="bolt-values-grid">
-          <div class="bolts-col">
-            <div class="symmetry-metric camber-bolt symmetry-metric--compact">
-              <span class="label">Camber Bolt</span>
-              <span class="value">${_sign(data.casterOptCamberBolt)}</span>
-            </div>
-            <div class="symmetry-metric caster-bolt symmetry-metric--compact">
-              <span class="label">Caster Bolt</span>
-              <span class="value">${_sign(data.casterOptCasterBolt)}</span>
-            </div>
-          </div>
-          <div class="values-col">
-            <div class="symmetry-metric caster symmetry-metric--compact">
-              <span class="label"><span class="metric-caster">Caster</span></span>
-              <span class="value">${data.bestCasterValue.toFixed(2)}°</span>
-              <span class="symmetry-target">Target: ${TARGET_CASTER.toFixed(2)}° &nbsp; Δ ${_delta(data.casterDelta)}°</span>
-            </div>
-            <div class="symmetry-metric camber symmetry-metric--compact">
-              <span class="label"><span class="metric-camber">Resulting Camber</span></span>
-              <span class="value">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
-            </div>
-          </div>
-        </div>
+        <div class="scenario-header">Optimize Caster</div>
+        <table class="scenario-table">
+          <thead><tr>
+            <th class="sct-metric"></th>
+            <th class="sct-bolt">Bolt</th>
+            <th class="sct-result">Achieved</th>
+            <th class="sct-vs">vs Target</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="sct-metric"><span class="metric-caster">Caster</span></td>
+              <td class="sct-bolt">${_sign(data.casterOptCasterBolt)}</td>
+              <td class="sct-result">${data.bestCasterValue.toFixed(2)}°</td>
+              <td class="sct-vs">Δ ${_delta(data.casterDelta)}°</td>
+            </tr>
+            <tr class="sct-side-effect">
+              <td class="sct-metric"><span class="metric-camber">Camber</span></td>
+              <td class="sct-bolt">${_sign(data.casterOptCamberBolt)}</td>
+              <td class="sct-result">${data.casterCamberAtBestCaster.toFixed(2)}°</td>
+              <td class="sct-vs">side effect</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>`;
   return card;
@@ -1199,9 +1194,9 @@ function _buildSymmetryPairCard(title, pairData, metricType) {
   const card = document.createElement('div');
   card.className = 'symmetry-card';
 
-  const leftPrefix = metricType === 'camber' ? 'FL' : 'FL';
-  const rightPrefix = metricType === 'camber' ? 'FR' : 'FR';
-  const metricValue = metricType === 'camber' ? pairData.flCamber : pairData.flCaster;
+  const flMetricValue = metricType === 'camber' ? pairData.flCamber : pairData.flCaster;
+  const frMetricValue = metricType === 'camber' ? pairData.frCamber : pairData.frCaster;
+  const avgMetricValue = (flMetricValue + frMetricValue) / 2;
   const resultingMetric = metricType === 'camber' ? 'Resulting Caster' : 'Resulting Camber';
   const resultingFL = metricType === 'camber' ? pairData.flCasterAtBestCamber : pairData.flCamberAtBestCaster;
   const resultingFR = metricType === 'camber' ? pairData.frCasterAtBestCamber : pairData.frCamberAtBestCaster;
@@ -1212,7 +1207,7 @@ function _buildSymmetryPairCard(title, pairData, metricType) {
 
   card.innerHTML = `
     <div class="title">${title}</div>
-    <div class="section-desc">FL and FR achieve matching <span class="${metricClass}">${metricLabelLower}</span> (${metricValue.toFixed(2)}°)</div>
+    <div class="section-desc">FL and FR achieve matching <span class="${metricClass}">${metricLabelLower}</span> (avg ${avgMetricValue.toFixed(2)}°)</div>
     <div class="scenario-grid">
       <div class="scenario-col">
         <div class="scenario-header">FL</div>
@@ -1230,7 +1225,7 @@ function _buildSymmetryPairCard(title, pairData, metricType) {
           <div class="values-col">
             <div class="symmetry-metric ${metricType} symmetry-metric--compact">
               <span class="label"><span class="${metricClass}">${metricLabel}</span></span>
-              <span class="value">${metricValue.toFixed(2)}°</span>
+              <span class="value">${flMetricValue.toFixed(2)}°</span>
             </div>
             <div class="symmetry-metric ${metricType === 'camber' ? 'caster' : 'camber'} symmetry-metric--compact">
               <span class="label"><span class="${resultingClass}">${resultingMetric}</span></span>
@@ -1255,7 +1250,7 @@ function _buildSymmetryPairCard(title, pairData, metricType) {
           <div class="values-col">
             <div class="symmetry-metric ${metricType} symmetry-metric--compact">
               <span class="label"><span class="${metricClass}">${metricLabel}</span></span>
-              <span class="value">${metricValue.toFixed(2)}°</span>
+              <span class="value">${frMetricValue.toFixed(2)}°</span>
             </div>
             <div class="symmetry-metric ${metricType === 'camber' ? 'caster' : 'camber'} symmetry-metric--compact">
               <span class="label"><span class="${resultingClass}">${resultingMetric}</span></span>
@@ -1461,8 +1456,8 @@ function _buildRearConsolidationTable(rearSymmetryResult) {
   camberRow.innerHTML = `
     <td class="bold-cell"><span class="metric-camber">Camber</span></td>
     <td>${recommendation.camber.toFixed(2)}°</td>
-    <td><div>F:${rlCamberBoltBolt}</div><div>R:${rlCasterBoltBolt}</div></td>
-    <td><div>F:${rrCamberBoltBolt}</div><div>R:${rrCasterBoltBolt}</div></td>
+    <td><div>Toe:${rlCamberBoltBolt}</div><div>Camber:${rlCasterBoltBolt}</div></td>
+    <td><div>Toe:${rrCamberBoltBolt}</div><div>Camber:${rrCasterBoltBolt}</div></td>
   `;
   tbody.appendChild(camberRow);
 
@@ -1604,60 +1599,55 @@ function _buildSymmetryPanel(sym) {
     card.innerHTML = `
       <div class="title">${wheel}</div>
       <div class="scenario-grid">
-        <!-- LEFT SIDE: Best Camber Scenario -->
         <div class="scenario-col">
-          <div class="scenario-header">Best Camber</div>
-          <div class="bolt-values-grid">
-            <div class="bolts-col">
-              <div class="symmetry-metric front-bolt symmetry-metric--compact">
-                <span class="label">Camber Bolt</span>
-                <span class="value">${_sign(data.camberFront)}</span>
-              </div>
-              <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-                <span class="label">Caster Bolt</span>
-                <span class="value">${_sign(data.camberRear)}</span>
-              </div>
-            </div>
-            <div class="values-col">
-              <div class="symmetry-metric camber symmetry-metric--compact">
-                <span class="label">Camber</span>
-                <span class="value">${data.bestCamberValue.toFixed(2)}°</span>
-                <span class="symmetry-target">Target: ${TARGET_CAMBER.toFixed(2)}° &nbsp; Δ ${_delta(data.camberDelta)}°</span>
-              </div>
-              <div class="symmetry-metric caster symmetry-metric--compact">
-                <span class="label">Resulting Caster</span>
-                <span class="value">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
-              </div>
-            </div>
-          </div>
+          <div class="scenario-header">Optimize Camber</div>
+          <table class="scenario-table">
+            <thead><tr>
+              <th class="sct-metric"></th>
+              <th class="sct-bolt">Bolt</th>
+              <th class="sct-result">Achieved</th>
+              <th class="sct-vs">vs Target</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td class="sct-metric"><span class="metric-camber">Camber</span></td>
+                <td class="sct-bolt">${_sign(data.camberOptCamberBolt)}</td>
+                <td class="sct-result">${data.bestCamberValue.toFixed(2)}°</td>
+                <td class="sct-vs">Δ ${_delta(data.camberDelta)}°</td>
+              </tr>
+              <tr class="sct-side-effect">
+                <td class="sct-metric"><span class="metric-caster">Caster</span></td>
+                <td class="sct-bolt">${_sign(data.camberOptCasterBolt)}</td>
+                <td class="sct-result">${data.camberCasterAtBestCamber.toFixed(2)}°</td>
+                <td class="sct-vs">side effect</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-
-        <!-- RIGHT SIDE: Best Caster Scenario -->
         <div class="scenario-col scenario-col--right">
-          <div class="scenario-header">Best Caster</div>
-          <div class="bolt-values-grid">
-            <div class="bolts-col">
-              <div class="symmetry-metric front-bolt symmetry-metric--compact">
-                <span class="label">Camber Bolt</span>
-                <span class="value">${_sign(data.casterFront)}</span>
-              </div>
-              <div class="symmetry-metric rear-bolt symmetry-metric--compact">
-                <span class="label">Caster Bolt</span>
-                <span class="value">${_sign(data.casterRear)}</span>
-              </div>
-            </div>
-            <div class="values-col">
-              <div class="symmetry-metric caster symmetry-metric--compact">
-                <span class="label">Caster</span>
-                <span class="value">${data.bestCasterValue.toFixed(2)}°</span>
-                <span class="symmetry-target">Target: ${TARGET_CASTER.toFixed(2)}° &nbsp; Δ ${_delta(data.casterDelta)}°</span>
-              </div>
-              <div class="symmetry-metric camber symmetry-metric--compact">
-                <span class="label">Resulting Camber</span>
-                <span class="value">${data.casterCamberAtBestCaster.toFixed(2)}°</span>
-              </div>
-            </div>
-          </div>
+          <div class="scenario-header">Optimize Caster</div>
+          <table class="scenario-table">
+            <thead><tr>
+              <th class="sct-metric"></th>
+              <th class="sct-bolt">Bolt</th>
+              <th class="sct-result">Achieved</th>
+              <th class="sct-vs">vs Target</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td class="sct-metric"><span class="metric-caster">Caster</span></td>
+                <td class="sct-bolt">${_sign(data.casterOptCasterBolt)}</td>
+                <td class="sct-result">${data.bestCasterValue.toFixed(2)}°</td>
+                <td class="sct-vs">Δ ${_delta(data.casterDelta)}°</td>
+              </tr>
+              <tr class="sct-side-effect">
+                <td class="sct-metric"><span class="metric-camber">Camber</span></td>
+                <td class="sct-bolt">${_sign(data.casterOptCamberBolt)}</td>
+                <td class="sct-result">${data.casterCamberAtBestCaster.toFixed(2)}°</td>
+                <td class="sct-vs">side effect</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>`;
     grid.appendChild(card);
@@ -1893,8 +1883,8 @@ function _buildRearSymmetryPanel(rearSymmetry) {
       <tr>
         <td class="bold-cell"><span class="metric-camber">Camber</span></td>
         <td>${rearSymmetry.recommendation.camber.toFixed(2)}°</td>
-        <td><div>F:${_sign(rearSymmetry.recommendation.leftFront)}</div><div>R:${_sign(rearSymmetry.recommendation.leftRear)}</div></td>
-        <td><div>F:${_sign(rearSymmetry.recommendation.rightFront)}</div><div>R:${_sign(rearSymmetry.recommendation.rightRear)}</div></td>
+        <td><div>Toe:${_sign(rearSymmetry.recommendation.leftFront)}</div><div>Camber:${_sign(rearSymmetry.recommendation.leftRear)}</div></td>
+        <td><div>Toe:${_sign(rearSymmetry.recommendation.rightFront)}</div><div>Camber:${_sign(rearSymmetry.recommendation.rightRear)}</div></td>
       </tr>
     </tbody>`;
   wrap.appendChild(summary);
@@ -1970,9 +1960,9 @@ function _determineFrontSymmetryStatus(sym) {
   
   // Check Camber
   if (sym.camberSymmetricPair) {
-    const camberValue = sym.camberSymmetricPair.flCamber; // or frCamber (should be ~same)
+    const camberValue = (sym.camberSymmetricPair.flCamber + sym.camberSymmetricPair.frCamber) / 2;
     const camberDelta = Math.abs(camberValue - TARGET_CAMBER);
-    
+
     if (camberDelta <= greenThreshold) {
       camberStatus = 'green';
       messages.push(`✓ <span class="metric-camber">Camber</span> match at target (${camberValue.toFixed(2)}°)`);
@@ -1993,7 +1983,7 @@ function _determineFrontSymmetryStatus(sym) {
   
   // Check Caster
   if (sym.casterSymmetricPair) {
-    const casterValue = sym.casterSymmetricPair.flCaster; // or frCaster (should be ~same)
+    const casterValue = (sym.casterSymmetricPair.flCaster + sym.casterSymmetricPair.frCaster) / 2;
     const casterDelta = Math.abs(casterValue - TARGET_CASTER);
     
     if (casterDelta <= greenThreshold) {
@@ -2073,22 +2063,24 @@ function _buildFrontConsolidationTableWithStatus(sym) {
   const tbody = document.createElement('tbody');
 
   const camberFlBolts = sym.camberSymmetricPair
-    ? `<div>F:${_sign(sym.camberSymmetricPair.flPosition.camberBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.flPosition.casterBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.flCamberBolt)}</div><div>R:${_sign(sym.recommendation.flCasterBolt)}</div>`;
+    ? `<div>Camber:${_sign(sym.camberSymmetricPair.flPosition.camberBolt)}</div><div>Caster:${_sign(sym.camberSymmetricPair.flPosition.casterBolt)}</div>`
+    : `<div>Camber:${_sign(sym.recommendation.flCamberBolt)}</div><div>Caster:${_sign(sym.recommendation.flCasterBolt)}</div>`;
   const camberFrBolts = sym.camberSymmetricPair
-    ? `<div>F:${_sign(sym.camberSymmetricPair.frPosition.camberBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.frPosition.casterBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.frCamberBolt)}</div><div>R:${_sign(sym.recommendation.frCasterBolt)}</div>`;
+    ? `<div>Camber:${_sign(sym.camberSymmetricPair.frPosition.camberBolt)}</div><div>Caster:${_sign(sym.camberSymmetricPair.frPosition.casterBolt)}</div>`
+    : `<div>Camber:${_sign(sym.recommendation.frCamberBolt)}</div><div>Caster:${_sign(sym.recommendation.frCasterBolt)}</div>`;
 
   const casterFlBolts = sym.casterSymmetricPair
-    ? `<div>F:${_sign(sym.casterSymmetricPair.flPosition.camberBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.flPosition.casterBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.flCamberBolt)}</div><div>R:${_sign(sym.recommendation.flCasterBolt)}</div>`;
+    ? `<div>Camber:${_sign(sym.casterSymmetricPair.flPosition.camberBolt)}</div><div>Caster:${_sign(sym.casterSymmetricPair.flPosition.casterBolt)}</div>`
+    : `<div>Camber:${_sign(sym.recommendation.flCamberBolt)}</div><div>Caster:${_sign(sym.recommendation.flCasterBolt)}</div>`;
   const casterFrBolts = sym.casterSymmetricPair
-    ? `<div>F:${_sign(sym.casterSymmetricPair.frPosition.camberBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.frPosition.casterBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.frCamberBolt)}</div><div>R:${_sign(sym.recommendation.frCasterBolt)}</div>`;
+    ? `<div>Camber:${_sign(sym.casterSymmetricPair.frPosition.camberBolt)}</div><div>Caster:${_sign(sym.casterSymmetricPair.frPosition.casterBolt)}</div>`
+    : `<div>Camber:${_sign(sym.recommendation.frCamberBolt)}</div><div>Caster:${_sign(sym.recommendation.frCasterBolt)}</div>`;
 
   // Camber row
   const camberRow = document.createElement('tr');
-  const camberCompromise = ((sym.fl.bestCamberValue + sym.fr.bestCamberValue) / 2).toFixed(2);
+  const camberCompromise = sym.camberSymmetricPair
+    ? ((sym.camberSymmetricPair.flCamber + sym.camberSymmetricPair.frCamber) / 2).toFixed(2)
+    : ((sym.fl.bestCamberValue + sym.fr.bestCamberValue) / 2).toFixed(2);
   camberRow.innerHTML = `
     <td class="bold-cell"><span class="metric-camber">Camber</span></td>
     <td>${camberCompromise}°</td>
@@ -2099,7 +2091,9 @@ function _buildFrontConsolidationTableWithStatus(sym) {
 
   // Caster row
   const casterRow = document.createElement('tr');
-  const casterCompromise = ((sym.fl.bestCasterValue + sym.fr.bestCasterValue) / 2).toFixed(2);
+  const casterCompromise = sym.casterSymmetricPair
+    ? ((sym.casterSymmetricPair.flCaster + sym.casterSymmetricPair.frCaster) / 2).toFixed(2)
+    : ((sym.fl.bestCasterValue + sym.fr.bestCasterValue) / 2).toFixed(2);
   casterRow.innerHTML = `
     <td class="bold-cell"><span class="metric-caster">Caster</span></td>
     <td>${casterCompromise}°</td>
@@ -2110,7 +2104,7 @@ function _buildFrontConsolidationTableWithStatus(sym) {
 
   table.appendChild(tbody);
   div.appendChild(table);
-  
+
   return div;
 }
 
@@ -2146,22 +2140,24 @@ function _buildFrontConsolidationTable(sym) {
   const tbody = document.createElement('tbody');
 
   const camberFlBolts = sym.camberSymmetricPair
-    ? `<div>F:${_sign(sym.camberSymmetricPair.flPosition.camberBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.flPosition.casterBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.flCamberBolt)}</div><div>R:${_sign(sym.recommendation.flCasterBolt)}</div>`;
+    ? `<div>Camber:${_sign(sym.camberSymmetricPair.flPosition.camberBolt)}</div><div>Caster:${_sign(sym.camberSymmetricPair.flPosition.casterBolt)}</div>`
+    : `<div>Camber:${_sign(sym.recommendation.flCamberBolt)}</div><div>Caster:${_sign(sym.recommendation.flCasterBolt)}</div>`;
   const camberFrBolts = sym.camberSymmetricPair
-    ? `<div>F:${_sign(sym.camberSymmetricPair.frPosition.camberBolt)}</div><div>R:${_sign(sym.camberSymmetricPair.frPosition.casterBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.frCamberBolt)}</div><div>R:${_sign(sym.recommendation.frCasterBolt)}</div>`;
+    ? `<div>Camber:${_sign(sym.camberSymmetricPair.frPosition.camberBolt)}</div><div>Caster:${_sign(sym.camberSymmetricPair.frPosition.casterBolt)}</div>`
+    : `<div>Camber:${_sign(sym.recommendation.frCamberBolt)}</div><div>Caster:${_sign(sym.recommendation.frCasterBolt)}</div>`;
 
   const casterFlBolts = sym.casterSymmetricPair
-    ? `<div>F:${_sign(sym.casterSymmetricPair.flPosition.camberBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.flPosition.casterBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.flCamberBolt)}</div><div>R:${_sign(sym.recommendation.flCasterBolt)}</div>`;
+    ? `<div>Camber:${_sign(sym.casterSymmetricPair.flPosition.camberBolt)}</div><div>Caster:${_sign(sym.casterSymmetricPair.flPosition.casterBolt)}</div>`
+    : `<div>Camber:${_sign(sym.recommendation.flCamberBolt)}</div><div>Caster:${_sign(sym.recommendation.flCasterBolt)}</div>`;
   const casterFrBolts = sym.casterSymmetricPair
-    ? `<div>F:${_sign(sym.casterSymmetricPair.frPosition.camberBolt)}</div><div>R:${_sign(sym.casterSymmetricPair.frPosition.casterBolt)}</div>`
-    : `<div>F:${_sign(sym.recommendation.frCamberBolt)}</div><div>R:${_sign(sym.recommendation.frCasterBolt)}</div>`;
+    ? `<div>Camber:${_sign(sym.casterSymmetricPair.frPosition.camberBolt)}</div><div>Caster:${_sign(sym.casterSymmetricPair.frPosition.casterBolt)}</div>`
+    : `<div>Camber:${_sign(sym.recommendation.frCamberBolt)}</div><div>Caster:${_sign(sym.recommendation.frCasterBolt)}</div>`;
 
   // Camber row
   const camberRow = document.createElement('tr');
-  const camberCompromise = ((sym.fl.bestCamberValue + sym.fr.bestCamberValue) / 2).toFixed(2);
+  const camberCompromise = sym.camberSymmetricPair
+    ? ((sym.camberSymmetricPair.flCamber + sym.camberSymmetricPair.frCamber) / 2).toFixed(2)
+    : ((sym.fl.bestCamberValue + sym.fr.bestCamberValue) / 2).toFixed(2);
   camberRow.innerHTML = `
     <td class="bold-cell"><span class="metric-camber">Camber</span></td>
     <td>${camberCompromise}°</td>
@@ -2172,7 +2168,9 @@ function _buildFrontConsolidationTable(sym) {
 
   // Caster row
   const casterRow = document.createElement('tr');
-  const casterCompromise = ((sym.fl.bestCasterValue + sym.fr.bestCasterValue) / 2).toFixed(2);
+  const casterCompromise = sym.casterSymmetricPair
+    ? ((sym.casterSymmetricPair.flCaster + sym.casterSymmetricPair.frCaster) / 2).toFixed(2)
+    : ((sym.fl.bestCasterValue + sym.fr.bestCasterValue) / 2).toFixed(2);
   casterRow.innerHTML = `
     <td class="bold-cell"><span class="metric-caster">Caster</span></td>
     <td>${casterCompromise}°</td>
@@ -2209,7 +2207,7 @@ function _buildCornerTable(wheel, camberBolt, casterBolt, camber, caster) {
   frontRow.innerHTML = `
     <td class="corner-table-cell">
       <div class="corner-value-grid">
-        <strong class="corner-bolt-label">F: ${_sign(camberBolt)}</strong>
+        <strong class="corner-bolt-label">Camber: ${_sign(camberBolt)}</strong>
         <span class="corner-separator">|</span>
         <span class="corner-value-camber">${camberStr}</span>
       </div>
@@ -2223,7 +2221,7 @@ function _buildCornerTable(wheel, camberBolt, casterBolt, camber, caster) {
   rearRow.innerHTML = `
     <td class="corner-table-cell--last">
       <div class="corner-value-grid">
-        <strong class="corner-bolt-label">R: ${_sign(casterBolt)}</strong>
+        <strong class="corner-bolt-label">Caster: ${_sign(casterBolt)}</strong>
         <span class="corner-separator">|</span>
         <span class="corner-value-caster">${casterStr}</span>
       </div>

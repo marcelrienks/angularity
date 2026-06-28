@@ -693,14 +693,14 @@ body {
 
 .cell-label {
   letter-spacing: 0.03em;
-  width: 60px;
+  width: 72px;
+  font-size: var(--font-size-p);
+  font-weight: var(--font-weight-p);
   text-align: right;
   flex-shrink: 0;
   user-select: none;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--text);
+  color: var(--muted);
 }
 
 .cell-input {
@@ -1139,16 +1139,22 @@ body {
     border-bottom: 1px solid var(--border);
   }
 
+  .scenario-grid {
+    grid-template-columns: 1fr;
+  }
+
   .scenario-col {
     padding-right: 0;
     border-right: none;
     padding-bottom: 20px;
     margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
   }
 
   .scenario-col:last-child {
     padding-bottom: 0;
     margin-bottom: 0;
+    border-bottom: none;
   }
 
   .symmetry-analysis-section {
@@ -1268,8 +1274,12 @@ body {
 
 .symmetry-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
   gap: 20px;
+}
+
+.symmetry-grid > * {
+  min-width: 0;
 }
 
 .symmetry-card {
@@ -1388,8 +1398,13 @@ body {
 /* Scenario layout grid (inside symmetry cards) */
 .scenario-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 24px 0;
+}
+
+.scenario-grid > * {
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* Compact symmetry metric (no bottom margin, reduced emphasis) */
@@ -1401,6 +1416,62 @@ body {
 /* Success-colored card title */
 .title--success {
   color: var(--success);
+}
+
+/* Scenario table: Bolt | Achieved | vs Target per metric row */
+.scenario-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-p);
+}
+
+.scenario-table thead tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.scenario-table th,
+.scenario-table td {
+  text-align: right;
+  vertical-align: middle;
+}
+
+.scenario-table th {
+  color: var(--muted);
+  font-weight: normal;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0 0 6px 0;
+}
+
+.scenario-table td {
+  padding: 7px 0 0 0;
+}
+
+.scenario-table .sct-metric {
+  text-align: left;
+  padding-right: 12px;
+}
+
+.scenario-table .sct-bolt {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-strong);
+  padding-right: 12px;
+}
+
+.scenario-table .sct-result {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  padding-right: 12px;
+}
+
+.scenario-table .sct-vs {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.scenario-table tr.sct-side-effect td {
+  opacity: 0.5;
 }
 
 /* Axle heading description text */
