@@ -130,7 +130,7 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
       const ty = yScale.getPixelForValue(targetCasterOrToe);
 
       ctx.save();
-      ctx.strokeStyle = '#22d3ee';
+      ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1;
       ctx.setLineDash([6, 4]);
 
@@ -147,7 +147,7 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
       ctx.stroke();
 
       // Small circle at intersection
-      ctx.fillStyle = '#22d3ee';
+      ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       ctx.arc(tx, ty, 3, 0, 2 * Math.PI);
       ctx.fill();
