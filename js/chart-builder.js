@@ -2,10 +2,9 @@
  * chart-builder.js — Chart.js v4 chart construction helpers.
  *
  * Exported API:
- *   buildScatterChart(canvasId, rows169, wheel, targets)           → Chart instance
- *   buildSensitivityChart(canvasId, rows169, wheel, targets, mode) → Chart instance
- *   updateChartNote(targets)                                        → void
- *   destroyChart(instance)                                          → void
+ *   buildScatterChart(canvasId, rows169, wheel, targets) → Chart instance
+ *   updateChartNote(targets)                              → void
+ *   destroyChart(instance)                                → void
  */
 
 import { BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER, REAR_WHEELS } from './constants.js';
@@ -91,12 +90,12 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
     pointData.forEach(pt => {
       const dist = getDistFromTarget(group[group.findIndex(r => r.camber === pt.x && getYMetric(r) === pt.y)]);
       if (dist <= 0.5) {
-        pointBgColors.push('#00ff88');
-        pointRadii.push(8);
-        pointBorders.push('#00ff88');
+        pointBgColors.push('#ffffff');
+        pointRadii.push(7);
+        pointBorders.push('#ffffff');
       } else {
         pointBgColors.push(groupColor);
-        pointRadii.push(6);
+        pointRadii.push(5);
         pointBorders.push(groupColor);
       }
     });
@@ -201,185 +200,6 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
               const yVal = pt.y.toFixed(2);
               return `CB ${_sign(pt.camberBolt)} / KB ${_sign(pt.casterBolt)} · ${camberVal}° / ${yVal}° · Δ ${dist.toFixed(2)}°`;
             },
-          },
-        },
-      },
-    },
-  };
-
-  const chart = new Chart(canvas, config);
-  return chart;
-}
-
-/**
- * Build a sensitivity chart: line plot showing how one angle responds as a bolt sweeps.
- * @param {string} canvasId DOM canvas element id
- * @param {import('./report-engine.js').DerivedRow[]} rows169
- * @param {string} wheel Wheel identifier
- * @param {{ camber?: number, caster?: number|null, toe?: number|null }} [targets]
- * @param {'camber'|'caster'} [mode='camber'] Sensitivity axis
- * @returns {Chart|null}
- */
-export function buildSensitivityChart(canvasId, rows169, wheel, targets = {}, mode = 'camber') {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return null;
-
-  const isRearWheel = REAR_WHEELS.includes(wheel);
-  const targetCamber = Object.prototype.hasOwnProperty.call(targets, 'camber') ? targets.camber : TARGET_CAMBER;
-  const targetCaster = Object.prototype.hasOwnProperty.call(targets, 'caster') ? targets.caster : TARGET_CASTER;
-  const targetToe = Object.prototype.hasOwnProperty.call(targets, 'toe') ? targets.toe : null;
-
-  // Filter to measured rows
-  const pts = rows169.filter(r => !r.isInterpolated);
-  if (pts.length === 0) return null;
-
-  let datasets = [];
-  let xAxisLabel = '';
-  let yAxisLabel = '';
-  let targetValue = null;
-
-  if (mode === 'camber') {
-    // Group by casterBolt, plot camberBolt vs camber
-    const groups = {};
-    pts.forEach(row => {
-      const key = row.casterBolt;
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(row);
-    });
-
-    const casterBoltKeys = Object.keys(groups)
-      .map(k => parseInt(k, 10))
-      .sort((a, b) => a - b);
-
-    const xMin = Math.min(...pts.map(r => r.camberBolt));
-    const xMax = Math.max(...pts.map(r => r.camberBolt));
-    const xRange = Array.from({ length: (xMax - xMin) * 10 + 1 }, (_, i) => xMin + i * 0.1);
-
-    datasets = casterBoltKeys.map((kb, index) => {
-      const group = groups[kb];
-      const color = _getGroupColour(index, casterBoltKeys.length);
-
-      return {
-        label: `KB ${_sign(kb)}`,
-        data: group
-          .map(r => ({ x: r.camberBolt, y: r.camber }))
-          .sort((a, b) => a.x - b.x),
-        borderColor: color,
-        borderWidth: 1.5,
-        pointRadius: 3,
-        pointBackgroundColor: color,
-        pointBorderColor: color,
-        tension: 0,
-      };
-    });
-
-    // Add target reference line
-    datasets.push({
-      label: 'Target',
-      data: xRange.map(x => ({ x, y: targetCamber })),
-      borderDash: [5, 5],
-      borderColor: COLOURS.camber,
-      borderWidth: 1,
-      pointRadius: 0,
-      tension: 0,
-      fill: false,
-    });
-
-    xAxisLabel = 'Camber Bolt';
-    yAxisLabel = 'Camber (°)';
-    targetValue = targetCamber;
-  } else if (mode === 'caster') {
-    // Group by camberBolt, plot casterBolt vs caster/toe
-    const groups = {};
-    pts.forEach(row => {
-      const key = row.camberBolt;
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(row);
-    });
-
-    const camberBoltKeys = Object.keys(groups)
-      .map(k => parseInt(k, 10))
-      .sort((a, b) => a - b);
-
-    const xMin = Math.min(...pts.map(r => r.casterBolt));
-    const xMax = Math.max(...pts.map(r => r.casterBolt));
-    const xRange = Array.from({ length: (xMax - xMin) * 10 + 1 }, (_, i) => xMin + i * 0.1);
-
-    const getYMetric = (row) => isRearWheel ? row.toe : row.caster;
-    const targetYMetric = isRearWheel ? targetToe : targetCaster;
-
-    datasets = camberBoltKeys.map((cb, index) => {
-      const group = groups[cb];
-      const color = _getGroupColour(index, camberBoltKeys.length);
-
-      return {
-        label: `CB ${_sign(cb)}`,
-        data: group
-          .map(r => ({ x: r.casterBolt, y: getYMetric(r) }))
-          .sort((a, b) => a.x - b.x),
-        borderColor: color,
-        borderWidth: 1.5,
-        pointRadius: 3,
-        pointBackgroundColor: color,
-        pointBorderColor: color,
-        tension: 0,
-      };
-    });
-
-    // Add target reference line
-    datasets.push({
-      label: 'Target',
-      data: xRange.map(x => ({ x, y: targetYMetric })),
-      borderDash: [5, 5],
-      borderColor: isRearWheel ? COLOURS.caster : COLOURS.caster,
-      borderWidth: 1,
-      pointRadius: 0,
-      tension: 0,
-      fill: false,
-    });
-
-    xAxisLabel = 'Caster Bolt';
-    yAxisLabel = isRearWheel ? 'Toe (°)' : 'Caster (°)';
-    targetValue = targetYMetric;
-  }
-
-  const config = {
-    type: 'line',
-    data: { datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      interaction: {
-        mode: 'index',
-        intersect: false,
-      },
-      scales: {
-        x: {
-          type: 'linear',
-          title: { display: true, text: xAxisLabel },
-          ticks: {
-            color: COLOURS.mutedStrong,
-            font: { family: "'Share Tech Mono', monospace", size: 9 },
-            stepSize: 1,
-          },
-          grid: { color: COLOURS.border + '33' },
-        },
-        y: {
-          type: 'linear',
-          title: { display: true, text: yAxisLabel },
-          ticks: {
-            color: COLOURS.mutedStrong,
-            font: { family: "'Share Tech Mono', monospace", size: 9 },
-          },
-          grid: { color: COLOURS.border + '33' },
-        },
-      },
-      plugins: {
-        legend: {
-          labels: {
-            color: COLOURS.muted,
-            font: { family: "'Share Tech Mono', monospace", size: 9 },
           },
         },
       },
