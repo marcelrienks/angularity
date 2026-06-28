@@ -32,6 +32,7 @@ const INTEGRATION_TESTS = [
   'test:clear-empty-cycle',
   'test:multi-field-sync',
   'test:report-chart',
+  'test:report-scatter-charts',
   'test:report-target-sync',
   'test:report-symmetry',
   'test:rear-axle-symmetry',

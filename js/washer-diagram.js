@@ -77,10 +77,13 @@ export function renderWasherSection(containerId, recommendations) {
   flWheelTitle.className = 'washer-wheel-label sub-header';
   flWheelTitle.textContent = 'Front Left (FL)';
   flGroup.appendChild(flWheelTitle);
-  
+
   if (recommendations.FL) {
     flGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.FL.camberBolt, COLOURS.camber));
     flGroup.appendChild(_makeBoltRow('Caster Bolt', 'Caster', recommendations.FL.casterBolt, COLOURS.caster));
+  } else {
+    flGroup.appendChild(_makeBlankBoltRow('Camber Bolt'));
+    flGroup.appendChild(_makeBlankBoltRow('Caster Bolt'));
   }
   frontGrid.appendChild(flGroup);
 
@@ -91,10 +94,13 @@ export function renderWasherSection(containerId, recommendations) {
   frWheelTitle.className = 'washer-wheel-label sub-header';
   frWheelTitle.textContent = 'Front Right (FR)';
   frGroup.appendChild(frWheelTitle);
-  
+
   if (recommendations.FR) {
     frGroup.appendChild(_makeBoltRow('Camber Bolt', 'Camber', recommendations.FR.camberBolt, COLOURS.camber));
     frGroup.appendChild(_makeBoltRow('Caster Bolt', 'Caster', recommendations.FR.casterBolt, COLOURS.caster));
+  } else {
+    frGroup.appendChild(_makeBlankBoltRow('Camber Bolt'));
+    frGroup.appendChild(_makeBlankBoltRow('Caster Bolt'));
   }
   frontGrid.appendChild(frGroup);
 

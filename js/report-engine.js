@@ -253,6 +253,14 @@ export function processWheel(parsedCSV, options = {}) {
         .sort((a, b) => Math.abs(a.casterDelta) - Math.abs(b.casterDelta))
         .slice(0, 4);
 
+  const topByToeDelta = targetToe == null
+    ? []
+    : rows169
+        .slice()
+        .filter(r => r.toeDelta != null)
+        .sort((a, b) => Math.abs(a.toeDelta) - Math.abs(b.toeDelta))
+        .slice(0, 4);
+
   // Best compromise (using Golden Rule weighted score)
   const bestCell = rows169.reduce((best, r) => r.score < best.score ? r : best, rows169[0]);
 
@@ -275,6 +283,7 @@ export function processWheel(parsedCSV, options = {}) {
     rows169,
     topByCamberDelta,
     topByCasterDelta,
+    topByToeDelta,
     bestCell,
     bestCamberCell,
     bestCasterCell,

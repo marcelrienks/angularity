@@ -6,8 +6,7 @@
  *   - Section visibility
  *   - 13×13 summary table rendering (Section 2.1)
  *   - Main chart (Section 2.2) via chart-builder.js
- *   - Washer diagrams (Section 2.3) via washer-diagram.js
- *   - Symmetry analysis (Section 2.4) via report-engine.js
+ *   - Symmetry analysis (Section 2.3) via report-engine.js
  */
 
 import { REQUIRED_POSITIONS, BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER,
@@ -16,8 +15,7 @@ import { REQUIRED_POSITIONS, BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CAST
          SYMMETRY_TOLERANCE, getBoltPositions, getCurrentMeasurementDensity } from './constants.js';
 import { parseCSV } from './csv-io.js';
 import { processWheel, symmetryAnalysis } from './report-engine.js';
-import { buildMainChart, destroyChart, updateChartNote } from './chart-builder.js';
-import { renderWasherSection } from './washer-diagram.js';
+import { buildScatterChart, destroyChart, updateChartNote } from './chart-builder.js';
 import { loadFullGridState, loadWheelFromStorage, loadWheelToeFromStorage, hasSufficientData, invalidateCache } from './localstorage-io.js';
 import { calculateCaster, toeDegreesToResultantMm } from './math-utils.js';
 import { _th } from './table-utils.js';
@@ -28,9 +26,6 @@ import { _showError, _hideError, _showWarning, _hideWarning } from './error-util
 
 /** @type {Object<string, object|null>} */
 const results = Object.fromEntries(WHEELS.map(wheel => [wheel, null]));
-
-/** Selected summary metric: 'camber' | 'caster' | 'toe' */
-let selectedMetric = 'camber';
 
 /** @type {{ main: Chart|null }} */
 const charts = { main: null };
@@ -118,11 +113,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Always bind UI controls first
   _bindFileInputs();
   _bindWheelTabs();
-  _bindMetricToggle();
-  
+
   // Load data ONLY from localStorage (user's previous session)
   _loadFromLocalStorage();
-  
+
   // Set up auto-refresh event listeners for when page becomes active
   _setupAutoRefresh();
 });
@@ -291,7 +285,7 @@ async function _handleFile(e, wheel) {
       const processedRows = _convertRowsForProcessing(csvRows);
       results[wheel] = processWheel(processedRows, _getWheelProcessingOptions(wheel));
       _updateStatus(wheel, file.name, csvRows.length);
-      
+
       _rebuildAll();
     } catch (err) {
       _showError(`${wheel} CSV error: ${err.message}`);
@@ -337,7 +331,6 @@ function _rebuildAll() {
   _rebuildWheelTabs(loadedWheels);
   _renderSummaryTable();
   _renderToeSummary();
-  _renderWashers();
   _renderSymmetry();
 
   _showSection('section-table');
@@ -349,15 +342,13 @@ function _rebuildAll() {
   } else {
     _hideSection('section-symmetry');
   }
-
-  _showSection('section-washers');
 }
 
 // ── Wheel tabs ─────────────────────────────────────────────────────────────
 
 function _bindWheelTabs() {
   const groups = [
-    { selector: '#table-wheel-tabs button',       setter: w => { activeTableWheel = w; _normalizeSelectedMetricForWheel(); _updateMetricButtonStates(); _renderSummaryTable(); } },
+    { selector: '#table-wheel-tabs button',       setter: w => { activeTableWheel = w; _renderSummaryTable(); } },
     { selector: '#chart-wheel-tabs button',       setter: w => { activeChartWheel = w; _renderMainChart(); } },
   ];
 
@@ -372,34 +363,6 @@ function _bindWheelTabs() {
   }
 }
 
-// ── Mode toggle ──────────────────────────────────────────────────────────────
-
-/**
- * (Removed: Analysis mode toggle - only symmetric analysis is shown)
- */
-
-/**
- * Bind the metric toggle to re-render the table when changed.
- */
-function _bindMetricToggle() {
-  const buttons = document.querySelectorAll('.color-coding-selector button');
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (btn.disabled) return;
-
-      // Update active state
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      
-      // Update selected metric and re-render
-      selectedMetric = btn.getAttribute('data-metric');
-      _renderSummaryTable();
-    });
-  });
-
-  _updateMetricButtonStates();
-}
-
 /**
  * Re-render all analysis sections when data is refreshed.
  */
@@ -407,7 +370,6 @@ function _rebuildAnalysisSections() {
   _renderSummaryTable();
   _renderMainChart();
   _renderToeSummary();
-  _renderWashers();
   _renderSymmetry();
 }
 
@@ -420,41 +382,9 @@ function _rebuildWheelTabs(loadedWheels) {
   for (const [sel, activeWheel] of tabMap) {
     const el = document.querySelector(sel);
     if (!el) continue;
-    el.style.display = loadedWheels.length > 1 ? '' : 'none';
     el.querySelectorAll('button').forEach(btn => {
-      btn.style.display = loadedWheels.includes(btn.dataset.wheel) ? '' : 'none';
       btn.classList.toggle('active', btn.dataset.wheel === activeWheel);
     });
-  }
-
-  _normalizeSelectedMetricForWheel();
-  _updateMetricButtonStates();
-}
-
-function _allowedMetricsForWheel(wheel) {
-  return REAR_WHEELS.includes(wheel) ? ['camber', 'toe'] : ['camber', 'caster'];
-}
-
-function _isMetricAllowedForWheel(metric, wheel) {
-  return _allowedMetricsForWheel(wheel).includes(metric);
-}
-
-function _normalizeSelectedMetricForWheel() {
-  if (!_isMetricAllowedForWheel(selectedMetric, activeTableWheel)) {
-    selectedMetric = 'camber';
-  }
-}
-
-function _updateMetricButtonStates() {
-  const buttons = document.querySelectorAll('.color-coding-selector button');
-  if (!buttons.length) return;
-
-  for (const btn of buttons) {
-    const metric = btn.getAttribute('data-metric');
-    const allowed = _isMetricAllowedForWheel(metric, activeTableWheel);
-    btn.disabled = !allowed;
-    btn.classList.toggle('active', allowed && metric === selectedMetric);
-    btn.setAttribute('aria-disabled', String(!allowed));
   }
 }
 
@@ -469,28 +399,31 @@ function _updateMetricButtonStates() {
  * @returns {Map<string, string>} Map of 'f,r' → 'camber'|'caster'|'both'
  */
 function _getTopTargetMatches(result, wheel) {
-  const { topByCamberDelta, topByCasterDelta } = result;
+  const { topByCamberDelta, topByCasterDelta, topByToeDelta } = result;
   const isRearWheel = REAR_WHEELS.includes(wheel);
-  
+
   // Convert pre-sorted rows to keys
   const topCamber = topByCamberDelta.map(r => `${r.camberBolt},${r.casterBolt}`);
-  const topCaster = isRearWheel ? [] : topByCasterDelta.map(r => `${r.camberBolt},${r.casterBolt}`);
-  
+  const topSecondary = isRearWheel
+    ? topByToeDelta.map(r => `${r.camberBolt},${r.casterBolt}`)
+    : topByCasterDelta.map(r => `${r.camberBolt},${r.casterBolt}`);
+
   // Build result map
   const result_map = new Map();
   for (const key of topCamber) {
-    if (topCaster.includes(key)) {
+    if (topSecondary.includes(key)) {
       result_map.set(key, 'both');        // Both targets close
     } else {
       result_map.set(key, 'camber');      // Only camber close
     }
   }
-  for (const key of topCaster) {
+  for (const key of topSecondary) {
     if (!result_map.has(key)) {
-      result_map.set(key, 'caster');      // Only caster close
+      const label = isRearWheel ? 'toe' : 'caster';
+      result_map.set(key, label);         // Only secondary target close
     }
   }
-  
+
   return result_map;
 }
 
@@ -574,6 +507,9 @@ function _buildTableHighlightingPosition(result, highlightFront, highlightRear) 
       } else if (matchType === 'caster') {
         td.classList.add('best-caster');     // Caster target met (green)
         isHighlightedCell = true;
+      } else if (matchType === 'toe') {
+        td.classList.add('best-toe');        // Toe target met (orange)
+        isHighlightedCell = true;
       }
 
       if (REQUIRED_POSITIONS.includes(r)) {
@@ -642,6 +578,7 @@ function _buildTable(result) {
       if (!cell) continue;  // Skip unmeasured positions
       const camber = +cell.zero.toFixed(2);
       const caster = +(calculateCaster(cell.neg20, cell.pos20, _getWheelCasterOptions(activeTableWheel, result))).toFixed(2);
+      const toe = rearToe;
 
       const key = `${cell.camberBolt},${cell.casterBolt}`;
       const matchType = targetMatches.get(key);
@@ -660,22 +597,39 @@ function _buildTable(result) {
       } else if (matchType === 'caster') {
         td.classList.add('best-caster');     // Caster target met (green)
         isHighlightedCell = true;
+      } else if (matchType === 'toe') {
+        td.classList.add('best-toe');        // Toe target met (orange)
+        isHighlightedCell = true;
       }
 
       if (REQUIRED_POSITIONS.includes(r)) {
         td.classList.add('required-col');
       }
 
-      const metricClass = _metricValueClass({ camber, caster, toe: rearToe }, activeTableWheel);
-      const metricValue = _formatSelectedMetricValue({ camber, caster, toe: rearToe }, isRearWheel);
+      const weightClass = !isHighlightedCell ? 'muted' : 'bold';
+      const sizeClass = !isHighlightedCell ? 'cell-value-small' : 'cell-value-large';
 
-      // Add muted class for non-highlighted cells (only best matches are bright)
-      const isMuted = !isHighlightedCell;
-      const mutedClass = isMuted ? 'muted' : '';
+      // Format both values: camber always, plus caster (front) or toe (rear)
+      const camberValue = `${camber > 0 ? '+' : ''}${camber.toFixed(2)}°`;
+      let secondValue = '';
+      let secondLabel = '';
+
+      if (isRearWheel) {
+        secondLabel = 'Toe';
+        if (toe != null && !Number.isNaN(Number(toe))) {
+          secondValue = `${Number(toe) >= 0 ? '+' : ''}${Number(toe).toFixed(2)}°`;
+        } else {
+          secondValue = 'n/a';
+        }
+      } else {
+        secondLabel = 'Caster';
+        secondValue = `${caster.toFixed(2)}°`;
+      }
 
       td.innerHTML = `
-        <div class="cell-value">
-          <div class="${selectedMetric} ${metricClass} ${mutedClass}">${metricValue}</div>
+        <div class="cell-value ${weightClass} ${sizeClass}">
+          <div class="metric-camber">${camberValue}</div>
+          <div class="metric-${secondLabel.toLowerCase()}">${secondValue}</div>
         </div>`;
     }
   }
@@ -748,7 +702,7 @@ function _renderMainChart() {
   const result = results[activeChartWheel];
   if (!result) return;
 
-  charts.main = buildMainChart('main-chart', result.rows169, activeChartWheel, result.targets ?? _getWheelTargets(activeChartWheel));
+  charts.main = buildScatterChart('main-chart', result.rows169, activeChartWheel, result.targets ?? _getWheelTargets(activeChartWheel));
   updateChartNote(result.targets ?? _getWheelTargets(activeChartWheel));
 }
 
@@ -783,72 +737,7 @@ function _renderToeSummary() {
   el.textContent = `${activeTableWheel} toe ${Number(measuredToeDeg) >= 0 ? '+' : ''}${Number(measuredToeDeg).toFixed(2)}° per wheel (target ${targetToeDeg >= 0 ? '+' : ''}${targetToeDeg.toFixed(2)}°, Δ ${deltaDeg >= 0 ? '+' : ''}${deltaDeg.toFixed(2)}°, ${status}; resultant ~${perWheelMm >= 0 ? '+' : ''}${perWheelMm.toFixed(2)} mm/wheel, axle ~${axleTotalMm >= 0 ? '+' : ''}${axleTotalMm.toFixed(2)} mm)`;
 }
 
-// ── Section 2.3: Washer Diagrams ───────────────────────────────────────────
-
-/**
- * Render washer diagrams based on data availability.
- * 
- * When one wheel is loaded: Show independent best position for that wheel.
- * When both wheels are loaded: Show symmetric positions for matched handling.
- */
-function _renderWashers() {
-  let recommendations = {};
-  
-  if (_hasAxlePair(FRONT_WHEELS)) {
-    try {
-      const sym = symmetryAnalysis(results.FL, results.FR);
-      const rec = sym.recommendation;
-      
-      recommendations.FL = {
-        camberBolt: rec.flCamberBolt,
-        casterBolt: rec.flCasterBolt,
-      };
-      recommendations.FR = {
-        camberBolt: rec.frCamberBolt,
-        casterBolt: rec.frCasterBolt,
-      };
-    } catch (err) {
-      console.error('[report-page] Error in symmetry analysis for washers:', err);
-      // Fall back to no recommendations
-      recommendations = {};
-    }
-  }
-
-  for (const wheel of FRONT_WHEELS) {
-    if (!recommendations[wheel] && results[wheel]) {
-      recommendations[wheel] = {
-        camberBolt: results[wheel].bestCell.camberBolt,
-        casterBolt: results[wheel].bestCell.casterBolt,
-      };
-    }
-  }
-
-  const rearSymmetry = _hasAxlePair(REAR_WHEELS) ? symmetryAnalysis(null, null, results.RL, results.RR) : null;
-  if (rearSymmetry && rearSymmetry.recommendation) {
-    const rec = rearSymmetry.recommendation;
-    recommendations.RL = {
-      camberBolt: rec.rlCamberBolt,
-      casterBolt: rec.rlCasterBolt,
-    };
-    recommendations.RR = {
-      camberBolt: rec.rrCamberBolt,
-      casterBolt: rec.rrCasterBolt,
-    };
-  }
-
-  for (const wheel of REAR_WHEELS) {
-    if (!recommendations[wheel] && results[wheel]) {
-      recommendations[wheel] = {
-        camberBolt: results[wheel].bestCell.camberBolt,
-        casterBolt: results[wheel].bestCell.casterBolt,
-      };
-    }
-  }
-  
-  renderWasherSection('washer-container', recommendations);
-}
-
-// ── Section 2.4: Symmetry Analysis ────────────────────────────────────────
+// ── Section 2.3: Symmetry Analysis ────────────────────────────────────────
 
 function _renderSymmetry() {
   try {
@@ -2322,7 +2211,7 @@ function _hideSection(id) {
 // ── Theme Change Listener ──────────────────────────────────────────────────
 
 document.addEventListener('themechange', () => {
-  _renderWashers();
+  _renderMainChart();
 });
 
 

@@ -2,8 +2,9 @@
  * chart-builder.js — Chart.js v4 chart construction helpers.
  *
  * Exported API:
- *   buildMainChart(canvasId, rows169, wheel)          → Chart instance  (Section 2.2)
- *   destroyChart(instance)                             → void
+ *   buildScatterChart(canvasId, rows169, wheel, targets) → Chart instance
+ *   updateChartNote(targets)                              → void
+ *   destroyChart(instance)                                → void
  */
 
 import { BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER, REAR_WHEELS } from './constants.js';
@@ -12,120 +13,225 @@ import { _sign } from './format-utils.js';
 // Number of rear bolt positions in one "front bolt group"
 const GROUP_SIZE = BOLT_POSITIONS.length; // 13
 
+// Diverging cool→warm colour palette for scatter chart grouping (13 entries, centre = neutral)
+const _SCATTER_COLOURS = [
+  '#7c3aed', '#6366f1', '#818cf8', '#22d3ee', '#67e8f9', '#a3e635', '#fde68a',
+  '#fb923c', '#f87171', '#e879f9', '#d946ef', '#a855f7', '#8b5cf6',
+];
+
+function _getGroupColour(index, total) {
+  if (total === 1) return _SCATTER_COLOURS[6]; // middle colour
+  const colorIndex = Math.round((index / (total - 1)) * 12);
+  return _SCATTER_COLOURS[Math.max(0, Math.min(12, colorIndex))];
+}
+
 // ── Public API ────────────────────────────────────────────────────────────
 
 /**
- * Build the main 169-point camber + caster chart (Section 2.2).
- *
- * @param {string}  canvasId  DOM canvas element id
+ * Build a parametric scatter plot: each measured bolt combination as a 2D point.
+ * @param {string} canvasId DOM canvas element id
  * @param {import('./report-engine.js').DerivedRow[]} rows169
- * @param {string}  wheel     Wheel identifier
- * @param {{ camber?: number, caster?: number|null }} [targets]
- * @returns {Chart}
+ * @param {string} wheel Wheel identifier
+ * @param {{ camber?: number, caster?: number|null, toe?: number|null }} [targets]
+ * @returns {Chart|null}
  */
-export function buildMainChart(canvasId, rows169, wheel, targets = {}) {
+export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return null;
 
+  const isRearWheel = REAR_WHEELS.includes(wheel);
   const targetCamber = Object.prototype.hasOwnProperty.call(targets, 'camber') ? targets.camber : TARGET_CAMBER;
-  const targetCaster = Object.prototype.hasOwnProperty.call(targets, 'caster') ? targets.caster : TARGET_CASTER;
-  const showCaster = targetCaster != null;
+  const targetCasterOrToe = isRearWheel
+    ? (Object.prototype.hasOwnProperty.call(targets, 'toe') ? targets.toe : null)
+    : (Object.prototype.hasOwnProperty.call(targets, 'caster') ? targets.caster : TARGET_CASTER);
 
-  // Aggregate rows by front bolt position, keeping best values for each position
-  const aggregated = _aggregateByFrontBolt(rows169);
-  const labels  = aggregated.map(r => r.camberBolt);
-  const cambers = aggregated.map(r => +r.camber.toFixed(3));
-  const casters = showCaster ? aggregated.map(r => +r.caster.toFixed(3)) : [];
-  const numPoints = aggregated.length;
-  const camberCrossing = _findNearestCrossing(cambers, targetCamber);
-  const casterCrossing = showCaster ? _findNearestCrossing(casters, targetCaster) : null;
+  // Filter to measured rows only
+  const pts = rows169.filter(r => !r.isInterpolated);
 
-  const chartDebug = {
-    wheel,
-    camberBolts: labels,
-    cambers,
-    casters,
-    targetCamber,
-    targetCaster,
-    camberCrossing,
-    casterCrossing,
+  // Group by camberBolt, sort keys ascending
+  const groups = {};
+  pts.forEach(row => {
+    const key = row.camberBolt;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(row);
+  });
+  const camberBoltKeys = Object.keys(groups)
+    .map(k => parseInt(k, 10))
+    .sort((a, b) => a - b);
+
+  // Helper to extract Y metric based on rear/front wheel
+  const getYMetric = (row) => isRearWheel ? row.toe : row.caster;
+
+  // Helper to get glow distance from target
+  const getDistFromTarget = (row) => {
+    const yMetric = getYMetric(row);
+    const tx = targetCamber;
+    const ty = targetCasterOrToe;
+    return Math.hypot(row.camber - tx, yMetric - ty);
   };
 
-  canvas.dataset.chartDebug = JSON.stringify(chartDebug);
-  if (typeof window !== 'undefined') {
-    window.__alignmentChartDebug = chartDebug;
-  }
+  // Build datasets — one per camber bolt group
+  const datasets = camberBoltKeys.map((cb, index) => {
+    const group = groups[cb];
+    const groupColor = _getGroupColour(index, camberBoltKeys.length);
+    const casterOrToeLabel = isRearWheel ? 'Toe Bolt' : 'Caster Bolt';
 
-  // Build drop lines plugin (vertical lines at intersections with targets)
-  const dropLinesPlugin = _buildDropLinesPlugin(cambers, casters, aggregated, { camber: targetCamber, caster: targetCaster });
-
-  const datasets = [
-    {
-      label: `Camber (${wheel})`,
-      data: cambers,
-      borderColor: COLOURS.camber,
-      backgroundColor: COLOURS.camber,
-      pointBackgroundColor: 'transparent',
-      pointBorderColor: 'transparent',
-      pointRadius: 0,
-      pointBorderWidth: 0,
-      borderWidth: 1.5,
-      tension: 0.2,
-      yAxisID: 'yCamber',
-      order: 1,
-    },
-    {
-      label: `Camber target (${targetCamber}°)`,
-      data: Array(numPoints).fill(targetCamber),
-      borderColor: COLOURS.camber,
-      borderWidth: 1.5,
-      borderDash: [5, 5],
-      pointRadius: 0,
-      tension: 0,
-      yAxisID: 'yCamber',
-      order: 3,
-    },
-  ];
-
-  if (showCaster) {
-    datasets.splice(1, 0, {
-      label: `Caster (${wheel})`,
-      data: casters,
-      borderColor: COLOURS.caster,
-      backgroundColor: COLOURS.caster,
-      pointBackgroundColor: 'transparent',
-      pointBorderColor: 'transparent',
-      pointRadius: 0,
-      pointBorderWidth: 0,
-      borderWidth: 1.5,
-      tension: 0.2,
-      yAxisID: 'yCaster',
-      order: 2,
+    // Build point arrays with metadata, marking target-matched points
+    const pointData = group.map(row => {
+      const dist = getDistFromTarget(row);
+      return {
+        x: row.camber,
+        y: getYMetric(row),
+        camberBolt: row.camberBolt,
+        casterBolt: row.casterBolt,
+        isTargetMatch: dist <= 0.5,
+      };
     });
 
-    datasets.push({
-      label: `Caster target (${targetCaster}°)`,
-      data: Array(numPoints).fill(targetCaster),
-      borderColor: COLOURS.caster,
-      borderWidth: 1.5,
-      borderDash: [5, 5],
-      pointRadius: 0,
-      tension: 0,
-      yAxisID: 'yCaster',
-      order: 4,
+    // Per-point styling
+    const pointBgColors = [];
+    const pointRadii = [];
+    const pointBorders = [];
+    pointData.forEach(pt => {
+      pointBgColors.push(pt.isTargetMatch ? '#ffffff' : groupColor);
+      pointRadii.push(5);
+      pointBorders.push(pt.isTargetMatch ? '#ffffff' : groupColor);
     });
-  }
 
-  const chart = new Chart(canvas, {
-    type: 'line',
-    plugins: [dropLinesPlugin],
-    data: {
-      labels,
-      datasets,
-    },
-    options: _mainChartOptions(aggregated, showCaster, wheel),
+    return {
+      label: `CmB ${_sign(cb)}`,
+      data: pointData,
+      borderColor: groupColor,
+      backgroundColor: groupColor,
+      borderWidth: 1.5,
+      pointRadius: pointRadii,
+      pointBackgroundColor: pointBgColors,
+      pointBorderColor: pointBorders,
+      pointBorderWidth: 0.5,
+      pointHoverRadius: 9,
+      showLine: true,
+      borderDash: [3, 3],
+      type: 'scatter',
+      tension: 0,
+    };
   });
 
+  // Halo plugin — draws thin circles around target-matched points
+  const haloPlugin = {
+    id: 'targetHalo',
+    afterDatasetsDraw(chart) {
+      const { ctx, data, scales } = chart;
+      const xScale = scales.x;
+      const yScale = scales.y;
+
+      data.datasets.forEach(dataset => {
+        if (!dataset.data) return;
+        dataset.data.forEach(pt => {
+          if (!pt.isTargetMatch) return;
+          const xPx = xScale.getPixelForValue(pt.x);
+          const yPx = yScale.getPixelForValue(pt.y);
+          ctx.save();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(xPx, yPx, 8, 0, 2 * Math.PI);
+          ctx.stroke();
+          ctx.restore();
+        });
+      });
+    },
+  };
+
+  // Crosshair plugin
+  const crosshairPlugin = {
+    id: 'scatterCrosshair',
+    beforeDatasetsDraw(chart) {
+      const { ctx, chartArea } = chart;
+      const xScale = chart.scales.x;
+      const yScale = chart.scales.y;
+
+      const tx = xScale.getPixelForValue(targetCamber);
+      const ty = yScale.getPixelForValue(targetCasterOrToe);
+
+      ctx.save();
+      ctx.strokeStyle = '#a0a0a0';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([6, 4]);
+
+      // Vertical line
+      ctx.beginPath();
+      ctx.moveTo(tx, chartArea.top);
+      ctx.lineTo(tx, chartArea.bottom);
+      ctx.stroke();
+
+      // Horizontal line
+      ctx.beginPath();
+      ctx.moveTo(chartArea.left, ty);
+      ctx.lineTo(chartArea.right, ty);
+      ctx.stroke();
+
+      // Small circle at intersection
+      ctx.fillStyle = '#a0a0a0';
+      ctx.beginPath();
+      ctx.arc(tx, ty, 3, 0, 2 * Math.PI);
+      ctx.fill();
+
+      ctx.restore();
+    },
+  };
+
+  const yAxisLabel = isRearWheel ? 'Toe (°)' : 'Caster (°)';
+
+  const config = {
+    type: 'scatter',
+    plugins: [haloPlugin, crosshairPlugin],
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: {
+        mode: 'nearest',
+        intersect: false,
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          title: { display: true, text: 'Camber (°)' },
+          ticks: {
+            color: COLOURS.mutedStrong,
+            font: { family: "'Share Tech Mono', monospace", size: 9 },
+          },
+          grid: { color: COLOURS.border + '33' },
+        },
+        y: {
+          type: 'linear',
+          title: { display: true, text: yAxisLabel },
+          ticks: {
+            color: COLOURS.mutedStrong,
+            font: { family: "'Share Tech Mono', monospace", size: 9 },
+          },
+          grid: { color: COLOURS.border + '33' },
+        },
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label(context) {
+              const pt = context.raw;
+              const dist = getDistFromTarget(pts.find(r => r.camber === pt.x && getYMetric(r) === pt.y));
+              const camberVal = pt.x.toFixed(2);
+              const yVal = pt.y.toFixed(2);
+              const casterOrToeLabel = isRearWheel ? 'Toe' : 'Caster';
+              return `CmB ${_sign(pt.camberBolt)} / CsB ${_sign(pt.casterBolt)} · ${camberVal}° / ${yVal}° · Δ ${dist.toFixed(2)}°`;
+            },
+          },
+        },
+      },
+    },
+  };
+
+  const chart = new Chart(canvas, config);
   return chart;
 }
 
@@ -163,247 +269,17 @@ export function destroyChart(instance) {
   }
 }
 
-// ── Chart options ─────────────────────────────────────────────────────────
-
-function _mainChartOptions(aggregated, showCaster, wheel) {
-  const isRearWheel = REAR_WHEELS.includes(wheel);
-  const xAxisLabel = isRearWheel ? 'Toe Bolt Position' : 'Camber Bolt Position';
-
-  // Calculate x-axis bounds from actual measured positions (not hardcoded 13)
-  const boltPositions = aggregated.map(r => r.camberBolt);
-  const xMin = Math.min(...boltPositions);
-  const xMax = Math.max(...boltPositions);
-
-  const scales = {
-    x: {
-      type: 'linear',
-      min: xMin,
-      max: xMax,
-      ticks: {
-        color: COLOURS.mutedStrong,
-        font: { family: "'Share Tech Mono', monospace", size: 9 },
-        stepSize: 1,
-      },
-      grid: { color: COLOURS.border + '33' },
-      title: {
-        display: true,
-        text: xAxisLabel,
-        color: COLOURS.muted,
-        font: { family: "'Share Tech Mono', monospace", size: 11 },
-      },
-    },
-    yCamber: {
-      type: 'linear',
-      position: 'left',
-      ticks: {
-        color: COLOURS.camber,
-        font: { family: "'Share Tech Mono', monospace", size: 10 },
-      },
-      grid: { color: COLOURS.border + '44' },
-      title: {
-        display: true,
-        text: 'Camber (°)',
-        color: COLOURS.camber,
-        font: { family: "'Share Tech Mono', monospace", size: 11 },
-      },
-    },
-  };
-
-  if (showCaster) {
-    scales.yCaster = {
-      type: 'linear',
-      position: 'right',
-      ticks: {
-        color: COLOURS.caster,
-        font: { family: "'Share Tech Mono', monospace", size: 10 },
-      },
-      grid: { drawOnChartArea: false },
-      title: {
-        display: true,
-        text: 'Caster (°)',
-        color: COLOURS.caster,
-        font: { family: "'Share Tech Mono', monospace", size: 11 },
-      },
-    };
-  }
-
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: false,
-    interaction: {
-      mode: 'index',
-      intersect: false,
-    },
-    plugins: {
-      legend: {
-        display: true,
-        position: 'top',
-        labels: {
-          color: COLOURS.muted,
-          font: { family: "'Share Tech Mono', monospace", size: 11 },
-          boxWidth: 12,
-        },
-      },
-      tooltip: {
-        backgroundColor: COLOURS.panelAlt,
-        borderColor: COLOURS.border,
-        borderWidth: 1,
-        titleColor: COLOURS.subtle,
-        bodyColor: COLOURS.muted,
-        titleFont: { family: "'Share Tech Mono', monospace", size: 11 },
-        bodyFont: { family: "'Share Tech Mono', monospace", size: 10 },
-        callbacks: {
-          title: ctx => {
-            const camberBolt = aggregated[ctx[0].dataIndex].camberBolt;
-            return `Camber Bolt: ${_sign(camberBolt)}`;
-          },
-        },
-      },
-    },
-    scales,
-  };
-}
-
-// ── Drop lines plugin (vertical lines at target intersections) ────────────
-
-function _buildDropLinesPlugin(cambers, casters, aggregated, targets) {
-  return {
-    id: 'dropLines',
-    afterDatasetsDraw(chart) {
-      const { ctx, chartArea: { left, right, top, bottom }, scales } = chart;
-
-      // Require x and yCamber; yCaster is optional (null for rear wheels with camber-only)
-      if (!scales || !scales.x || !scales.yCamber) {
-        return;  // Missing required scales; skip drop-lines
-      }
-
-      ctx.save();
-      ctx.lineWidth = 2;
-      ctx.setLineDash([4, 4]);
-
-      const xScale = scales.x;
-      const yCamberScale = scales.yCamber;
-      const yCasterScale = scales.yCaster;  // May be null for rear wheels (camber-only)
-
-      // Find closest crossing points
-      const camberCrossing = _findNearestCrossing(cambers, targets.camber);
-      const casterCrossing = targets.caster == null ? null : _findNearestCrossing(casters, targets.caster);
-
-      // Draw drop line for camber crossing (BLUE)
-      if (camberCrossing !== null && camberCrossing !== undefined) {
-        // Convert crossing index to actual bolt position
-        const xVal = aggregated[Math.floor(camberCrossing)].camberBolt;
-        const xPx = xScale.getPixelForValue(xVal);
-        
-        if (xPx !== undefined && xPx !== null && !isNaN(xPx)) {
-          const yPx = yCamberScale.getPixelForValue(targets.camber);
-          if (yPx !== undefined && yPx !== null && !isNaN(yPx)) {
-            ctx.strokeStyle = COLOURS.camber;
-            ctx.beginPath();
-            ctx.moveTo(xPx, yPx);
-            ctx.lineTo(xPx, bottom);
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Draw drop line for caster crossing (GREEN)
-      // Only draw if caster target exists and caster scale is available (front wheels only)
-      if (targets.caster != null && yCasterScale && casterCrossing !== null && casterCrossing !== undefined) {
-        // Convert crossing index to actual bolt position
-        const xVal = aggregated[Math.floor(casterCrossing)].camberBolt;
-        const xPx = xScale.getPixelForValue(xVal);
-        
-        if (xPx !== undefined && xPx !== null && !isNaN(xPx)) {
-          const yPx = yCasterScale.getPixelForValue(targets.caster);
-          if (yPx !== undefined && yPx !== null && !isNaN(yPx)) {
-            ctx.strokeStyle = COLOURS.caster;
-            ctx.beginPath();
-            ctx.moveTo(xPx, yPx);
-            ctx.lineTo(xPx, bottom);
-            ctx.stroke();
-          }
-        }
-      }
-
-      ctx.restore();
-    },
-  };
-}
 
 /**
  * Find the index of the point closest to crossing the target value.
  * Linear interpolation between adjacent points.
  */
-function _findNearestCrossing(values, target) {
-  let bestIdx = null;
-  let bestDist = Infinity;
-
-  for (let i = 0; i < values.length - 1; i++) {
-    const v0 = values[i];
-    const v1 = values[i + 1];
-    
-    // Check if target is between v0 and v1 (crossing)
-    if ((v0 <= target && target <= v1) || (v1 <= target && target <= v0)) {
-      // Linear interpolation: find fractional position
-      const t = v0 === v1 ? 0.5 : (target - v0) / (v1 - v0);
-      const idx = i + t;
-      const dist = Math.abs(v0 - target);
-      
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestIdx = idx;
-      }
-    }
-  }
-
-  // If no crossing found, find the closest point
-  if (bestIdx === null) {
-    for (let i = 0; i < values.length; i++) {
-      const dist = Math.abs(values[i] - target);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestIdx = i;
-      }
-    }
-  }
-
-  return bestIdx;
-}
 
 // ── Group bands plugin (alternating background per front bolt group) ───────
 
-function _buildGroupBandsPlugin(rows169) {
-  return {
-    id: 'groupBands',
-    beforeDraw(chart) {
-      const { ctx, chartArea: { left, right, top, bottom }, scales: { x } } = chart;
-      if (!x) return;
-
-      ctx.save();
-      for (let g = 0; g < BOLT_POSITIONS.length; g++) {
-        if (g % 2 === 0) continue;  // Only odd groups get a band
-
-        const startIdx = g * GROUP_SIZE;
-        const endIdx   = startIdx + GROUP_SIZE - 1;
-
-        const startPx = x.getPixelForValue(startIdx) ?? left;
-        const endPx   = x.getPixelForValue(endIdx)   ?? right;
-
-        ctx.fillStyle = 'rgba(255,255,255,0.015)';
-        ctx.fillRect(startPx, top, endPx - startPx, bottom - top);
-      }
-      ctx.restore();
-    },
-  };
-}
 
 // ── Utility ────────────────────────────────────────────────────────────────
 
-function _comboLabel(f, r) {
-  return `${_sign(f)}/${_sign(r)}`;
-}
 
 
 function _delta(d) {
@@ -417,36 +293,3 @@ function _delta(d) {
  * @param {import('./report-engine.js').DerivedRow[]} rows169
  * @returns {{ camberBolt: number, camber: number, caster: number }[]}
  */
-function _aggregateByFrontBolt(rows169) {
-  const result = [];
-
-  // Group rows by camberBolt position
-  const map = {};
-  for (const row of rows169) {
-    if (!map[row.camberBolt]) map[row.camberBolt] = [];
-    map[row.camberBolt].push(row);
-  }
-
-  // For each camberBolt, pick the casterBolt that gets closest to the caster target.
-  // rows169 already carry casterDelta; null means rear wheel (no caster target) → fall
-  // back to minimising |camberDelta| so the camber line is still meaningful.
-  const frontPositions = Object.keys(map).map(Number).sort((a, b) => a - b);
-
-  for (const camberBolt of frontPositions) {
-    const candidates = map[camberBolt];
-    const bestRow = candidates.reduce((best, row) => {
-      const hasCaster = row.casterDelta != null && best.casterDelta != null;
-      if (hasCaster) {
-        return Math.abs(row.casterDelta) < Math.abs(best.casterDelta) ? row : best;
-      }
-      return Math.abs(row.camberDelta) < Math.abs(best.camberDelta) ? row : best;
-    });
-    result.push({
-      camberBolt: bestRow.camberBolt,
-      camber: bestRow.camber,
-      caster: bestRow.caster,
-    });
-  }
-
-  return result;
-}

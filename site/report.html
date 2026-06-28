@@ -22,6 +22,7 @@
       <li><a href="index.html" class="active">Home</a></li>
       <li><a href="input.html">Input Sheet</a></li>
       <li><a href="report.html">Report</a></li>
+      <li><a href="diagrams.html">Diagrams</a></li>
     </ul>
   </nav>
 
@@ -86,22 +87,12 @@
          Shows which positions best match alignment targets.
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="summary-table" id="section-table" style="display:none">
-      <!-- Wheel tabs and color coding toggle -->
-      <div style="display:flex; gap:24px; margin-bottom:12px; align-items:flex-start;">
-        <!-- Wheel selector -->
-        <div class="wheel-selector" id="table-wheel-tabs" style="display:none">
-          <button class="active sub-header" data-wheel="FL" id="tab-table-fl">FL</button>
-          <button class="sub-header" data-wheel="FR" id="tab-table-fr">FR</button>
-          <button class="sub-header" data-wheel="RL" id="tab-table-rl">RL</button>
-          <button class="sub-header" data-wheel="RR" id="tab-table-rr">RR</button>
-        </div>
-
-        <!-- Metric selector -->
-        <div class="color-coding-selector" id="color-coding-group">
-          <button class="active sub-header" data-metric="camber" id="btn-metric-camber">Camber</button>
-          <button class="sub-header" data-metric="caster" id="btn-metric-caster">Caster</button>
-          <button class="sub-header" data-metric="toe" id="btn-metric-toe">Toe</button>
-        </div>
+      <!-- Wheel selector -->
+      <div class="wheel-selector" id="table-wheel-tabs" style="margin-bottom:16px;">
+        <button class="active sub-header" data-wheel="FL" id="tab-table-fl">FL</button>
+        <button class="sub-header" data-wheel="FR" id="tab-table-fr">FR</button>
+        <button class="sub-header" data-wheel="RL" id="tab-table-rl">RL</button>
+        <button class="sub-header" data-wheel="RR" id="tab-table-rr">RR</button>
       </div>
 
       <div style="overflow-x:auto">
@@ -115,7 +106,7 @@
          ──────────────────────────────────────────────────────────────────────────────────────── -->
     <section class="chart-section" id="section-chart" style="display:none">
       <h2 class="header">Alignment vs Bolt Position</h2>
-      <div class="wheel-selector" id="chart-wheel-tabs" style="margin-bottom:16px; display:none">
+      <div class="wheel-selector" id="chart-wheel-tabs" style="margin-bottom:16px;">
         <button class="active sub-header" data-wheel="FL" id="tab-chart-fl">FL</button>
         <button class="sub-header" data-wheel="FR" id="tab-chart-fr">FR</button>
         <button class="sub-header" data-wheel="RL" id="tab-chart-rl">RL</button>
@@ -125,14 +116,12 @@
         <canvas id="main-chart" aria-label="Camber and caster chart"></canvas>
       </div>
       <p class="chart-note paragraph" id="chart-note">
-        X-axis: camber bolt position · caster bolt set to best caster for each point ·
-        Dashed lines: targets (<span id="chart-note-camber">Camber −1.1°</span> · <span id="chart-note-caster">Caster 5.0°</span>) ·
-        Solid markers = measured · Hollow markers = interpolated
+        Colour = CmB group · ✕ = target · CmB = Camber Bolt · CsB = Caster Bolt
       </p>
       <p class="chart-note paragraph" id="toe-summary"></p>
     </section>
 
-    <!-- ── Section OPT-4: Historical Sessions & Trend Analysis (Phase 4 feature)
+<!-- ── Section OPT-4: Historical Sessions & Trend Analysis (Phase 4 feature)
          PURPOSE: Store and track alignment measurements over time to detect drift.
          Shows session history and trend data for key metrics.
          ──────────────────────────────────────────────────────────────────────────────────────── -->
@@ -179,25 +168,12 @@
     </section>
 
 
-    <!-- ── Section 2.4: Recommended Symmetric Bolt Positions
-         PURPOSE: Visual representation of recommended eccentric bolt positions that achieve symmetric alignment (left-right wheels match).
-         Shows the bolt positions for both FL and FR wheels that result in matching (symmetric) camber and caster values.
-         These are the positions the user should physically implement on the vehicle to achieve the symmetric alignment goal.
-         ──────────────────────────────────────────────────────────────────────────────────────── -->
-    <section class="washer-section" id="section-washers" style="display:none">
-      <h2 class="header">Recommended Bolt Positions</h2>
-      <p class="section-desc paragraph">
-        Front and rear recommendations are shown for each loaded wheel. Front wheels prioritize symmetric camber and caster across the axle; rear wheels are camber-focused and shown as a separate axle pair.
-      </p>
-      <div id="washer-container"></div>
-    </section>
 
   </main>
 
   <script type="module" src="../js/error-handler.js"></script>
   <script type="module" src="../js/report-engine.js"></script>
   <script type="module" src="../js/chart-builder.js"></script>
-  <script type="module" src="../js/washer-diagram.js"></script>
   <script type="module" src="../js/report-page.js"></script>
 
   <script type="module">
