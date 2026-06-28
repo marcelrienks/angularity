@@ -6,8 +6,7 @@
  *   - Section visibility
  *   - 13×13 summary table rendering (Section 2.1)
  *   - Main chart (Section 2.2) via chart-builder.js
- *   - Washer diagrams (Section 2.3) via washer-diagram.js
- *   - Symmetry analysis (Section 2.4) via report-engine.js
+ *   - Symmetry analysis (Section 2.3) via report-engine.js
  */
 
 import { REQUIRED_POSITIONS, BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CASTER,
@@ -17,7 +16,6 @@ import { REQUIRED_POSITIONS, BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CAST
 import { parseCSV } from './csv-io.js';
 import { processWheel, symmetryAnalysis } from './report-engine.js';
 import { buildScatterChart, destroyChart, updateChartNote } from './chart-builder.js';
-import { renderWasherSection } from './washer-diagram.js';
 import { loadFullGridState, loadWheelFromStorage, loadWheelToeFromStorage, hasSufficientData, invalidateCache } from './localstorage-io.js';
 import { calculateCaster, toeDegreesToResultantMm } from './math-utils.js';
 import { _th } from './table-utils.js';
@@ -337,7 +335,6 @@ function _rebuildAll() {
   _rebuildWheelTabs(loadedWheels);
   _renderSummaryTable();
   _renderToeSummary();
-  _renderWashers();
   _renderSymmetry();
 
   _showSection('section-table');
@@ -349,8 +346,6 @@ function _rebuildAll() {
   } else {
     _hideSection('section-symmetry');
   }
-
-  _showSection('section-washers');
 }
 
 // ── Wheel tabs ─────────────────────────────────────────────────────────────
@@ -407,7 +402,6 @@ function _rebuildAnalysisSections() {
   _renderSummaryTable();
   _renderMainChart();
   _renderToeSummary();
-  _renderWashers();
   _renderSymmetry();
 }
 
@@ -783,72 +777,7 @@ function _renderToeSummary() {
   el.textContent = `${activeTableWheel} toe ${Number(measuredToeDeg) >= 0 ? '+' : ''}${Number(measuredToeDeg).toFixed(2)}° per wheel (target ${targetToeDeg >= 0 ? '+' : ''}${targetToeDeg.toFixed(2)}°, Δ ${deltaDeg >= 0 ? '+' : ''}${deltaDeg.toFixed(2)}°, ${status}; resultant ~${perWheelMm >= 0 ? '+' : ''}${perWheelMm.toFixed(2)} mm/wheel, axle ~${axleTotalMm >= 0 ? '+' : ''}${axleTotalMm.toFixed(2)} mm)`;
 }
 
-// ── Section 2.3: Washer Diagrams ───────────────────────────────────────────
-
-/**
- * Render washer diagrams based on data availability.
- * 
- * When one wheel is loaded: Show independent best position for that wheel.
- * When both wheels are loaded: Show symmetric positions for matched handling.
- */
-function _renderWashers() {
-  let recommendations = {};
-  
-  if (_hasAxlePair(FRONT_WHEELS)) {
-    try {
-      const sym = symmetryAnalysis(results.FL, results.FR);
-      const rec = sym.recommendation;
-      
-      recommendations.FL = {
-        camberBolt: rec.flCamberBolt,
-        casterBolt: rec.flCasterBolt,
-      };
-      recommendations.FR = {
-        camberBolt: rec.frCamberBolt,
-        casterBolt: rec.frCasterBolt,
-      };
-    } catch (err) {
-      console.error('[report-page] Error in symmetry analysis for washers:', err);
-      // Fall back to no recommendations
-      recommendations = {};
-    }
-  }
-
-  for (const wheel of FRONT_WHEELS) {
-    if (!recommendations[wheel] && results[wheel]) {
-      recommendations[wheel] = {
-        camberBolt: results[wheel].bestCell.camberBolt,
-        casterBolt: results[wheel].bestCell.casterBolt,
-      };
-    }
-  }
-
-  const rearSymmetry = _hasAxlePair(REAR_WHEELS) ? symmetryAnalysis(null, null, results.RL, results.RR) : null;
-  if (rearSymmetry && rearSymmetry.recommendation) {
-    const rec = rearSymmetry.recommendation;
-    recommendations.RL = {
-      camberBolt: rec.rlCamberBolt,
-      casterBolt: rec.rlCasterBolt,
-    };
-    recommendations.RR = {
-      camberBolt: rec.rrCamberBolt,
-      casterBolt: rec.rrCasterBolt,
-    };
-  }
-
-  for (const wheel of REAR_WHEELS) {
-    if (!recommendations[wheel] && results[wheel]) {
-      recommendations[wheel] = {
-        camberBolt: results[wheel].bestCell.camberBolt,
-        casterBolt: results[wheel].bestCell.casterBolt,
-      };
-    }
-  }
-  
-  renderWasherSection('washer-container', recommendations);
-}
-
-// ── Section 2.4: Symmetry Analysis ────────────────────────────────────────
+// ── Section 2.3: Symmetry Analysis ────────────────────────────────────────
 
 function _renderSymmetry() {
   try {
@@ -2322,7 +2251,7 @@ function _hideSection(id) {
 // ── Theme Change Listener ──────────────────────────────────────────────────
 
 document.addEventListener('themechange', () => {
-  _renderWashers();
+  _renderMainChart();
 });
 
 

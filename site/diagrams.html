@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagrams | Angularity</title>
+  <script>
+    const theme = localStorage.getItem('angularity-theme');
+    if (theme === 'light' || theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  </script>
+  <link rel="stylesheet" href="css/shared.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <h1 class="title header">Angularity</h1>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="input.html">Input Sheet</a></li>
+      <li><a href="report.html">Report</a></li>
+      <li><a href="diagrams.html" class="active">Diagrams</a></li>
+    </ul>
+  </nav>
+
+  <header class="page-header">
+    <h1 class="header">Recommended Bolt Positions</h1>
+    <p class="section-intro paragraph">
+      Visual diagrams showing the recommended eccentric bolt positions for achieving target alignment values.
+      Each wheel shows camber and caster (front) or camber and toe (rear) bolt positions.
+    </p>
+  </header>
+
+  <main id="diagrams-main">
+
+    <div id="error-banner" class="error-banner" role="alert" style="display: none;">
+      <span id="error-message"></span>
+      <button class="sub-header" id="error-close">&times;</button>
+    </div>
+
+    <!-- ── Placeholder shown before data is loaded ──────────────────────── -->
+    <div id="no-data-msg">
+      Load data from the report page to see recommendations. The diagrams will show recommended bolt positions for each wheel based on the loaded data.
+    </div>
+
+    <!-- ── Section: Recommended Bolt Positions (Washer Diagrams)
+         PURPOSE: Visual representation of recommended eccentric bolt positions.
+         Shows the bolt positions for each wheel that result in optimal alignment values.
+         These are the positions the user should physically implement on the vehicle.
+         ──────────────────────────────────────────────────────────────────────────────────────── -->
+    <section class="washer-section" id="section-washers" style="display:none">
+      <p class="section-desc paragraph">
+        Front and rear recommendations are shown for each loaded wheel. All bolts are displayed, with placeholders for data not yet available.
+      </p>
+      <div id="washer-container"></div>
+    </section>
+
+  </main>
+
+  <script type="module" src="../js/error-handler.js"></script>
+  <script type="module" src="../js/washer-diagram.js"></script>
+  <script type="module" src="../js/diagrams-page.js"></script>
+
+  <script type="module">
+    // Set active nav link
+    const links = document.querySelectorAll('.nav-links a');
+    const current = location.pathname.split('/').pop() || 'index.html';
+    links.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === current);
+    });
+  </script>
+
+  <script type="module" defer>
+    import { initTheme, buildConfigMenu } from '../js/theme-manager.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      document.querySelector('.nav-links').appendChild(buildConfigMenu());
+    });
+  </script>
+
+</body>
+</html>
