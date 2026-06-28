@@ -99,7 +99,7 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
     });
 
     return {
-      label: `Camber Bolt ${_sign(cb)}`,
+      label: `CmB ${_sign(cb)}`,
       data: pointData,
       borderColor: groupColor,
       backgroundColor: groupColor,
@@ -222,8 +222,8 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
               const dist = getDistFromTarget(pts.find(r => r.camber === pt.x && getYMetric(r) === pt.y));
               const camberVal = pt.x.toFixed(2);
               const yVal = pt.y.toFixed(2);
-              const casterOrToeLabel = isRearWheel ? 'Toe Bolt' : 'Caster Bolt';
-              return `Camber Bolt ${_sign(pt.camberBolt)} / ${casterOrToeLabel} ${_sign(pt.casterBolt)} · ${camberVal}° / ${yVal}° · Δ ${dist.toFixed(2)}°`;
+              const casterOrToeLabel = isRearWheel ? 'Toe' : 'Caster';
+              return `CmB ${_sign(pt.camberBolt)} / CsB ${_sign(pt.casterBolt)} · ${camberVal}° / ${yVal}° · Δ ${dist.toFixed(2)}°`;
             },
           },
         },
