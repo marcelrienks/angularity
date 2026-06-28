@@ -74,6 +74,7 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
   const datasets = camberBoltKeys.map((cb, index) => {
     const group = groups[cb];
     const groupColor = _getGroupColour(index, camberBoltKeys.length);
+    const casterOrToeLabel = isRearWheel ? 'Toe Bolt' : 'Caster Bolt';
 
     // Build point arrays with metadata, marking target-matched points
     const pointData = group.map(row => {
@@ -98,7 +99,7 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
     });
 
     return {
-      label: `CB ${_sign(cb)}`,
+      label: `Camber Bolt ${_sign(cb)}`,
       data: pointData,
       borderColor: groupColor,
       backgroundColor: groupColor,
@@ -221,7 +222,8 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
               const dist = getDistFromTarget(pts.find(r => r.camber === pt.x && getYMetric(r) === pt.y));
               const camberVal = pt.x.toFixed(2);
               const yVal = pt.y.toFixed(2);
-              return `CB ${_sign(pt.camberBolt)} / KB ${_sign(pt.casterBolt)} · ${camberVal}° / ${yVal}° · Δ ${dist.toFixed(2)}°`;
+              const casterOrToeLabel = isRearWheel ? 'Toe Bolt' : 'Caster Bolt';
+              return `Camber Bolt ${_sign(pt.camberBolt)} / ${casterOrToeLabel} ${_sign(pt.casterBolt)} · ${camberVal}° / ${yVal}° · Δ ${dist.toFixed(2)}°`;
             },
           },
         },
