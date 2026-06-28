@@ -125,11 +125,52 @@
         <canvas id="main-chart" aria-label="Camber and caster chart"></canvas>
       </div>
       <p class="chart-note paragraph" id="chart-note">
-        X-axis: camber bolt position · caster bolt set to best caster for each point ·
-        Dashed lines: targets (<span id="chart-note-camber">Camber −1.1°</span> · <span id="chart-note-caster">Caster 5.0°</span>) ·
-        Solid markers = measured · Hollow markers = interpolated
+        Each point = one measured bolt combination · X = achieved camber° · Y = achieved caster° · Colour = camber bolt group · ✕ = target (Camber <span id="chart-note-camber"></span> / Caster <span id="chart-note-caster"></span>)
       </p>
       <p class="chart-note paragraph" id="toe-summary"></p>
+    </section>
+
+    <section class="sensitivity-section" id="section-sensitivity" style="display:none">
+      <h2 class="header">Bolt Sensitivity</h2>
+      <p class="section-desc paragraph">
+        How each angle responds as one bolt sweeps its full range.
+        Each line = one held-constant bolt value.
+      </p>
+      <div class="color-coding-selector" id="sensitivity-mode-tabs">
+        <button class="active sub-header" data-mode="camber" id="btn-sens-camber">Camber</button>
+        <button class="sub-header" data-mode="caster" id="btn-sens-caster">Caster</button>
+      </div>
+      <div class="sensitivity-grid" id="sensitivity-grid">
+        <!-- one card per wheel -->
+        <div class="sensitivity-card" id="sens-card-FL">
+          <div class="card-title sub-header">FL</div>
+          <div class="chart-wrapper sensitivity-chart-wrapper">
+            <canvas id="sens-chart-FL" aria-label="FL sensitivity chart"></canvas>
+          </div>
+          <div class="sensitivity-placeholder" id="sens-placeholder-FL">No data loaded</div>
+        </div>
+        <div class="sensitivity-card" id="sens-card-FR">
+          <div class="card-title sub-header">FR</div>
+          <div class="chart-wrapper sensitivity-chart-wrapper">
+            <canvas id="sens-chart-FR" aria-label="FR sensitivity chart"></canvas>
+          </div>
+          <div class="sensitivity-placeholder" id="sens-placeholder-FR">No data loaded</div>
+        </div>
+        <div class="sensitivity-card" id="sens-card-RL">
+          <div class="card-title sub-header">RL</div>
+          <div class="chart-wrapper sensitivity-chart-wrapper">
+            <canvas id="sens-chart-RL" aria-label="RL sensitivity chart"></canvas>
+          </div>
+          <div class="sensitivity-placeholder" id="sens-placeholder-RL">No data loaded</div>
+        </div>
+        <div class="sensitivity-card" id="sens-card-RR">
+          <div class="card-title sub-header">RR</div>
+          <div class="chart-wrapper sensitivity-chart-wrapper">
+            <canvas id="sens-chart-RR" aria-label="RR sensitivity chart"></canvas>
+          </div>
+          <div class="sensitivity-placeholder" id="sens-placeholder-RR">No data loaded</div>
+        </div>
+      </div>
     </section>
 
     <!-- ── Section OPT-4: Historical Sessions & Trend Analysis (Phase 4 feature)

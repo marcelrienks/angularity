@@ -16,7 +16,7 @@ import { REQUIRED_POSITIONS, BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CAST
          SYMMETRY_TOLERANCE, getBoltPositions, getCurrentMeasurementDensity } from './constants.js';
 import { parseCSV } from './csv-io.js';
 import { processWheel, symmetryAnalysis } from './report-engine.js';
-import { buildMainChart, destroyChart, updateChartNote } from './chart-builder.js';
+import { buildScatterChart, buildSensitivityChart, destroyChart, updateChartNote } from './chart-builder.js';
 import { renderWasherSection } from './washer-diagram.js';
 import { loadFullGridState, loadWheelFromStorage, loadWheelToeFromStorage, hasSufficientData, invalidateCache } from './localstorage-io.js';
 import { calculateCaster, toeDegreesToResultantMm } from './math-utils.js';
@@ -32,8 +32,14 @@ const results = Object.fromEntries(WHEELS.map(wheel => [wheel, null]));
 /** Selected summary metric: 'camber' | 'caster' | 'toe' */
 let selectedMetric = 'camber';
 
-/** @type {{ main: Chart|null }} */
-const charts = { main: null };
+/** @type {{ main: Chart|null, sensitivity: Object<string, Chart|null> }} */
+const charts = { main: null, sensitivity: { FL: null, FR: null, RL: null, RR: null } };
+
+/** Store wheel results for sensitivity charts access */
+const _wheelResults = { FL: null, FR: null, RL: null, RR: null };
+
+/** Active sensitivity mode: 'camber' or 'caster' */
+let activeSensitivityMode = 'camber';
 
 /** Active wheel tab for multi-wheel sections */
 let activeTableWheel  = 'FL';
@@ -119,6 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   _bindFileInputs();
   _bindWheelTabs();
   _bindMetricToggle();
+  _bindSensitivityModeToggle();
   
   // Load data ONLY from localStorage (user's previous session)
   _loadFromLocalStorage();
@@ -156,6 +163,7 @@ function _loadFromLocalStorage() {
         // Convert property names from gridState format to processWheel format
         const processedRows = _convertRowsForProcessing(gridStateRows);
         results[wheel] = processWheel(processedRows, _getWheelProcessingOptions(wheel));
+        _wheelResults[wheel] = results[wheel];
         _updateStatus(wheel, '(from browser memory)', gridStateRows.length);
       } catch (wheelErr) {
         console.error(`[report-page] ${wheel} processing error:`, wheelErr.message);
@@ -290,12 +298,14 @@ async function _handleFile(e, wheel) {
       // Convert CSV property names to processWheel format
       const processedRows = _convertRowsForProcessing(csvRows);
       results[wheel] = processWheel(processedRows, _getWheelProcessingOptions(wheel));
+      _wheelResults[wheel] = results[wheel];
       _updateStatus(wheel, file.name, csvRows.length);
       
       _rebuildAll();
     } catch (err) {
       _showError(`${wheel} CSV error: ${err.message}`);
       results[wheel] = null;
+      _wheelResults[wheel] = null;
       _updateStatus(wheel, null, 0);
       _rebuildAll();
     }
@@ -343,6 +353,7 @@ function _rebuildAll() {
   _showSection('section-table');
   _showSection('section-chart');
   _renderMainChart();
+  _renderSensitivityCharts();
 
   if (hasFrontPair || hasRearPair) {
     _showSection('section-symmetry');
@@ -358,7 +369,7 @@ function _rebuildAll() {
 function _bindWheelTabs() {
   const groups = [
     { selector: '#table-wheel-tabs button',       setter: w => { activeTableWheel = w; _normalizeSelectedMetricForWheel(); _updateMetricButtonStates(); _renderSummaryTable(); } },
-    { selector: '#chart-wheel-tabs button',       setter: w => { activeChartWheel = w; _renderMainChart(); } },
+    { selector: '#chart-wheel-tabs button',       setter: w => { activeChartWheel = w; _renderMainChart(); _renderSensitivityCharts(); } },
   ];
 
   for (const { selector, setter } of groups) {
@@ -400,12 +411,29 @@ function _bindMetricToggle() {
   _updateMetricButtonStates();
 }
 
+function _bindSensitivityModeToggle() {
+  const tabs = document.getElementById('sensitivity-mode-tabs');
+  if (!tabs) return;
+
+  tabs.addEventListener('click', e => {
+    const btn = e.target;
+    if (!btn.dataset.mode) return;
+
+    activeSensitivityMode = btn.dataset.mode;
+    document.querySelectorAll('#sensitivity-mode-tabs button').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === activeSensitivityMode);
+    });
+    _renderSensitivityCharts();
+  });
+}
+
 /**
  * Re-render all analysis sections when data is refreshed.
  */
 function _rebuildAnalysisSections() {
   _renderSummaryTable();
   _renderMainChart();
+  _renderSensitivityCharts();
   _renderToeSummary();
   _renderWashers();
   _renderSymmetry();
@@ -748,8 +776,34 @@ function _renderMainChart() {
   const result = results[activeChartWheel];
   if (!result) return;
 
-  charts.main = buildMainChart('main-chart', result.rows169, activeChartWheel, result.targets ?? _getWheelTargets(activeChartWheel));
+  charts.main = buildScatterChart('main-chart', result.rows169, activeChartWheel, result.targets ?? _getWheelTargets(activeChartWheel));
   updateChartNote(result.targets ?? _getWheelTargets(activeChartWheel));
+}
+
+function _renderSensitivityCharts() {
+  _showSection('section-sensitivity');
+
+  for (const wheel of WHEELS) {
+    const result = _wheelResults[wheel];
+    const canvasId = `sens-chart-${wheel}`;
+    const placeholderId = `sens-placeholder-${wheel}`;
+
+    if (result) {
+      destroyChart(charts.sensitivity[wheel]);
+      charts.sensitivity[wheel] = buildSensitivityChart(
+        canvasId,
+        result.rows169,
+        wheel,
+        result.targets ?? _getWheelTargets(wheel),
+        activeSensitivityMode
+      );
+      document.getElementById(placeholderId).style.display = 'none';
+    } else {
+      destroyChart(charts.sensitivity[wheel]);
+      charts.sensitivity[wheel] = null;
+      document.getElementById(placeholderId).style.display = 'block';
+    }
+  }
 }
 
 function _renderToeSummary() {

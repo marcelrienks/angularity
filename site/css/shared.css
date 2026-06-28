@@ -847,6 +847,32 @@ body {
   line-height: 1.6;
 }
 
+.sensitivity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.sensitivity-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 12px;
+}
+
+.sensitivity-chart-wrapper {
+  height: 200px;
+  position: relative;
+}
+
+.sensitivity-placeholder {
+  display: none;
+  text-align: center;
+  color: var(--muted);
+  padding: 40px 0;
+  font-size: 12px;
+}
+
 
 /* ── Heatmap Visualizations (OPT-1) ────────────────────────────────────── */
 

@@ -25,6 +25,7 @@
     "test:rear-axle-symmetry": "node tests/integration/rear-axle-symmetry.mjs",
     "test:rear-wheel-heatmaps": "node tests/integration/rear-wheel-heatmaps.mjs",
     "test:report-chart": "node tests/integration/report-chart-interactions.mjs",
+    "test:report-scatter-charts": "node tests/integration/report-scatter-charts.mjs",
     "test:report-oracle": "node tests/integration/report-oracle-validation.mjs",
     "test:report-responsive": "node tests/integration/report-responsive-design.mjs",
     "test:report-status": "node tests/integration/report-status-scenarios.mjs",

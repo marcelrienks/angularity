@@ -15,7 +15,7 @@
 **Purpose**: Verify the existing layout supports the new charts. No new project structure required —
 all changes land in three existing files plus one new test file.
 
-- [ ] T001 Confirm `<canvas id="main-chart">` in `site/report.html` has no fixed-height constraint
+- [x] T001 Confirm `<canvas id="main-chart">` in `site/report.html` has no fixed-height constraint
   that would break the scatter chart, and verify `.chart-wrapper` in `site/css/shared.css` uses
   `height` (not `min-height` only) so the scatter renders at a visible size.
   *If height is missing or zero, add an appropriate fixed height (e.g. 420px) to `.chart-wrapper`.*
@@ -29,7 +29,7 @@ Must be complete before Phase 3 or Phase 4 work begins.
 
 **⚠️ CRITICAL**: T003 and T006 both depend on this.
 
-- [ ] T002 Add `_SCATTER_COLOURS` constant (array of 13 CSS hex strings, diverging cool→warm)
+- [x] T002 Add `_SCATTER_COLOURS` constant (array of 13 CSS hex strings, diverging cool→warm)
   and `_getGroupColour(index, total)` helper to `js/chart-builder.js`.
   - `_SCATTER_COLOURS`: 13-entry array covering density-13 maximum.
     Suggested values indexed 0–12 (centre = 6 maps to lime/neutral):
@@ -55,7 +55,7 @@ a visible crosshair, and tooltip appears on hover. Line chart is gone.
 
 ### Implementation for User Story 1
 
-- [ ] T003 [US1] Add `buildScatterChart(canvasId, rows169, wheel, targets)` to `js/chart-builder.js`:
+- [x] T003 [US1] Add `buildScatterChart(canvasId, rows169, wheel, targets)` to `js/chart-builder.js`:
   - Filter input to measured rows: `const pts = rows169.filter(r => !r.isInterpolated)`
   - Group `pts` by `camberBolt`. Collect unique camberBolt values, sort ascending. Each value → one Chart.js dataset.
   - For each group: `{ label: 'CB +N', data: [{x, y, camberBolt, casterBolt}], showLine: true,
@@ -80,12 +80,12 @@ a visible crosshair, and tooltip appears on hover. Line chart is gone.
   - Return the `new Chart(canvas, config)` instance, or `null` if canvas not found.
   - Keep `destroyChart` and `updateChartNote` exports unchanged.
 
-- [ ] T004 [US1] Update `js/report-page.js`:
+- [x] T004 [US1] Update `js/report-page.js`:
   - Change import: `buildMainChart` → `buildScatterChart` (same file, same module path)
   - In `_renderMainChart()`: change call from `buildMainChart(...)` to `buildScatterChart(...)`
   - No other changes to argument list or destroy logic — signature is identical
 
-- [ ] T005 [US1] Update chart-note paragraph in `site/report.html`:
+- [x] T005 [US1] Update chart-note paragraph in `site/report.html`:
   - Find the `<p class="chart-note paragraph" id="chart-note">` element
   - Replace its content with: `"Each point = one measured bolt combination · X = achieved camber° · Y = achieved caster° · Colour = camber bolt group · ✕ = target (Camber <span id='chart-note-camber'></span> / Caster <span id='chart-note-caster'></span>)"`
   - Keep the existing `<span id="chart-note-camber">` and `<span id="chart-note-caster">` spans
@@ -105,7 +105,7 @@ three placeholders. Toggle Camber↔Caster, FR chart updates. No errors.
 
 ### Implementation for User Story 2
 
-- [ ] T006 [US2] Add `buildSensitivityChart(canvasId, rows169, wheel, targets, mode)` to
+- [x] T006 [US2] Add `buildSensitivityChart(canvasId, rows169, wheel, targets, mode)` to
   `js/chart-builder.js`:
   - Filter to measured: `const pts = rows169.filter(r => !r.isInterpolated)`
   - **Camber mode** (`mode === 'camber'`):
@@ -128,7 +128,7 @@ three placeholders. Toggle Camber↔Caster, FR chart updates. No errors.
   - Shared font/colour config matching existing chart style (Share Tech Mono, COLOURS.muted)
   - Return `new Chart(canvas, config)` or `null` if canvas not found.
 
-- [ ] T007 [P] [US2] Add `section-sensitivity` to `site/report.html` immediately after
+- [x] T007 [P] [US2] Add `section-sensitivity` to `site/report.html` immediately after
   the closing `</section>` of `section-chart`:
   ```html
   <section class="sensitivity-section" id="section-sensitivity" style="display:none">
@@ -180,7 +180,7 @@ three placeholders. Toggle Camber↔Caster, FR chart updates. No errors.
   - `.sensitivity-chart-wrapper`: `height: 200px; position: relative;`
   - `.sensitivity-placeholder`: `display: none; text-align: center; color: var(--muted); padding: 40px 0; font-size: 12px;`
 
-- [ ] T008 [US2] Add sensitivity section wiring to `js/report-page.js`:
+- [x] T008 [US2] Add sensitivity section wiring to `js/report-page.js`:
   - Add a module-level map `const _wheelResults = { FL: null, FR: null, RL: null, RR: null }` (type `Record<string, WheelResult|null>`).
     Wherever a wheel's result is currently stored/updated (the point where `result` is assigned after processing), also write `_wheelResults[wheel] = result`.
     This gives `_renderSensitivityCharts()` access to all four wheels simultaneously without changing existing single-wheel render logic.
@@ -217,7 +217,7 @@ working correctly when four wheels are loaded. Covered by integration tests in P
 
 **Purpose**: Verify all user stories end-to-end and remove dead code from chart-builder.js.
 
-- [ ] T009 [P] Write `tests/integration/report-scatter-charts.mjs` covering the 7 scenarios
+- [x] T009 [P] Write `tests/integration/report-scatter-charts.mjs` covering the 7 scenarios
   from `specs/001-scatter-sensitivity-charts/quickstart.md`:
   - **S1 — Scatter renders**: Load FR CSV → evaluate `Chart.getChart('main-chart').config.type`
     in page context → assert equals `'scatter'`; also verify `Chart.getChart('main-chart').data.datasets.length >= 1`
@@ -234,10 +234,10 @@ working correctly when four wheels are loaded. Covered by integration tests in P
   - **S7 — All four wheels**: Load all four CSVs → verify all four `sens-chart-*` canvases
     visible, all four `sens-placeholder-*` hidden
 
-- [ ] T010 Add `report-scatter-charts` to test suite in `tests/test-runner.js` so
+- [x] T010 Add `report-scatter-charts` to test suite in `tests/test-runner.js` so
   `npm run test:all-sync` includes the new integration test file.
 
-- [ ] T011 Remove dead code from `js/chart-builder.js` — functions only used by the old
+- [x] T011 Remove dead code from `js/chart-builder.js` — functions only used by the old
   `buildMainChart` line chart that no longer exist:
   - `_aggregateByFrontBolt(rows169)` — was used to reduce 169 rows for line chart
   - `_buildGroupBandsPlugin(rows169)` — alternating band background plugin
