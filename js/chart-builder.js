@@ -75,29 +75,26 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
     const group = groups[cb];
     const groupColor = _getGroupColour(index, camberBoltKeys.length);
 
-    // Build point arrays with metadata
-    const pointData = group.map(row => ({
-      x: row.camber,
-      y: getYMetric(row),
-      camberBolt: row.camberBolt,
-      casterBolt: row.casterBolt,
-    }));
+    // Build point arrays with metadata, marking target-matched points
+    const pointData = group.map(row => {
+      const dist = getDistFromTarget(row);
+      return {
+        x: row.camber,
+        y: getYMetric(row),
+        camberBolt: row.camberBolt,
+        casterBolt: row.casterBolt,
+        isTargetMatch: dist <= 0.5,
+      };
+    });
 
-    // Per-point styling for glow effect
+    // Per-point styling
     const pointBgColors = [];
     const pointRadii = [];
     const pointBorders = [];
     pointData.forEach(pt => {
-      const dist = getDistFromTarget(group[group.findIndex(r => r.camber === pt.x && getYMetric(r) === pt.y)]);
-      if (dist <= 0.5) {
-        pointBgColors.push('#ffffff');
-        pointRadii.push(7);
-        pointBorders.push('#ffffff');
-      } else {
-        pointBgColors.push(groupColor);
-        pointRadii.push(5);
-        pointBorders.push(groupColor);
-      }
+      pointBgColors.push(pt.isTargetMatch ? '#ffffff' : groupColor);
+      pointRadii.push(5);
+      pointBorders.push(pt.isTargetMatch ? '#ffffff' : groupColor);
     });
 
     return {
@@ -117,6 +114,32 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
       tension: 0,
     };
   });
+
+  // Halo plugin — draws thin circles around target-matched points
+  const haloPlugin = {
+    id: 'targetHalo',
+    afterDatasetsDraw(chart) {
+      const { ctx, data, scales } = chart;
+      const xScale = scales.x;
+      const yScale = scales.y;
+
+      data.datasets.forEach(dataset => {
+        if (!dataset.data) return;
+        dataset.data.forEach(pt => {
+          if (!pt.isTargetMatch) return;
+          const xPx = xScale.getPixelForValue(pt.x);
+          const yPx = yScale.getPixelForValue(pt.y);
+          ctx.save();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(xPx, yPx, 8, 0, 2 * Math.PI);
+          ctx.stroke();
+          ctx.restore();
+        });
+      });
+    },
+  };
 
   // Crosshair plugin
   const crosshairPlugin = {
@@ -160,7 +183,7 @@ export function buildScatterChart(canvasId, rows169, wheel, targets = {}) {
 
   const config = {
     type: 'scatter',
-    plugins: [crosshairPlugin],
+    plugins: [haloPlugin, crosshairPlugin],
     data: { datasets },
     options: {
       responsive: true,
