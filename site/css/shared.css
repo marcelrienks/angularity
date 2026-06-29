@@ -735,19 +735,6 @@ body {
   align-items: center;
 }
 
-.csv-loader {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.csv-loader input[type="file"] {
-  display: none;
-}
-
-.csv-loader .file-info {
-}
-
 /* Summary Table */
 .summary-table {
   max-width: 1200px;
@@ -1970,38 +1957,6 @@ body {
    REPORT — FILE LOADER CARDS
    ============================================================================ */
 
-.csv-loader-grid {
-  max-width: 1200px;
-  margin: 0 auto 32px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-}
-
-.csv-loader-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.csv-loader-card .card-title {
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--subtle);
-}
-
-.csv-loader-card .file-status {
-  color: var(--muted);
-}
-
-.csv-loader-card .row-count {
-  color: var(--muted);
-}
-
 /* ============================================================================
    HEATMAP SECTIONS (OPT-1, OPT-2, OPT-3)
    ============================================================================ */
@@ -2744,10 +2699,6 @@ body {
   .home-grid {
     grid-template-columns: 1fr !important;
     gap: 16px;
-  }
-
-  .csv-loader-grid {
-    grid-template-columns: 1fr !important;
   }
 
   /* Preset selector */

@@ -5,17 +5,15 @@
  */
 
 module.exports = {
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
   rootDir: '..',
   testMatch: ['**/tests/unit/**/*.test.js'],
   testTimeout: 15000,
   verbose: true,
-  transform: {
-    '^.+\\.jsx?$': 'babel-jest',
-  },
+  onlyChanged: false,
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
-    '\\.\\./(fixtures/.*)\\.js$': '<rootDir>/tests/unit/$1.js',
+    '\\.\\./(fixtures/.*)$': '<rootDir>/tests/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/unit/setup.js'],
   collectCoverage: true,

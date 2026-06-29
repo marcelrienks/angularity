@@ -2,7 +2,6 @@
  * report-page.js — Main controller for report.html.
  *
  * Handles:
- *   - CSV loading for FL and FR
  *   - Section visibility
  *   - 13×13 summary table rendering (Section 2.1)
  *   - Main chart (Section 2.2) via chart-builder.js
@@ -13,7 +12,6 @@ import { REQUIRED_POSITIONS, BOLT_POSITIONS, COLOURS, TARGET_CAMBER, TARGET_CAST
          TARGET_CAMBER_REAR, TARGET_TOE_FRONT, TARGET_TOE_REAR, TARGET_STEERING_RATIO, TARGET_CASTER_INPUT_MODE, TARGET_CASTER_WHEEL_DEGREES, TARGET_WHEEL_DIAMETER, CAMBER_THRESHOLDS, CASTER_THRESHOLDS, TOE_THRESHOLDS,
          WHEELS, FRONT_WHEELS, REAR_WHEELS, WHEEL_LABELS,
          SYMMETRY_TOLERANCE, getBoltPositions, getCurrentMeasurementDensity } from './constants.js';
-import { parseCSV } from './csv-io.js';
 import { processWheel, symmetryAnalysis } from './report-engine.js';
 import { buildScatterChart, destroyChart, updateChartNote } from './chart-builder.js';
 import { loadFullGridState, loadWheelFromStorage, loadWheelToeFromStorage, hasSufficientData, invalidateCache } from './localstorage-io.js';
@@ -111,7 +109,6 @@ function _clearInsufficientDataMessage() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Always bind UI controls first
-  _bindFileInputs();
   _bindWheelTabs();
 
   // Load data ONLY from localStorage (user's previous session)
@@ -128,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
  * Load gridState from localStorage (input page session data) for each wheel independently.
  * Called first on page load, on page visibility changes, and by manual refresh button.
  * Each wheel's data is stored and loaded separately.
- * Converts gridState format to CSV row format and processes wheels.
+ * Converts gridState format to measurement row format and processes wheels.
  */
 function _loadFromLocalStorage() {
   try {
@@ -143,7 +140,7 @@ function _loadFromLocalStorage() {
       if (!wheelState) continue;
 
       try {
-        // Convert gridState[wheel] to CSV row format
+        // Convert gridState[wheel] to measurement row format
         const gridStateRows = _gridStateToRows(wheelState);
         if (gridStateRows.length === 0) continue;
 
@@ -192,7 +189,7 @@ function _setupAutoRefresh() {
 }
 
 /**
- * Convert gridState for a wheel into an array of CSV row objects.
+ * Convert gridState for a wheel into an array of measurement row objects.
  * Only includes positions that have at least one non-empty input value.
  *
  * JSON deserialization converts numeric keys to strings, so we access with both
@@ -242,73 +239,6 @@ function _gridStateToRows(wheelState) {
   }
 
   return rows;
-}
-
-/**
- * Helper: Convert localStorage gridState rows to processWheel input format.
- * gridStateToRows returns objects with camberNeg20/camber0/camberPos20 properties,
- * but processWheel (via interpolateGrid) expects neg20/zero/pos20 properties.
- */
-function _convertRowsForProcessing(gridStateRows) {
-  return gridStateRows.map(r => ({
-    camberBolt: r.camberBolt,
-    casterBolt: r.casterBolt,
-    neg20: r.camberNeg20,
-    zero: r.camber0,
-    pos20: r.camberPos20,
-    toe: r.toe ?? null,
-  }));
-}
-
-// ── File inputs ────────────────────────────────────────────────────────────
-
-function _bindFileInputs() {
-  for (const wheel of WHEELS) {
-    const input = document.getElementById(`${wheel.toLowerCase()}-upload`);
-    if (!input) continue;
-    input.addEventListener('change', e => _handleFile(e, wheel));
-  }
-}
-
-
-async function _handleFile(e, wheel) {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  _hideError();
-
-  const reader = new FileReader();
-  reader.onload = evt => {
-    try {
-      const csvRows = parseCSV(evt.target.result);
-      // Convert CSV property names to processWheel format
-      const processedRows = _convertRowsForProcessing(csvRows);
-      results[wheel] = processWheel(processedRows, _getWheelProcessingOptions(wheel));
-      _updateStatus(wheel, file.name, csvRows.length);
-
-      _rebuildAll();
-    } catch (err) {
-      _showError(`${wheel} CSV error: ${err.message}`);
-      results[wheel] = null;
-      _updateStatus(wheel, null, 0);
-      _rebuildAll();
-    }
-    e.target.value = '';
-  };
-  reader.readAsText(file);
-}
-
-function _updateStatus(wheel, filename, rowCount) {
-  const w = wheel.toLowerCase();
-  const statusEl   = document.getElementById(`${w}-status`);
-  const rowCountEl = document.getElementById(`${w}-row-count`);
-  if (statusEl) {
-    statusEl.textContent = filename ?? 'No file loaded';
-    statusEl.className   = `file-status ${filename ? 'loaded' : ''}`;
-  }
-  if (rowCountEl) {
-    rowCountEl.textContent = filename ? `${rowCount} measured rows` : '';
-  }
 }
 
 // ── Master rebuild ─────────────────────────────────────────────────────────

@@ -25,12 +25,12 @@ export function updateMeasurementMethodText(casterInputMode, density = 13) {
     const method = isRatioMode
       ? 'at 360° anti-clockwise steering wheel, 0°, and 360° clockwise steering wheel'
       : 'at three measurement wheel positions';
-    inputCardDesc.textContent = `Front: enter camber readings ${method} for each bolt combination. Rear: enter camber at 0° and toe distance (mm). Covers the full ${gridText} with a minimum of 9 required positions. Download or load CSV files per wheel.`;
+    inputCardDesc.textContent = `Front: enter camber readings ${method} for each bolt combination. Rear: enter camber at 0° and toe distance (mm). Covers the full ${gridText} with a minimum of 9 required positions. Export and import your measurements as JSON files.`;
   }
 
   const reportCardDesc = document.getElementById('report-card-desc');
   if (reportCardDesc) {
-    reportCardDesc.textContent = `Load CSV files for Front Left, Front Right, Rear Left, and Rear Right. View the interpolated ${gridText} summary table, multi-line chart, washer position diagrams, symmetry analysis, and toe alignment status — then read off the recommended bolt settings.`;
+    reportCardDesc.textContent = `The report automatically loads your measurement data from the Input Sheet. View the interpolated ${gridText} summary table, multi-line chart, washer position diagrams, symmetry analysis, and toe alignment status — then read off the recommended bolt settings.`;
   }
 }
 

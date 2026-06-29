@@ -14,7 +14,6 @@
 
 import { WHEELS, FRONT_WHEELS, REAR_WHEELS, TARGET_CAMBER, TARGET_CASTER,
          TARGET_CAMBER_REAR, TARGET_TOE_FRONT, TARGET_TOE_REAR } from './constants.js';
-import { parseCSV } from './csv-io.js';
 import { processWheel, symmetryAnalysis } from './report-engine.js';
 
 /**
@@ -385,49 +384,9 @@ function convertRowsForProcessing(rows) {
     neg20: row.camber_neg20,
     zero: row.camber_0,
     pos20: row.camber_pos20,
-    isInterpolated: false, // All from CSV are measurements
+    isInterpolated: false, // All measurements (not interpolated)
   }));
 }
-
-/**
- * Handle file upload for a wheel
- * @param {File} file - CSV file
- * @param {string} wheel - Wheel ID
- * @returns {Promise<object>} { success: boolean, message: string, rowCount?: number }
- */
-export async function handleFileUpload(file, wheel) {
-  try {
-    const csvText = await file.text();
-    const gridState = parseCSV(csvText);
-
-    // Store in cache
-    const options = getWheelProcessingOptions(wheel);
-    const rows = gridStateToRows(gridState, '0');
-    const processedRows = convertRowsForProcessing(rows);
-    const result = processWheel(processedRows, options);
-    resultsCache[wheel] = result;
-
-    // Count non-empty cells
-    let rowCount = 0;
-    for (const frontVal of Object.values(gridState)) {
-      for (const cell of Object.values(frontVal)) {
-        if (cell.zero) rowCount++;
-      }
-    }
-
-    return {
-      success: true,
-      message: `Loaded ${rowCount} measurements`,
-      rowCount,
-    };
-  } catch (err) {
-    return {
-      success: false,
-      message: `Failed to load CSV: ${err.message}`,
-    };
-  }
-}
-
 
 /**
  * Clear all cached data

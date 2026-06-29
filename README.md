@@ -122,7 +122,7 @@ alignment/
 |---------|----------|
 | Tests hang | Increase timeout in jest.config.js; verify port 8080 free |
 | localStorage not persisting | Check browser privacy settings |
-| CSV import fails | Verify CSV structure: `{frontBolt, rearBolt, neg20, zero, pos20}` per row (see [wiki/internals.md](wiki/internals.md)) |
+| JSON import fails | Verify JSON structure matches exported format (see [wiki/internals.md](wiki/internals.md)) |
 
 ---
 

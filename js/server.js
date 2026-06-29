@@ -2,9 +2,7 @@
 /**
  * server.js — Local development server for the MX5 NC1 alignment site.
  *
- * Serves static files from the site directory and exposes one write endpoint:
- *   POST /save-csv?wheel=FL   — writes data/alignment-FL.csv
- *   POST /save-csv?wheel=FR   — writes data/alignment-FR.csv
+ * Serves static files from the site directory.
  *
  * Usage:  node js/server.js
  *         node js/server.js 8080      (custom port)
@@ -30,7 +28,6 @@ const MIME = {
   '.html': 'text/html',
   '.css':  'text/css',
   '.js':   'application/javascript',
-  '.csv':  'text/csv',
   '.json': 'application/json',
   '.svg':  'image/svg+xml',
   '.png':  'image/png',
@@ -39,32 +36,6 @@ const MIME = {
 
 http.createServer((req, res) => {
   const parsed = url.parse(req.url, true);
-
-  // ── POST /save-csv?wheel=FL|FR ──────────────────────────────────────────
-  if (req.method === 'POST' && parsed.pathname === '/save-csv') {
-    const wheel = parsed.query.wheel;
-    if (wheel !== 'FL' && wheel !== 'FR') {
-      res.writeHead(400, { 'Content-Type': 'text/plain' });
-      res.end('wheel must be FL or FR');
-      return;
-    }
-
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
-      const dest = path.join(DATA, `alignment-${wheel}.csv`);
-      fs.writeFile(dest, body, 'utf8', err => {
-        if (err) {
-          res.writeHead(500, { 'Content-Type': 'text/plain' });
-          res.end('Write failed');
-        } else {
-          res.writeHead(200, { 'Content-Type': 'text/plain' });
-          res.end('OK');
-        }
-      });
-    });
-    return;
-  }
 
   // ── Static file serving ─────────────────────────────────────────────────
   let filePath;

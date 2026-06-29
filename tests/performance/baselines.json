@@ -1,0 +1,38 @@
+{
+  "calculation-speed-13x13": {
+    "testName": "13×13 grid full calculation",
+    "avgDuration": 350,
+    "minDuration": 280,
+    "maxDuration": 420,
+    "stdDev": 45,
+    "sampleCount": 20,
+    "timestamp": "2026-06-29T12:00:00Z"
+  },
+  "chart-render-scatter": {
+    "testName": "Scatter chart render with 169 points",
+    "avgDuration": 420,
+    "minDuration": 350,
+    "maxDuration": 500,
+    "stdDev": 55,
+    "sampleCount": 20,
+    "timestamp": "2026-06-29T12:00:00Z"
+  },
+  "calculation-speed-7x7": {
+    "testName": "7×7 grid calculation",
+    "avgDuration": 120,
+    "minDuration": 90,
+    "maxDuration": 150,
+    "stdDev": 20,
+    "sampleCount": 20,
+    "timestamp": "2026-06-29T12:00:00Z"
+  },
+  "calculation-speed-5x5": {
+    "testName": "5×5 grid calculation",
+    "avgDuration": 65,
+    "minDuration": 50,
+    "maxDuration": 80,
+    "stdDev": 10,
+    "sampleCount": 20,
+    "timestamp": "2026-06-29T12:00:00Z"
+  }
+}
