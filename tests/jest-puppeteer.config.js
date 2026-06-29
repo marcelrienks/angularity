@@ -1,23 +1,8 @@
-export default {
+module.exports = {
   launch: {
-    headless: 'new',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-web-resources',
-      '--disable-features=IsolateOrigins,site-per-process',
-      '--disable-blink-features=AutomationControlled',
-      '--allow-file-access-from-files',
-      '--disable-security-extension'
-    ],
-    timeout: 60000,
-    ignoreDefaultArgs: ['--disable-extensions']
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    timeout: 30000,
   },
-  server: {
-    command: 'node js/server.js',
-    port: 8080,
-    launchTimeout: 30000,
-    debug: false
-  }
+  browserContext: 'default',
 };

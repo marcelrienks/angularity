@@ -20,15 +20,15 @@ Tasks organized by test category (Unit → Invariant → Boundary → Regression
 
 Foundation for all tests. Must complete before any test implementation.
 
-- [ ] T001 Create Jest configuration file at `jest.config.js` with test patterns, setup files, coverage settings
-- [ ] T002 Create Puppeteer + Jest integration config at `tests/jest-puppeteer.config.js` with browser launch options
-- [ ] T003 Create test directory structure: `tests/{unit,integration,invariant,regression,performance}/` and `tests/fixtures/{sample-data,exports}/`
-- [ ] T004 Create test utilities at `tests/fixtures/test-helpers.js` with shared functions: `generateGridState()`, `calculateExpectedValue()`, `loadFixtureFile()`, `compareGrids()`, `extractUIValues()`
-- [ ] T005 Create base test setup file at `tests/setup.js` with localStorage mock, browser context initialization, cleanup hooks
-- [ ] T006 Create performance baseline template at `tests/performance/baselines.json` with reference metrics for 13×13 calculation (< 500ms), chart render (< 600ms)
-- [ ] T007 [P] Create npm scripts in `package.json`: `test:all-sync`, `test:calculation-unit`, `test:calculation-integration`, `test:symmetry-correctness`, `test:csv-integrity`, `test:regression`, `test:performance`, `test:determinism`, `test:coverage`
-- [ ] T008 [P] Create CI/CD workflow at `.github/workflows/test.yml` with: on push/PR, run all tests, generate HTML report, email alerts on failure
-- [ ] T009 Create fixture generation script at `tests/fixtures/generate-fixtures.js` that populates sample data, exports grid, saves as JSON with expected values
+- [x] T001 Create Jest configuration file at `jest.config.js` with test patterns, setup files, coverage settings
+- [x] T002 Create Puppeteer + Jest integration config at `tests/jest-puppeteer.config.js` with browser launch options
+- [x] T003 Create test directory structure: `tests/{unit,integration,invariant,regression,performance}/` and `tests/fixtures/{sample-data,exports}/`
+- [x] T004 Create test utilities at `tests/fixtures/test-helpers.js` with shared functions: `generateGridState()`, `calculateExpectedValue()`, `loadFixtureFile()`, `compareGrids()`, `extractUIValues()`
+- [x] T005 Create base test setup file at `tests/setup.js` with localStorage mock, browser context initialization, cleanup hooks
+- [x] T006 Create performance baseline template at `tests/performance/baselines.json` with reference metrics for 13×13 calculation (< 500ms), chart render (< 600ms)
+- [x] T007 [P] Create npm scripts in `package.json`: `test:all-sync`, `test:calculation-unit`, `test:calculation-integration`, `test:symmetry-correctness`, `test:csv-integrity`, `test:regression`, `test:performance`, `test:determinism`, `test:coverage`
+- [x] T008 [P] Create CI/CD workflow at `.github/workflows/test.yml` with: on push/PR, run all tests, generate HTML report, email alerts on failure
+- [x] T009 Create fixture generation script at `tests/fixtures/generate-fixtures.js` that populates sample data, exports grid, saves as JSON with expected values
 
 ---
 
@@ -36,14 +36,14 @@ Foundation for all tests. Must complete before any test implementation.
 
 Blocking prerequisites for all test categories. Establishes baseline fixtures and test infrastructure.
 
-- [ ] T010 Create `tests/fixtures/exports/alignment-export-v1.json` with 13×13 grid, all 4 wheels (FL/FR/RL/RR), targets, expected calculations
-- [ ] T011 [P] Create `tests/fixtures/exports/alignment-export-v2.json` (different sample data set for regression testing)
-- [ ] T012 [P] Create `tests/fixtures/exports/alignment-export-sparse.json` with 5×5 grid for boundary testing
+- [x] T010 Create `tests/fixtures/exports/alignment-export-v1.json`.json` with 13×13 grid, all 4 wheels (FL/FR/RL/RR), targets, expected calculations
+- [x] T011 [P] Create `tests/fixtures/exports/alignment-export-v2.json`.json` (different sample data set for regression testing)
+- [x] T012 [P] Create `tests/fixtures/exports/alignment-export-sparse.json`.json` with 5×5 grid for boundary testing
 - [ ] T013 [P] Create `tests/fixtures/sample-data/known-values.json` lookup table: (frontBolt, rearBolt) → expectedCamber, expectedCaster, expectedColor
 - [ ] T014 [P] Create `tests/fixtures/sample-data/caster-test-cases.json` with test cases: {360CW, 360ACW} → expectedCaster
 - [ ] T015 [P] Create `tests/fixtures/sample-data/interpolation-points.json` with interpolation test values: neighbors → expectedInterpolated
-- [ ] T016 Create fixture loading helper at `tests/fixtures/test-helpers.js::loadFixture()` that validates fixture format and structure
-- [ ] T017 Create validation utilities at `tests/fixtures/test-helpers.js`: `expectValueWithTolerance()` (0.01°), `expectSymmetry()`, `expectMonotonicity()`
+- [x] T016 Create fixture loading helper at `tests/fixtures/test-helpers.js::loadFixture()` that validates fixture format and structure
+- [x] T017 Create validation utilities at `tests/fixtures/test-helpers.js`: `expectValueWithTolerance()` (0.01°), `expectSymmetry()`, `expectMonotonicity()`
 
 ---
 
