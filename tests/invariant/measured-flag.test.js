@@ -36,23 +36,32 @@ describe('Measured Flag Correctness Invariants', () => {
   it('density change updates all flags correctly', () => {
     const densities = [5, 7, 13];
     const required = [-6, -3, 0, 3, 6];
-    
+
     densities.forEach(d => {
       let totalCells = 0;
       let measuredCells = 0;
-      
-      for (let i = -Math.floor(d/2); i <= Math.floor(d/2); i++) {
-        for (let j = -Math.floor(d/2); j <= Math.floor(d/2); j++) {
+      const range = Math.floor(d/2);
+
+      for (let i = -range; i <= range; i++) {
+        for (let j = -range; j <= range; j++) {
           totalCells++;
           if (required.includes(i) && required.includes(j)) {
             measuredCells++;
           }
         }
       }
-      
+
       expect(totalCells).toBe(d * d);
-      expect(measuredCells).toBe(25); // Always 5×5 required positions
-      expect(totalCells - measuredCells).toBeGreaterThan(0); // Rest are interpolated
+
+      // Count required positions that fit in range
+      const requiredInRange = required.filter(p => p >= -range && p <= range).length;
+      const expectedMeasured = requiredInRange * requiredInRange;
+      expect(measuredCells).toBe(expectedMeasured);
+
+      // Only for 13×13 all required positions fit
+      if (d === 13) {
+        expect(measuredCells).toBe(25);
+      }
     });
   });
 

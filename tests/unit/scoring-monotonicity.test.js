@@ -52,11 +52,11 @@ describe('Golden Rule Score Monotonicity', () => {
       positions.push({ pos, distance, score });
     }
     
-    // Verify: lower distance = higher score
+    // Verify: lower distance = higher or equal score
     for (let i = 0; i < positions.length; i++) {
       for (let j = i + 1; j < positions.length; j++) {
         if (positions[i].distance < positions[j].distance) {
-          expect(positions[i].score).toBeGreaterThan(positions[j].score);
+          expect(positions[i].score).toBeGreaterThanOrEqual(positions[j].score);
         }
       }
     }

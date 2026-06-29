@@ -117,7 +117,7 @@ describe('Interpolation Linear Calculation', () => {
 describe('Golden Rule Score Monotonicity', () => {
   it('score increases as distance decreases', () => {
     const target = -1.10;
-    const positions = [-2.0, -1.5, -1.10, -0.7, -0.2];
+    const positions = [-2.0, -1.5, -1.20, -1.15, -1.10];
     const scores = positions.map(pos => {
       const distance = Math.abs(pos - target);
       return Math.max(0, 1 - distance * 2);
