@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CloudFormation Template Parameters for S3 Subdomain Deployment",
+  "description": "Input parameters required to deploy the Angularity app to AWS S3 + CloudFront + Route53",
+  "type": "object",
+  "properties": {
+    "HostedZoneId": {
+      "type": "string",
+      "description": "Route53 hosted zone ID (e.g., Z1234567890ABC)",
+      "pattern": "^Z[A-Z0-9]{12,32}$",
+      "examples": ["Z1234567890ABC", "ZABCDEF123456"]
+    },
+    "SubdomainName": {
+      "type": "string",
+      "description": "Subdomain prefix (e.g., 'alignment'). Must be valid DNS label.",
+      "minLength": 1,
+      "maxLength": 63,
+      "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$",
+      "examples": ["alignment", "app", "my-alignment-tool"]
+    },
+    "ParentDomainName": {
+      "type": "string",
+      "description": "Parent domain name (e.g., 'example.com'). Must be registered and have Route53 hosted zone.",
+      "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,}$",
+      "examples": ["example.com", "mydomain.co.uk"]
+    },
+    "CertificateArn": {
+      "type": "string",
+      "description": "ARN of ACM wildcard certificate (must be ISSUED status). Format: arn:aws:acm:region:account:certificate/uuid",
+      "pattern": "^arn:aws:acm:[a-z]{2}-[a-z]+-\\d{1}:\\d{12}:certificate/[a-f0-9-]+$",
+      "examples": ["arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"]
+    },
+    "Environment": {
+      "type": "string",
+      "description": "Deployment environment for resource tagging",
+      "enum": ["production", "staging", "development"],
+      "default": "production"
+    }
+  },
+  "required": ["HostedZoneId", "SubdomainName", "ParentDomainName", "CertificateArn"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "HostedZoneId": "Z1234567890ABC",
+      "SubdomainName": "alignment",
+      "ParentDomainName": "example.com",
+      "CertificateArn": "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012",
+      "Environment": "production"
+    }
+  ]
+}

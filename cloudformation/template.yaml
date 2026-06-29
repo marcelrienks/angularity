@@ -1,0 +1,313 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  S3 Subdomain Deployment for Angularity
+
+  Deploys static Angularity application to AWS S3 bucket with CloudFront CDN
+  and Route53 DNS alias on a subdomain of an existing domain.
+
+  Resources:
+  - S3 bucket (private, accessed via CloudFront OAI)
+  - CloudFront distribution (CDN, HTTPS, caching, compression)
+  - CloudFront Origin Access Identity (OAI for secure S3 access)
+  - Route53 alias record (DNS resolution to CloudFront)
+
+  Prerequisites:
+  - ACM wildcard certificate provisioned and ISSUED in the region
+  - Route53 hosted zone exists for the parent domain
+  - AWS account with CloudFormation, S3, CloudFront, Route53 permissions
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Domain Configuration"
+        Parameters:
+          - HostedZoneId
+          - ParentDomainName
+          - SubdomainName
+      - Label:
+          default: "SSL/TLS Certificate"
+        Parameters:
+          - CertificateArn
+      - Label:
+          default: "Deployment"
+        Parameters:
+          - Environment
+    ParameterLabels:
+      HostedZoneId:
+        default: "Route53 Hosted Zone ID"
+      ParentDomainName:
+        default: "Parent Domain Name"
+      SubdomainName:
+        default: "Subdomain Prefix"
+      CertificateArn:
+        default: "ACM Certificate ARN"
+      Environment:
+        default: "Environment"
+
+Parameters:
+  HostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+    Description: |
+      Route53 hosted zone ID for the parent domain.
+      Example: Z1234567890ABC
+
+      To find your zone ID:
+      aws route53 list-hosted-zones --query 'HostedZones[0].Id' --output text | cut -d'/' -f3
+
+  ParentDomainName:
+    Type: String
+    Description: |
+      Parent domain name (e.g., example.com).
+      Must have an active Route53 hosted zone.
+    AllowedPattern: "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,}$"
+    ConstraintDescription: "Must be a valid domain name (e.g., example.com)"
+
+  SubdomainName:
+    Type: String
+    Description: |
+      Subdomain prefix (e.g., 'alignment' for alignment.example.com).
+      Must be 1-63 characters, lowercase alphanumeric and hyphens.
+    AllowedPattern: "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$"
+    ConstraintDescription: "Must be 1-63 chars, lowercase alphanumeric and hyphens only"
+    MinLength: 1
+    MaxLength: 63
+
+  CertificateArn:
+    Type: String
+    Description: |
+      ARN of ACM wildcard certificate (must be ISSUED status).
+      Format: arn:aws:acm:region:account:certificate/uuid
+
+      Certificate MUST cover *.{ParentDomainName} or be a wildcard.
+      Example: arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012
+
+      To find your certificate ARN:
+      aws acm list-certificates --region us-east-1 --query 'CertificateSummaryList[0].CertificateArn' --output text
+    AllowedPattern: "^arn:aws:acm:[a-z]{2}-[a-z]+-\\d{1}:\\d{12}:certificate/[a-f0-9-]+$"
+    ConstraintDescription: "Must be a valid ACM certificate ARN"
+
+  Environment:
+    Type: String
+    Description: "Deployment environment for resource tagging"
+    Default: production
+    AllowedValues:
+      - production
+      - staging
+      - development
+    ConstraintDescription: "Must be production, staging, or development"
+
+Resources:
+  # ============================================================================
+  # S3 Bucket: Static file storage (private, accessed via CloudFront OAI)
+  # ============================================================================
+
+  AppBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${SubdomainName}-${AWS::AccountId}"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: angularity
+        - Key: Feature
+          Value: s3-subdomain-deployment
+        - Key: ManagedBy
+          Value: cloudformation
+
+  # ============================================================================
+  # CloudFront Origin Access Identity (OAI): Secure S3 access
+  # ============================================================================
+
+  OriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub "OAI for ${SubdomainName}.${ParentDomainName}"
+
+  # ============================================================================
+  # S3 Bucket Policy: Allow CloudFront OAI to read objects
+  # ============================================================================
+
+  AppBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AppBucket
+      PolicyText:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${OriginAccessIdentity}"
+            Action: s3:GetObject
+            Resource: !Sub "${AppBucket.Arn}/*"
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${OriginAccessIdentity}"
+            Action: s3:ListBucket
+            Resource: !GetAtt AppBucket.Arn
+
+  # ============================================================================
+  # CloudFront Distribution: CDN for global content delivery, caching, HTTPS
+  # ============================================================================
+
+  AppDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        HttpVersion: http2and3
+        DefaultRootObject: index.html
+
+        # Origin: S3 bucket (via OAI)
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt AppBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${OriginAccessIdentity}"
+
+        # Default cache behavior (HTML files - minimal caching)
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachePolicyId: 4135ea3d-c35d-46eb-81d7-af4baef4c7c9
+          Compress: true
+          ViewerProtocolPolicy: redirect-to-https
+          TargetOriginId: S3Origin
+
+        # Cache behavior for static assets (JS, CSS - aggressive caching)
+        CacheBehaviors:
+          - PathPattern: "*.js"
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+            Compress: true
+            ViewerProtocolPolicy: redirect-to-https
+            TargetOriginId: S3Origin
+
+          - PathPattern: "*.css"
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+            Compress: true
+            ViewerProtocolPolicy: redirect-to-https
+            TargetOriginId: S3Origin
+
+          - PathPattern: "*.png"
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+            Compress: true
+            ViewerProtocolPolicy: redirect-to-https
+            TargetOriginId: S3Origin
+
+          - PathPattern: "*.jpg"
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+            Compress: true
+            ViewerProtocolPolicy: redirect-to-https
+            TargetOriginId: S3Origin
+
+          - PathPattern: "*.gif"
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+            Compress: true
+            ViewerProtocolPolicy: redirect-to-https
+            TargetOriginId: S3Origin
+
+          - PathPattern: "*.woff*"
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+            Compress: true
+            ViewerProtocolPolicy: redirect-to-https
+            TargetOriginId: S3Origin
+
+        # Viewer certificate (HTTPS)
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+
+        # Logging (optional, disabled for now)
+        Logging:
+          Enabled: false
+
+        # Tags
+        Tags:
+          - Key: Environment
+            Value: !Ref Environment
+          - Key: Project
+            Value: angularity
+          - Key: Feature
+            Value: s3-subdomain-deployment
+          - Key: ManagedBy
+            Value: cloudformation
+
+  # ============================================================================
+  # Route53 Alias Record: DNS resolution to CloudFront
+  # ============================================================================
+
+  AppDomainAlias:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Sub "${SubdomainName}.${ParentDomainName}"
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt AppDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2  # CloudFront hosted zone ID (global)
+        EvaluateTargetHealth: false
+
+Outputs:
+  AppBucketName:
+    Description: S3 bucket name for uploading app files
+    Value: !Ref AppBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-AppBucketName"
+
+  CloudFrontDomainName:
+    Description: CloudFront distribution domain name (temporary access before DNS propagates)
+    Value: !GetAtt AppDistribution.DomainName
+    Export:
+      Name: !Sub "${AWS::StackName}-CloudFrontDomainName"
+
+  DistributionId:
+    Description: CloudFront distribution ID (for cache invalidation)
+    Value: !Ref AppDistribution
+    Export:
+      Name: !Sub "${AWS::StackName}-DistributionId"
+
+  DeployedUrl:
+    Description: Final FQDN where app is accessible
+    Value: !Sub "${SubdomainName}.${ParentDomainName}"
+    Export:
+      Name: !Sub "${AWS::StackName}-DeployedUrl"
+
+  StackStatus:
+    Description: CloudFormation stack status
+    Value: !Sub "Stack ${AWS::StackName} is ${AWS::StackStatus}"
