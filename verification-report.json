@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-06-29T07:05:17.294Z",
+  "index": {
+    "targets": {}
+  },
+  "input": {
+    "FL": [],
+    "FR": [],
+    "RL": [],
+    "RR": []
+  },
+  "report": {
+    "hasTable": true,
+    "cellCount": 20,
+    "charts": 1
+  },
+  "screenshots": "See ./screenshots/ directory"
+}
