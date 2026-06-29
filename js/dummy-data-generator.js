@@ -1,8 +1,8 @@
 /**
  * dummy-data-generator.js — Pure algorithm for generating synthetic alignment data
  *
- * Exports functions to generate measurement grids and individual measurements
- * for all wheel combinations (FL, FR, RL, RR).
+ * Exports functions to generate measurement grids for sample data in the app
+ * and test data for integration tests.
  *
  * The algorithm (opposing sweeps):
  * - Camber IMPROVES left-to-right: from -3.2° (front=-6) to -0.5° (front=+6)
@@ -219,21 +219,6 @@ export function generateMeasurements(wheel = 'FL') {
   }
   
   return measurements;
-}
-
-/**
- * Generate CSV rows (one row per measurement).
- * Returns array: [{ frontBolt, rearBolt, camberNeg20, camber0, camberPos20 }, ...]
- */
-export function generateCSVRows(wheel = 'FL') {
-  const measurements = generateMeasurements(wheel);
-  return measurements.map(m => ({
-    frontBolt: m.frontBolt,
-    rearBolt: m.rearBolt,
-    camberNeg20: m.camberNeg20,
-    camber0: m.camber0,
-    camberPos20: m.camberPos20
-  }));
 }
 
 /**

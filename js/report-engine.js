@@ -2,7 +2,7 @@
  * report-engine.js — Data processing layer for the report page.
  *
  * Exported API:
- *   processWheel(parsedCSV) → WheelResult
+ *   processWheel(measurementRows) → WheelResult
  *   symmetryAnalysis(flResult, frResult) → SymmetryResult
  *
  * WheelResult shape:
@@ -118,7 +118,7 @@ function _computeGoldenRuleScore(camberDelta, casterDelta, toeDelta = null) {
 }
 
 /**
- * Process a parsed CSV for one wheel.
+ * Process measurement rows for one wheel.
  *
  * Returns multiple "best" positions because camber and caster optimize independently:
  *   - bestCell: Best compromise (weighted score using Golden Rule)
@@ -129,7 +129,7 @@ function _computeGoldenRuleScore(camberDelta, casterDelta, toeDelta = null) {
  * both camber and caster simultaneously. The position that minimizes camber error
  * may not be the same as the position that minimizes caster error.
  *
- * @param {import('./csv-io.js').MeasuredRow[]} parsedCSV
+ * @param {Array<{camberBolt:number, casterBolt:number, neg20:number|string, zero:number|string, pos20:number|string, toe:number|null}>} measurementRows
  * @param {{ targetCamber?: number, targetCaster?: number|null, targetToe?: number|null, measuredToe?: number|null, steeringRatio?: number|null, casterInputMode?: string|null, casterWheelDegrees?: number|null }} [options]
  * @returns {{
  *   grid: GridCell[][],
@@ -141,7 +141,7 @@ function _computeGoldenRuleScore(camberDelta, casterDelta, toeDelta = null) {
  *   measuredToe: number|null
  * }}
  */
-export function processWheel(parsedCSV, options = {}) {
+export function processWheel(rows, options = {}) {
   const targetCamber = Object.prototype.hasOwnProperty.call(options, 'targetCamber') ? options.targetCamber : TARGET_CAMBER;
   const targetCaster = Object.prototype.hasOwnProperty.call(options, 'targetCaster') ? options.targetCaster : TARGET_CASTER;
   const targetToe = Object.prototype.hasOwnProperty.call(options, 'targetToe') ? options.targetToe : null;
@@ -165,17 +165,17 @@ export function processWheel(parsedCSV, options = {}) {
     ? { wheelDegrees: casterWheelDegrees }
     : { steeringRatio };
 
-  const csvToe = parsedCSV.find(r => r.toe != null && Number.isFinite(Number(r.toe)));
-  const effectiveToe = csvToe ? Number(csvToe.toe) : measuredToe;
+  const toeRow = rows.find(r => r.toe != null && Number.isFinite(Number(r.toe)));
+  const effectiveToe = toeRow ? Number(toeRow.toe) : measuredToe;
 
   // Build grid from MEASURED data only — no interpolation
   // Infer measured positions from the data itself
-  const camberMeasured = [...new Set(parsedCSV.map(r => r.camberBolt))].sort((a, b) => a - b);
-  const casterMeasured = [...new Set(parsedCSV.map(r => r.casterBolt))].sort((a, b) => a - b);
+  const camberMeasured = [...new Set(rows.map(r => r.camberBolt))].sort((a, b) => a - b);
+  const casterMeasured = [...new Set(rows.map(r => r.casterBolt))].sort((a, b) => a - b);
 
   // Create map for quick lookup
   const measuredMap = {};
-  for (const row of parsedCSV) {
+  for (const row of rows) {
     if (!measuredMap[row.camberBolt]) measuredMap[row.camberBolt] = {};
     measuredMap[row.camberBolt][row.casterBolt] = row;
   }

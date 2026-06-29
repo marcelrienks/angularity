@@ -25,7 +25,6 @@ const execFileAsync = promisify(execFile);
 const INTEGRATION_TESTS = [
   'test:input-grid',
   'test:input-wheel',
-  'test:input-csv',
   'test:required-fields',
   'test:target-values',
   'test:color-coding-ui',

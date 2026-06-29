@@ -10,9 +10,8 @@
  *   - Tab navigation through all inputs left→right, top→bottom
  *   - Row/column focus highlight on input focus
  *   - Wheel selector tabs (FL / FR) — saves/restores per-wheel state
- *   - Setup overlay blocks use until user picks the data/ save folder once per session
- *   - Auto-load from data/alignment-{wheel}.csv on page open (via fetch)
- *   - CSV save via showDirectoryPicker (data/ folder, picked once, then silent)
+ *   - Auto-save all wheel data to localStorage on every cell change
+ *   - JSON export (exportGridToJSON → all wheels to file)
  *   - JSON import (file input → importGridFromJSON → populate all wheels)
  */
 
@@ -181,8 +180,6 @@ function _saveToStorage() {
 
 /**
  * Restore gridState from localStorage on page load.
- * Runs before _loadFromDataFiles() so in-progress work takes priority over
- * the last-saved CSV checkpoint.
  * Loads each wheel independently using per-wheel keys.
  */
 function _restoreFromStorage() {
@@ -230,11 +227,10 @@ document.addEventListener('DOMContentLoaded', () => {
   _renderToeInput();
   _updateProgress();
   _bindControls();
-  // NOTE: Auto-loading CSV files is disabled because:
+  // NOTE: Auto-loading from data files is disabled because:
   // 1. It interferes with test isolation (loads sample data for all wheels)
-  // 2. CSV import is documented as manual (button click, file upload)
+  // 2. JSON import is documented as manual (button click, file upload)
   // 3. Users work with empty wheels intentionally at start
-  // _loadFromDataFiles();
 });
 
 // Flush any pending changes before the page unloads
@@ -583,7 +579,7 @@ function _bindControls() {
   document.getElementById('btn-download')?.addEventListener('click', _exportJSON);
 
   // JSON import
-  document.getElementById('csv-upload')?.addEventListener('change', _importJSON);
+  document.getElementById('json-upload')?.addEventListener('change', _importJSON);
 
   // Load sample data
   const sampleBtn = document.getElementById('btn-sample');

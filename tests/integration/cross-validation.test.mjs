@@ -48,7 +48,7 @@ describe('Cross-Validation', () => {
     expect(targets).toEqual(originalTargets);
   });
 
-  it('CSV export: all cells match exactly (169 test)', () => {
+  it('export: all cells match exactly (169 test)', () => {
     const gridSize = 13;
     let matchCount = 0;
 

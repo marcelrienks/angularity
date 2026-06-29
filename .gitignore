@@ -11,7 +11,7 @@ coverage/
 *.png
 *.jpg
 .test-results/
-tmp/          # Temporary files for CSV export/import tests
+tmp/          # Temporary files for test operations
 
 # IDE
 .vscode/
