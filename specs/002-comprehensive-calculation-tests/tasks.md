@@ -53,43 +53,43 @@ Test individual calculation functions in isolation. Each test < 100ms, all compl
 
 ### User Story: US1 - Caster Formula
 
-- [ ] T018 [US1] Create test file `tests/unit/calculation-formulas.test.js` with test suite "Caster Calculation"
-- [ ] T019 [US1] Implement test: "should return 1.0 when 360CW=6.0 and 360ACW=4.0" (known input)
-- [ ] T020 [P] [US1] Implement test: "should return 0 when angles are identical" (edge case)
-- [ ] T021 [P] [US1] Implement test: "should handle negative differences" (negative caster)
-- [ ] T022 [P] [US1] Implement test: "should prevent division by zero" (identical angles)
-- [ ] T023 [US1] Add caster formula tests to npm script: `npm run test:calculation-unit -- --testNamePattern="Caster"`
+- [x] T018 [US1] Create test file `tests/unit/calculation-formulas.test.js` with test suite "Caster Calculation"
+- [x] T019 [US1] Implement test: "should return 1.0 when 360CW=6.0 and 360ACW=4.0" (known input)
+- [x] T020 [P] [US1] Implement test: "should return 0 when angles are identical" (edge case)
+- [x] T021 [P] [US1] Implement test: "should handle negative differences" (negative caster)
+- [x] T022 [P] [US1] Implement test: "should prevent division by zero" (identical angles)
+- [x] T023 [US1] Add caster formula tests to npm script: `npm run test:calculation-unit -- --testNamePattern="Caster"`
 
 ### User Story: US2 - Camber Average
 
-- [ ] T024 [US2] Implement test suite "Camber Average Formula" in `tests/unit/calculation-formulas.test.js`
-- [ ] T025 [US2] Implement test: "should calculate (360ACW + 0° + 360CW) / 3" with known values
-- [ ] T026 [P] [US2] Implement test: "should preserve precision with long decimals" (5.123456789)
-- [ ] T027 [P] [US2] Implement test: "should handle identical input values" (5.0, 5.0, 5.0)
-- [ ] T028 [US2] Add camber tests to npm script: `npm run test:calculation-unit -- --testNamePattern="Camber"`
+- [x] T024 [US2] Implement test suite "Camber Average Formula" in `tests/unit/calculation-formulas.test.js`
+- [x] T025 [US2] Implement test: "should calculate (360ACW + 0° + 360CW) / 3" with known values
+- [x] T026 [P] [US2] Implement test: "should preserve precision with long decimals" (5.123456789)
+- [x] T027 [P] [US2] Implement test: "should handle identical input values" (5.0, 5.0, 5.0)
+- [x] T028 [US2] Add camber tests to npm script: `npm run test:calculation-unit -- --testNamePattern="Camber"`
 
 ### User Story: US3 - Interpolation Linear
 
-- [ ] T029 [US3] Implement test suite "Interpolation Linear Calculation" in `tests/unit/calculation-formulas.test.js`
-- [ ] T030 [US3] Implement test: "value at 0.5 between -3 and +3 = (val_-3 + val_+3) / 2"
-- [ ] T031 [P] [US3] Implement test: "quarter-point interpolation" (0.25 between neighbors)
-- [ ] T032 [P] [US3] Implement test: "should never extrapolate beyond -6/+6" (boundary check)
-- [ ] T033 [P] [US3] Implement test: "interpolated flag correct for measured positions"
+- [x] T029 [US3] Implement test suite "Interpolation Linear Calculation" in `tests/unit/calculation-formulas.test.js`
+- [x] T030 [US3] Implement test: "value at 0.5 between -3 and +3 = (val_-3 + val_+3) / 2"
+- [x] T031 [P] [US3] Implement test: "quarter-point interpolation" (0.25 between neighbors)
+- [x] T032 [P] [US3] Implement test: "should never extrapolate beyond -6/+6" (boundary check)
+- [x] T033 [P] [US3] Implement test: "interpolated flag correct for measured positions"
 
 ### User Story: US4 - Golden Rule Score
 
-- [ ] T034 [US4] Implement test suite "Golden Rule Score Monotonicity" in `tests/unit/scoring-monotonicity.test.js`
-- [ ] T035 [US4] Implement test: "score increases monotonically as distance to target decreases"
-- [ ] T036 [P] [US4] Implement test: "no scoring dips: closest cell always wins"
-- [ ] T037 [P] [US4] Implement test: "direction correct: best = highest score"
-- [ ] T038 [US4] Property test: generate 100 random positions, verify monotonicity for all
+- [x] T034 [US4] Implement test suite "Golden Rule Score Monotonicity" in `tests/unit/scoring-monotonicity.test.js`
+- [x] T035 [US4] Implement test: "score increases monotonically as distance to target decreases"
+- [x] T036 [P] [US4] Implement test: "no scoring dips: closest cell always wins"
+- [x] T037 [P] [US4] Implement test: "direction correct: best = highest score"
+- [x] T038 [US4] Property test: generate 100 random positions, verify monotonicity for all
 
 ### User Story: US5 - Color Coding
 
-- [ ] T039 [US5] Implement test suite "Color Coding Distance Mapping" in `tests/unit/color-coding.test.js`
-- [ ] T040 [US5] Implement test: "distance → color (green/orange/red) mapping"
-- [ ] T041 [P] [US5] Implement test: "monotonic: closer values always greener"
-- [ ] T042 [P] [US5] Implement test: "threshold boundaries validated" (transition points)
+- [x] T039 [US5] Implement test suite "Color Coding Distance Mapping" in `tests/unit/color-coding.test.js`
+- [x] T040 [US5] Implement test: "distance → color (green/orange/red) mapping"
+- [x] T041 [P] [US5] Implement test: "monotonic: closer values always greener"
+- [x] T042 [P] [US5] Implement test: "threshold boundaries validated" (transition points)
 
 ---
 
@@ -99,27 +99,27 @@ Property-based tests validating conditions that must hold for all inputs. Each g
 
 ### User Story: US6 - Symmetry Invariants
 
-- [ ] T043 [US6] Implement test suite "Symmetry Pair Invariants" in `tests/invariant/symmetry-invariants.test.js`
-- [ ] T044 [US6] Property test: "FL bolt = FR bolt mirror when rear toe locked" for all valid positions (-6 to +6)
-- [ ] T045 [P] [US6] Property test: "RL/RR positions match if symmetric config enabled" for all densities (5×5, 7×7, 13×13)
+- [x] T043 [US6] Implement test suite "Symmetry Pair Invariants" in `tests/invariant/symmetry-invariants.test.js`
+- [x] T044 [US6] Property test: "FL bolt = FR bolt mirror when rear toe locked" for all valid positions (-6 to +6)
+- [x] T045 [P] [US6] Property test: "RL/RR positions match if symmetric config enabled" for all densities (5×5, 7×7, 13×13)
 
 ### User Story: US7 - Interpolation Bounds
 
-- [ ] T046 [US7] Implement test suite "Interpolation Bounds" in `tests/invariant/interpolation-bounds.test.js`
-- [ ] T047 [US7] Property test: "interpolated values never outside measured neighbor range" (100 random cells)
-- [ ] T048 [P] [US7] Property test: "no extrapolation beyond -6 to +6 positions" for all density modes
+- [x] T046 [US7] Implement test suite "Interpolation Bounds" in `tests/invariant/interpolation-bounds.test.js`
+- [x] T047 [US7] Property test: "interpolated values never outside measured neighbor range" (100 random cells)
+- [x] T048 [P] [US7] Property test: "no extrapolation beyond -6 to +6 positions" for all density modes
 
 ### User Story: US8 - Color Monotonicity
 
-- [ ] T049 [US8] Implement test suite "Color Monotonicity" in `tests/invariant/color-monotonicity.test.js`
-- [ ] T050 [US8] Property test: "cell closer to target never redder than farther cell" (100 position pairs)
-- [ ] T051 [P] [US8] Property test: "best cell always green (closest to any target)" across all wheels
+- [x] T049 [US8] Implement test suite "Color Monotonicity" in `tests/invariant/color-monotonicity.test.js`
+- [x] T050 [US8] Property test: "cell closer to target never redder than farther cell" (100 position pairs)
+- [x] T051 [P] [US8] Property test: "best cell always green (closest to any target)" across all wheels
 
 ### User Story: US9 - Measured Flag
 
-- [ ] T052 [US9] Implement test suite "Measured Flag Correctness" in `tests/invariant/measured-flag.test.js`
-- [ ] T053 [US9] Property test: "`isInterpolated === false` only for measured positions" (all 169 cells per density)
-- [ ] T054 [P] [US9] Assertion: "required positions (-6, -3, 0, +3, +6) never interpolated" for all wheels
+- [x] T052 [US9] Implement test suite "Measured Flag Correctness" in `tests/invariant/measured-flag.test.js`
+- [x] T053 [US9] Property test: "`isInterpolated === false` only for measured positions" (all 169 cells per density)
+- [x] T054 [P] [US9] Assertion: "required positions (-6, -3, 0, +3, +6) never interpolated" for all wheels
 
 ---
 
@@ -129,46 +129,46 @@ Test min/max values, empty grids, single measurements, division by zero.
 
 ### User Story: US10 - Position Bounds
 
-- [ ] T055 [US10] Implement test suite "Position Handling" in `tests/unit/grid-edge-cases.test.js`
-- [ ] T056 [US10] Test: "positions -6 to +6 all work without errors"
-- [ ] T057 [P] [US10] Test: "calculations correct at boundaries" (check values at -6 and +6)
+- [x] T055 [US10] Implement test suite "Position Handling" in `tests/unit/grid-edge-cases.test.js`
+- [x] T056 [US10] Test: "positions -6 to +6 all work without errors"
+- [x] T057 [P] [US10] Test: "calculations correct at boundaries" (check values at -6 and +6)
 
 ### User Story: US11 - Required Positions
 
-- [ ] T058 [US11] Implement test: "all 5 required positions always present" (-6, -3, 0, +3, +6)
-- [ ] T059 [P] [US11] Integration test: "cannot delete or clear required cells" (Puppeteer)
+- [x] T058 [US11] Implement test: "all 5 required positions always present" (-6, -3, 0, +3, +6)
+- [x] T059 [P] [US11] Integration test: "cannot delete or clear required cells" (Puppeteer)
 
 ### User Story: US12 - Grid Resize
 
-- [ ] T060 [US12] Integration test: "5×5 → 13×13 → 5×5 all cells recalculated correctly" in `tests/integration/grid-operations.test.mjs`
-- [ ] T061 [P] [US12] Test: "no data corruption during resize"
-- [ ] T062 [P] [US12] Test: "interpolation updated correctly"
+- [x] T060 [US12] Integration test: "5×5 → 13×13 → 5×5 all cells recalculated correctly" in `tests/integration/grid-operations.test.mjs`
+- [x] T061 [P] [US12] Test: "no data corruption during resize"
+- [x] T062 [P] [US12] Test: "interpolation updated correctly"
 
 ### User Story: US13 - Empty Grid
 
-- [ ] T063 [US13] Integration test: "clearing all data shows proper message (no crash)"
-- [ ] T064 [P] [US13] Test: "can reload after clear"
-- [ ] T065 [P] [US13] Test: "sample data populates empty grid"
+- [x] T063 [US13] Integration test: "clearing all data shows proper message (no crash)"
+- [x] T064 [P] [US13] Test: "can reload after clear"
+- [x] T065 [P] [US13] Test: "sample data populates empty grid"
 
 ### User Story: US14 - Single Measurement
 
-- [ ] T066 [US14] Test: "interpolation works with only 1 measured cell"
-- [ ] T067 [P] [US14] Test: "calculations don't break with minimal data"
+- [x] T066 [US14] Test: "interpolation works with only 1 measured cell"
+- [x] T067 [P] [US14] Test: "calculations don't break with minimal data"
 
 ### User Story: US15 - Zero Targets
 
-- [ ] T068 [US15] Test: "calculations valid when targets are 0°"
-- [ ] T069 [P] [US15] Test: "color coding works with zero targets"
+- [x] T068 [US15] Test: "calculations valid when targets are 0°"
+- [x] T069 [P] [US15] Test: "color coding works with zero targets"
 
 ### User Story: US16 - Division by Zero
 
-- [ ] T070 [US16] Test: "caster calculation when 360CW = 360ACW" (diff = 0)
-- [ ] T071 [P] [US16] Test: "interpolation when neighbor values identical"
+- [x] T070 [US16] Test: "caster calculation when 360CW = 360ACW" (diff = 0)
+- [x] T071 [P] [US16] Test: "interpolation when neighbor values identical"
 
 ### User Story: US17 - Precision
 
-- [ ] T072 [US17] Test: "string-to-number conversion preserves precision" (5.123456789)
-- [ ] T073 [P] [US17] Test: "long decimals not truncated"
+- [x] T072 [US17] Test: "string-to-number conversion preserves precision" (5.123456789)
+- [x] T073 [P] [US17] Test: "long decimals not truncated"
 
 ---
 
@@ -252,8 +252,8 @@ Validate rear toe lock, symmetric camber, asymmetric config.
 
 ### User Story: US30 - Asymmetric Options
 
-- [ ] T100 [US30] Test: "'no match found' shows when FL ≠ FR required"
-- [ ] T101 [P] [US30] Test: "independent optimization shows for each wheel"
+- [x] T100 [US30] Test: "'no match found' shows when FL ≠ FR required"
+- [x] T101 [P] [US30] Test: "independent optimization shows for each wheel"
 
 ---
 
@@ -263,26 +263,26 @@ Validate linear assumption, no extrapolation, correct flags.
 
 ### User Story: US31 - Linear Correctness
 
-- [ ] T102 [US31] Implement test in `tests/invariant/interpolation-bounds.test.js`: "midpoint value = (val_-3 + val_+3) / 2"
-- [ ] T103 [P] [US31] Test quarter-point, three-quarter-point
-- [ ] T104 [P] [US31] Validate for all wheels
+- [x] T102 [US31] Implement test in `tests/invariant/interpolation-bounds.test.js`: "midpoint value = (val_-3 + val_+3) / 2"
+- [x] T103 [P] [US31] Test quarter-point, three-quarter-point
+- [x] T104 [P] [US31] Validate for all wheels
 
 ### User Story: US32 - No Extrapolation
 
-- [ ] T105 [US32] Test: "requesting value beyond -6 rejected or clamped"
-- [ ] T106 [P] [US32] Test: "requesting value beyond +6 rejected or clamped"
-- [ ] T107 [P] [US32] Verify only -6 to +6 positions valid
+- [x] T105 [US32] Test: "requesting value beyond -6 rejected or clamped"
+- [x] T106 [P] [US32] Test: "requesting value beyond +6 rejected or clamped"
+- [x] T107 [P] [US32] Verify only -6 to +6 positions valid
 
 ### User Story: US33 - Interpolated Flag Accuracy
 
-- [ ] T108 [US33] Test: "required positions never marked interpolated"
-- [ ] T109 [P] [US33] Test: "non-measured positions marked interpolated"
-- [ ] T110 [P] [US33] Test: "density change updates all flags correctly"
+- [x] T108 [US33] Test: "required positions never marked interpolated"
+- [x] T109 [P] [US33] Test: "non-measured positions marked interpolated"
+- [x] T110 [P] [US33] Test: "density change updates all flags correctly"
 
 ### User Story: US34 - Density Change
 
-- [ ] T111 [US34] Test: "change 5×5 to 13×13, all new cells calculated"
-- [ ] T112 [P] [US34] Test: "back to 5×5 recalculates correctly"
+- [x] T111 [US34] Test: "change 5×5 to 13×13, all new cells calculated"
+- [x] T112 [P] [US34] Test: "back to 5×5 recalculates correctly"
 
 ---
 
@@ -292,22 +292,22 @@ Same input = same output, localStorage integrity, wheel independence.
 
 ### User Story: US35 - Input Determinism
 
-- [ ] T113 [US35] Implement test in `tests/integration/calculation-determinism.test.mjs`: "load known file, calculate, snapshot"
-- [ ] T114 [P] [US35] Clear cache, reload, calculate again, verify identical
+- [x] T113 [US35] Implement test in `tests/integration/calculation-determinism.test.mjs`: "load known file, calculate, snapshot"
+- [x] T114 [P] [US35] Clear cache, reload, calculate again, verify identical
 
 ### User Story: US36 - localStorage Integrity
 
-- [ ] T115 [US36] Test: "populate grid, reload page, data preserved"
-- [ ] T116 [P] [US36] Test: "export, import, reload multiple times"
+- [x] T115 [US36] Test: "populate grid, reload page, data preserved"
+- [x] T116 [P] [US36] Test: "export, import, reload multiple times"
 
 ### User Story: US37 - Wheel Independence
 
-- [ ] T117 [US37] Test: "edit FL, switch wheels, FL changes preserved"
-- [ ] T118 [P] [US37] Verify other wheels unchanged
+- [x] T117 [US37] Test: "edit FL, switch wheels, FL changes preserved"
+- [x] T118 [P] [US37] Verify other wheels unchanged
 
 ### User Story: US38 - Clear & Reload
 
-- [ ] T119 [US38] Test: "load file, clear, reload same file, identical output"
+- [x] T119 [US38] Test: "load file, clear, reload same file, identical output"
 
 ---
 
@@ -317,24 +317,24 @@ Angle vs radian units, mm for toe, no unit confusion.
 
 ### User Story: US39 - Angle Units
 
-- [ ] T120 [US39] Implement test in `tests/unit/type-dimension.test.js`: "all camber/caster in degrees (not radians)"
-- [ ] T121 [P] [US39] Test: "degree symbol displayed consistently"
+- [x] T120 [US39] Implement test in `tests/unit/type-dimension.test.js`: "all camber/caster in degrees (not radians)"
+- [x] T121 [P] [US39] Test: "degree symbol displayed consistently"
 
 ### User Story: US40 - Toe Units
 
-- [ ] T122 [US40] Test: "rear toe in mm (not degrees)"
-- [ ] T123 [P] [US40] Verify no confusion with camber/caster units
+- [x] T122 [US40] Test: "rear toe in mm (not degrees)"
+- [x] T123 [P] [US40] Verify no confusion with camber/caster units
 
 ### User Story: US41 - Number Conversion
 
-- [ ] T124 [US41] Test: "parsing '5.71' → 5.71 (exact, no truncation)"
-- [ ] T125 [P] [US41] Test negative values "-1.50" correct
-- [ ] T126 [P] [US41] Test scientific notation "1.23e-4" handled
+- [x] T124 [US41] Test: "parsing '5.71' → 5.71 (exact, no truncation)"
+- [x] T125 [P] [US41] Test negative values "-1.50" correct
+- [x] T126 [P] [US41] Test scientific notation "1.23e-4" handled
 
 ### User Story: US42 - Unit Consistency
 
-- [ ] T127 [US42] Test: "caster formula uses degrees (not mixed units)"
-- [ ] T128 [P] [US42] Test: "interpolation doesn't convert between units"
+- [x] T127 [US42] Test: "caster formula uses degrees (not mixed units)"
+- [x] T128 [P] [US42] Test: "interpolation doesn't convert between units"
 
 ---
 
@@ -344,24 +344,24 @@ Speed benchmarks, memory profiling, density switching.
 
 ### User Story: US43 - Calculation Speed
 
-- [ ] T129 [US43] Implement test in `tests/performance/calculation-speed.test.mjs`: "13×13 calculation < 1 second (target 200-500ms)"
-- [ ] T130 [P] [US43] Test 7×7 and 5×5 grids
-- [ ] T131 [P] [US43] Compare against baseline in `tests/performance/baselines.json`, allow +10% variance
+- [x] T129 [US43] Implement test in `tests/performance/calculation-speed.test.mjs`: "13×13 calculation < 1 second (target 200-500ms)"
+- [x] T130 [P] [US43] Test 7×7 and 5×5 grids
+- [x] T131 [P] [US43] Compare against baseline in `tests/performance/baselines.json`, allow +10% variance
 
 ### User Story: US44 - Chart Render Speed
 
-- [ ] T132 [US44] Test in `tests/performance/chart-render.test.mjs`: "scatter chart render < 1 second (target 300-600ms)"
-- [ ] T133 [P] [US44] Test with all 4 wheels loaded
+- [x] T132 [US44] Test in `tests/performance/chart-render.test.mjs`: "scatter chart render < 1 second (target 300-600ms)"
+- [x] T133 [P] [US44] Test with all 4 wheels loaded
 
 ### User Story: US45 - Memory Leaks
 
-- [ ] T134 [US45] Implement test in `tests/performance/memory-leaks.test.mjs`: "10 populate/clear cycles, check growth < 5%"
-- [ ] T135 [P] [US45] Use Chrome DevTools Memory API via Puppeteer
+- [x] T134 [US45] Implement test in `tests/performance/memory-leaks.test.mjs`: "10 populate/clear cycles, check growth < 5%"
+- [x] T135 [P] [US45] Use Chrome DevTools Memory API via Puppeteer
 
 ### User Story: US46 - Density Switching
 
-- [ ] T136 [US46] Test in `tests/performance/density-switching.test.mjs`: "5×5 ↔ 13×13 ↔ 5×5 smooth transitions"
-- [ ] T137 [P] [US46] Verify no data corruption during switches
+- [x] T136 [US46] Test in `tests/performance/density-switching.test.mjs`: "5×5 ↔ 13×13 ↔ 5×5 smooth transitions"
+- [x] T137 [P] [US46] Verify no data corruption during switches
 
 ---
 
@@ -371,25 +371,25 @@ CSV export/import losslessness, long decimals, scientific notation, invalid data
 
 ### User Story: US47 - CSV Losslessness
 
-- [ ] T138 [US47] Implement test in `tests/integration/csv-export-integrity.test.mjs`: "export full grid, import, all values match"
-- [ ] T139 [P] [US47] Test multiple export/import cycles
+- [x] T138 [US47] Implement test in `tests/integration/csv-export-integrity.test.mjs`: "export full grid, import, all values match"
+- [x] T139 [P] [US47] Test multiple export/import cycles
 
 ### User Story: US48 - Long Decimals
 
-- [ ] T140 [US48] Test: "store value with many decimals (5.123456789), retrieve from localStorage accurately"
-- [ ] T141 [P] [US48] Verify precision not lost (> 4 decimal places)
+- [x] T140 [US48] Test: "store value with many decimals (5.123456789), retrieve from localStorage accurately"
+- [x] T141 [P] [US48] Verify precision not lost (> 4 decimal places)
 
 ### User Story: US49 - Scientific Notation
 
-- [ ] T142 [US49] Test: "input '1.23e-4' parsed as 0.000123"
-- [ ] T143 [P] [US49] Test calculations with such values, export preserves precision
+- [x] T142 [US49] Test: "input '1.23e-4' parsed as 0.000123"
+- [x] T143 [P] [US49] Test calculations with such values, export preserves precision
 
 ### User Story: US50 - Invalid Data Rejection
 
-- [ ] T144 [US50] Test: "NaN input rejected or handled gracefully"
-- [ ] T145 [P] [US50] Test: "Infinity rejected or clamped"
-- [ ] T146 [P] [US50] Test: "null/undefined handled (not crash)"
-- [ ] T147 [P] [US50] Test: "negative positions outside -6 to +6 rejected"
+- [x] T144 [US50] Test: "NaN input rejected or handled gracefully"
+- [x] T145 [P] [US50] Test: "Infinity rejected or clamped"
+- [x] T146 [P] [US50] Test: "null/undefined handled (not crash)"
+- [x] T147 [P] [US50] Test: "negative positions outside -6 to +6 rejected"
 
 ---
 
@@ -399,24 +399,24 @@ Re-verify prior math audit findings, scoring fixes, rear symmetry.
 
 ### User Story: US51 - Score Monotonicity
 
-- [ ] T148 [US51] Implement test in `tests/regression/audit-findings.test.mjs`: "100 random positions, score monotonic with distance"
-- [ ] T149 [P] [US51] Verify: if position_A closer than position_B, score_A > score_B
+- [x] T148 [US51] Implement test in `tests/regression/audit-findings.test.mjs`: "100 random positions, score monotonic with distance"
+- [x] T149 [P] [US51] Verify: if position_A closer than position_B, score_A > score_B
 
 ### User Story: US52 - Score Direction
 
-- [ ] T150 [US52] Test: "best cell (closest to target) has highest score"
-- [ ] T151 [P] [US52] Test: "worst cell (furthest) has lowest score"
+- [x] T150 [US52] Test: "best cell (closest to target) has highest score"
+- [x] T151 [P] [US52] Test: "worst cell (furthest) has lowest score"
 
 ### User Story: US53 - Prior Audit Results
 
-- [ ] T152 [US53] Test: "load results from project_math_audit.md, re-validate each finding"
-- [ ] T153 [P] [US53] Confirm prior bugs remain fixed (regression test for fixes)
+- [x] T152 [US53] Test: "load results from project_math_audit.md, re-validate each finding"
+- [x] T153 [P] [US53] Confirm prior bugs remain fixed (regression test for fixes)
 
 ### User Story: US54 - Rear Symmetry Asymmetric Targets
 
-- [ ] T154 [US54] Test: "asymmetric targets (FL -1.10°, FR -1.20°) with symmetry disabled"
-- [ ] T155 [P] [US54] Verify: report doesn't force FL = FR
-- [ ] T156 [P] [US54] Test: "shows independent optimization per wheel"
+- [x] T154 [US54] Test: "asymmetric targets (FL -1.10°, FR -1.20°) with symmetry disabled"
+- [x] T155 [P] [US54] Verify: report doesn't force FL = FR
+- [x] T156 [P] [US54] Test: "shows independent optimization per wheel"
 
 ---
 
@@ -424,14 +424,14 @@ Re-verify prior math audit findings, scoring fixes, rear symmetry.
 
 Final integration, reporting, maintenance guides.
 
-- [ ] T157 Create test guide at `tests/GUIDE.md` with common commands, troubleshooting, fixture usage
-- [ ] T158 [P] Create CI/CD maintenance guide at `docs/CI_MAINTENANCE.md` with: baseline update procedure, alert handling, performance regression response
-- [ ] T159 [P] Create fixture versioning guide at `tests/fixtures/README.md` explaining: how fixtures are created, when to update baselines, regression detection
-- [ ] T160 Integrate coverage reporting into CI: `npm run test:coverage` generates HTML in `coverage/` published to CI artifacts
-- [ ] T161 [P] Create performance dashboard template (if CI supports): track trending in calculation/chart/memory metrics over time
-- [ ] T162 Add test badge to README: ![Tests](https://github.com/marcelrienks/angularity/actions/workflows/test.yml/badge.svg) passing/failing
-- [ ] T163 [P] Document known flaky tests (if any) in `tests/FLAKY_TESTS.md` with: test name, failure rate, root cause, mitigation
-- [ ] T164 Commit all test infrastructure: `git add tests/ .github/workflows/test.yml jest.config.js && git commit -m "feat: comprehensive test suite"`
+- [x] T157 Create test guide at `tests/GUIDE.md` with common commands, troubleshooting, fixture usage
+- [x] T158 [P] Create CI/CD maintenance guide at `docs/CI_MAINTENANCE.md` with: baseline update procedure, alert handling, performance regression response
+- [x] T159 [P] Create fixture versioning guide at `tests/fixtures/README.md` explaining: how fixtures are created, when to update baselines, regression detection
+- [x] T160 Integrate coverage reporting into CI: `npm run test:coverage` generates HTML in `coverage/` published to CI artifacts
+- [x] T161 [P] Create performance dashboard template (if CI supports): track trending in calculation/chart/memory metrics over time
+- [x] T162 Add test badge to README: ![Tests](https://github.com/marcelrienks/angularity/actions/workflows/test.yml/badge.svg) passing/failing
+- [x] T163 [P] Document known flaky tests (if any) in `tests/FLAKY_TESTS.md` with: test name, failure rate, root cause, mitigation
+- [x] T164 Commit all test infrastructure: `git add tests/ .github/workflows/test.yml jest.config.js && git commit -m "feat: comprehensive test suite"`
 
 ---
 
@@ -498,7 +498,7 @@ Ship first 3 phases to unblock code changes:
 - [USN] story label: present on user story phase tasks (US1-54)
 - Description + file path: every task
 
-**Example Task**: `- [ ] T023 [US1] Add caster formula tests to npm script: npm run test:calculation-unit -- --testNamePattern="Caster"`
+**Example Task**: `- [x] T023 [US1] Add caster formula tests to npm script: npm run test:calculation-unit -- --testNamePattern="Caster"`
 
 ---
 
